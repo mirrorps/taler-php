@@ -1,0 +1,37 @@
+{
+  "name": "mirrorps/taler-php",
+  "description": "PHP SDK for GNU Taler REST API",
+  "type": "library",
+  "autoload": {
+    "psr-4": {
+      "Taler\\": "src/"
+    },
+    "autoload-dev": {
+      "psr-4": {
+        "Taler\\Tests\\": "tests/"
+      }
+    },
+    "files": [
+      "src/Helpers/Common.php"
+    ]
+  },
+  "require": {
+    "php": "^8.1",
+    "guzzlehttp/guzzle": "^7.0"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^10.5",
+    "phpstan/phpstan": "^2.1"
+  },
+  "exclude-from-classmap": [
+    "tests/"
+  ],
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Miro",
+      "email": "mirrorps.foss@gmail.com"
+    }
+  ]
+}
