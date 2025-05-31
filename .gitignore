@@ -1,0 +1,47 @@
+# Composer dependencies
+/vendor/
+
+# PHPUnit cache
+.phpunit.cache
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Logs and temp files
+*.log
+*.tmp
+
+# Build and coverage artifacts
+/build/
+/dist/
+coverage/
+.phpunit.result.cache
+
+# User-specific files
+*.swp
+*.bak
+
+# Ignore environment and secret files
+.env
+.env.*
+
+# Node modules (if any frontend work)
+node_modules/
+
+# Mac system files
+.DS_Store
+
+# Windows system files
+ehthumbs.db
+Icon?
+Desktop.ini
+
+# PHPStan config
+phpstan.neon
