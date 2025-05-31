@@ -29,7 +29,9 @@ Before you begin, ensure you have met the following requirements:
 
 Install TalerPHP via Composer:
 
+```
 composer require mirrorps/taler-php
+```
 
 ---
 
