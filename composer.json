@@ -6,14 +6,14 @@
     "psr-4": {
       "Taler\\": "src/"
     },
-    "autoload-dev": {
-      "psr-4": {
-        "Taler\\Tests\\": "tests/"
-      }
-    },
     "files": [
       "src/Helpers/Common.php"
     ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Taler\\Tests\\": "tests/"
+    }
   },
   "require": {
     "php": "^8.1",
@@ -23,9 +23,6 @@
     "phpunit/phpunit": "^10.5",
     "phpstan/phpstan": "^2.1"
   },
-  "exclude-from-classmap": [
-    "tests/"
-  ],
   "minimum-stability": "stable",
   "license": "MIT",
   "authors": [
