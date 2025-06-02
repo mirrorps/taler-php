@@ -2,6 +2,8 @@
 
 namespace Taler\Config;
 
+use function Taler\Helpers\isValidBaseUrl;
+
 class TalerConfig
 {
     public function __construct(

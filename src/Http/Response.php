@@ -53,15 +53,17 @@ class Response implements ResponseInterface
 
     /**
      * @param string $version
-     * @return MessageInterface
+     * @return ResponseInterface
      */
-    public function withProtocolVersion(string $version): MessageInterface
+    public function withProtocolVersion(string $version): ResponseInterface
     {
-        return $this->response->withProtocolVersion($version);
+        $new = clone $this;
+        $new->response = $this->response->withProtocolVersion($version);
+        return $new;
     }
 
     /**
-     * @return array|\string[][]
+     * @return array<string, array<int, string>>
      */
     public function getHeaders(): array
     {
@@ -78,8 +80,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param string $name
-     * @return array|string[]
+     * @return array<int, string>
      */
     public function getHeader(string $name): array
     {
@@ -87,7 +88,6 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @param string $name
      * @return string
      */
     public function getHeaderLine(string $name): string
@@ -97,37 +97,37 @@ class Response implements ResponseInterface
 
     /**
      * @param string $name
-     * @param $value
-     * @return MessageInterface
+     * @param string|array<int, string> $value
+     * @return ResponseInterface
      */
-    public function withHeader(
-        string $name,
-               $value
-    ): MessageInterface
+    public function withHeader(string $name, $value): ResponseInterface
     {
-        return $this->response->withHeader($name, $value);
+        $new = clone $this;
+        $new->response = $this->response->withHeader($name, $value);
+        return $new;
     }
 
     /**
      * @param string $name
-     * @param $value
-     * @return MessageInterface
+     * @param string|array<int, string> $value
+     * @return ResponseInterface
      */
-    public function withAddedHeader(
-        string $name,
-               $value
-    ): MessageInterface
+    public function withAddedHeader(string $name, $value): ResponseInterface
     {
-        return $this->response->withAddedHeader($name, $value);
+        $new = clone $this;
+        $new->response = $this->response->withAddedHeader($name, $value);
+        return $new;
     }
 
     /**
      * @param string $name
-     * @return MessageInterface
+     * @return ResponseInterface
      */
-    public function withoutHeader(string $name): MessageInterface
+    public function withoutHeader(string $name): ResponseInterface
     {
-        return $this->response->withoutHeader($name);
+        $new = clone $this;
+        $new->response = $this->response->withoutHeader($name);
+        return $new;
     }
 
     /**
@@ -140,11 +140,13 @@ class Response implements ResponseInterface
 
     /**
      * @param StreamInterface $body
-     * @return MessageInterface
+     * @return ResponseInterface
      */
-    public function withBody(StreamInterface $body): MessageInterface
+    public function withBody(StreamInterface $body): ResponseInterface
     {
-        return $this->response->withBody($body);
+        $new = clone $this;
+        $new->response = $this->response->withBody($body);
+        return $new;
     }
 
     /**
@@ -160,12 +162,11 @@ class Response implements ResponseInterface
      * @param string $reasonPhrase
      * @return ResponseInterface
      */
-    public function withStatus(
-        int $code,
-        string $reasonPhrase = ''
-    ): ResponseInterface
+    public function withStatus(int $code, string $reasonPhrase = ''): ResponseInterface
     {
-        return $this->response->withStatus($code, $reasonPhrase);
+        $new = clone $this;
+        $new->response = $this->response->withStatus($code, $reasonPhrase);
+        return $new;
     }
 
     /**
