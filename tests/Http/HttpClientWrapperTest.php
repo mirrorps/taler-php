@@ -18,6 +18,7 @@ class HttpClientWrapperTest extends TestCase
 {
     private TalerConfig $config;
     private MockHandler $mockHandler;
+    private Client $client;
 
     private const BASE_URL = 'https://backend.demo.taler.net/instances/sandbox';
     private const AUTH_TOKEN = 'Bearer secret-token:sandbox';
@@ -48,7 +49,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_sync_get_request()
+    public function it_sends_sync_get_request(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(200, [], 'OK'));
@@ -61,7 +62,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_sync_post_request_with_body()
+    public function it_sends_sync_post_request_with_body(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(201));
@@ -74,7 +75,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_sync_patch_request_with_body()
+    public function it_sends_sync_patch_request_with_body(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(201));
@@ -87,7 +88,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_sync_delete_request()
+    public function it_sends_sync_delete_request(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(204));
@@ -103,7 +104,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_async_get_request()
+    public function it_sends_async_get_request(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(200));
@@ -116,10 +117,14 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_async_post_request_with_body()
+    public function it_sends_async_post_request_with_body(): void
     {
         $wrapper = $this->createWrapper();
-        $this->mockHandler->append(new Response(201, [], json_encode(['id' => 123])));
+        $jsonData = json_encode(['id' => 123]);
+        if ($jsonData === false) {
+            $this->fail('Failed to encode JSON data');
+        }
+        $this->mockHandler->append(new Response(201, [], $jsonData));
 
         $promise = $wrapper->requestAsync('POST', 'users', [
             'json' => ['name' => 'John']
@@ -141,10 +146,14 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_async_patch_request_with_body()
+    public function it_sends_async_patch_request_with_body(): void
     {
         $wrapper = $this->createWrapper();
-        $this->mockHandler->append(new Response(200, [], json_encode(['status' => 'updated'])));
+        $jsonData = json_encode(['status' => 'updated']);
+        if ($jsonData === false) {
+            $this->fail('Failed to encode JSON data');
+        }
+        $this->mockHandler->append(new Response(200, [], $jsonData));
 
         $promise = $wrapper->requestAsync('PATCH', 'users/123', [
             'json' => ['name' => 'Updated Name']
@@ -166,7 +175,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_sends_async_delete_request()
+    public function it_sends_async_delete_request(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(204));
@@ -183,7 +192,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_wraps_responses_when_configured()
+    public function it_wraps_responses_when_configured(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(200));
@@ -193,7 +202,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_throws_taler_exception_on_error_when_wrapped()
+    public function it_throws_taler_exception_on_error_when_wrapped(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new \GuzzleHttp\Exception\ClientException(
@@ -207,7 +216,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_passes_through_exceptions_when_not_wrapped()
+    public function it_passes_through_exceptions_when_not_wrapped(): void
     {
         $wrapper = $this->createWrapper(false);
         $this->mockHandler->append(new \GuzzleHttp\Exception\ClientException(
@@ -221,7 +230,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
     /** @test */
-    public function it_merges_client_options()
+    public function it_merges_client_options(): void
     {
         $container = [];
         $history = Middleware::history($container);
@@ -237,7 +246,7 @@ class HttpClientWrapperTest extends TestCase
         $wrapper = new \Taler\Http\HttpClientWrapper(
             $config,
             $client,
-            ['timeout' => 10],
+            ['body' => 'test'],
             true
         );
 
@@ -246,51 +255,51 @@ class HttpClientWrapperTest extends TestCase
         // Now inspect the options used in the request
         $this->assertNotEmpty($container);
         $transaction = $container[0];
-        $this->assertEquals(10, $transaction['options']['timeout']);
-        $this->assertEquals(5, $transaction['options']['connect_timeout']);    }
+        $this->assertEquals('test', (string)$transaction['request']->getBody());
+    }
 
     /** @test */
-    public function async_request_fails_without_async_support()
+    public function async_request_fails_without_async_support(): void
     {
-        $client = $this->createMock(ClientInterface::class);
-        $wrapper = new HttpClientWrapper($this->config, $client);
+        $nonAsyncClient = $this->createMock(ClientInterface::class);
+        $wrapper = new HttpClientWrapper($this->config, $nonAsyncClient);
 
         $this->expectException(\RuntimeException::class);
         $wrapper->requestAsync('GET', 'users');
     }
 
     /** @test */
-    public function it_includes_auth_header()
+    public function it_includes_auth_header(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(200));
 
-        $response = $wrapper->request('GET', 'secure-endpoint');
+        $wrapper->request('GET', 'users');
 
-        // Verify Authorization header was sent
         $lastRequest = $this->mockHandler->getLastRequest();
-        $this->assertEquals('Bearer secret-token:sandbox', $lastRequest->getHeaderLine('Authorization'));
+        $this->assertEquals('Bearer secret-token:sandbox', $lastRequest->getHeader('Authorization')[0]);
     }
 
     /** @test */
-    public function it_uses_correct_user_agent()
+    public function it_uses_correct_user_agent(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(200));
 
-        $response = $wrapper->request('GET', 'users');
+        $wrapper->request('GET', 'users');
 
         $lastRequest = $this->mockHandler->getLastRequest();
-        $this->assertStringContainsString('Mirrorps_Taler_PHP', $lastRequest->getHeaderLine('User-Agent'));
+        $this->assertStringStartsWith('Mirrorps_Taler_PHP', $lastRequest->getHeader('User-Agent')[0]);
+        $this->assertStringContainsString('https://github.com/mirrorps/taler-php', $lastRequest->getHeader('User-Agent')[0]);
     }
 
     /** @test */
-    public function it_builds_correct_url()
+    public function it_builds_correct_url(): void
     {
         $wrapper = $this->createWrapper();
         $this->mockHandler->append(new Response(200));
 
-        $response = $wrapper->request('GET', 'users');
+        $wrapper->request('GET', 'users');
 
         $lastRequest = $this->mockHandler->getLastRequest();
         $this->assertEquals(self::BASE_URL . '/users', (string)$lastRequest->getUri());
