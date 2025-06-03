@@ -116,26 +116,38 @@ class HttpClientWrapper
     private function buildUrl(string $endpoint): string
     {
         try {
-            $baseUrlString = rtrim($this->config->getBaseUrl(), '/') . '/';
-
             // Resolve the endpoint URI against the base URI.
             // Uri::fromBaseUri handles path normalization (e.g., removing dot segments like "/./", "/../")
             // and resolves the endpoint relative to the base URI according to RFC 3986.
-            $finalUri = Uri::fromBaseUri($endpoint, $baseUrlString);
+            $finalUrl = Uri::fromBaseUri($endpoint, $this->getBaseUrl());
 
-            // Ensure the resolved URI is still "under" the original base URI's scheme, authority, and path prefix.
-            $baseUriForCheck = Uri::new($baseUrlString);
-            $baseUriPrefixString = $baseUriForCheck->withPath($baseUriForCheck->getPath())->__toString();
+            $this->validateFinalUrl($endpoint, $finalUrl);
 
-            if (strpos($finalUri->__toString(), $baseUriPrefixString) !== 0) {
-                 throw new \InvalidArgumentException('Endpoint results in a URL outside the configured base path. Resolved URL: ' . $finalUri->__toString() . ', Base prefix: ' . $baseUriPrefixString);
-            }
-
-            return $finalUri->__toString();
+            return $finalUrl->__toString();
 
         } catch (\League\Uri\Contracts\UriException | \InvalidArgumentException $e) {
             throw new TalerException('Failed to build URL: ' . $e->getMessage(), 0, $e);
         }
+    }
+
+    private function validateFinalUrl(string $endpoint, Uri $finalUrl): void
+    {
+        if (strpos($endpoint, '%2F') !== false || strpos($endpoint, '%2f') !== false) {
+            throw new \InvalidArgumentException('Encoded slashes are not allowed in endpoints.');
+        }
+
+        // Ensure the resolved URI is still "under" the original base URI's scheme, authority, and path prefix.
+        $baseUriForCheck = Uri::new($this->getBaseUrl());
+        $baseUriPrefixString = $baseUriForCheck->withPath($baseUriForCheck->getPath())->__toString();
+
+        if (strpos($finalUrl->__toString(), $baseUriPrefixString) !== 0) {
+             throw new \InvalidArgumentException('Endpoint results in a URL outside the configured base path. Resolved URL: ' . $finalUrl->__toString() . ', Base prefix: ' . $baseUriPrefixString);
+        }
+    }
+
+    private function getBaseUrl(): string
+    {
+        return rtrim($this->config->getBaseUrl(), '/') . '/';
     }
 
     /**
@@ -143,7 +155,7 @@ class HttpClientWrapper
      */
     private function loadClient(?ClientInterface $client): void
     {
-        $this->client = $client ?? new GuzzleClient();
+        $this->client = $client ?? new GuzzleClient($this->clientOptions);
     }
 
     private function ensureClientSupported(): void
