@@ -4,6 +4,7 @@ namespace Taler\Http;
 
 use GuzzleHttp\Client as GuzzleClient;
 use GuzzleHttp\Promise\PromiseInterface;
+use League\Uri\Uri;
 use Taler\Http\Response;
 use Psr\Http\Client\ClientInterface;
 use Psr\Http\Message\ResponseInterface;
@@ -114,7 +115,27 @@ class HttpClientWrapper
 
     private function buildUrl(string $endpoint): string
     {
-        return rtrim($this->config->getBaseUrl(), '/') . '/' . ltrim($endpoint, '/');
+        try {
+            $baseUrlString = rtrim($this->config->getBaseUrl(), '/') . '/';
+
+            // Resolve the endpoint URI against the base URI.
+            // Uri::fromBaseUri handles path normalization (e.g., removing dot segments like "/./", "/../")
+            // and resolves the endpoint relative to the base URI according to RFC 3986.
+            $finalUri = Uri::fromBaseUri($endpoint, $baseUrlString);
+
+            // Ensure the resolved URI is still "under" the original base URI's scheme, authority, and path prefix.
+            $baseUriForCheck = Uri::new($baseUrlString);
+            $baseUriPrefixString = $baseUriForCheck->withPath($baseUriForCheck->getPath())->__toString();
+
+            if (strpos($finalUri->__toString(), $baseUriPrefixString) !== 0) {
+                 throw new \InvalidArgumentException('Endpoint results in a URL outside the configured base path. Resolved URL: ' . $finalUri->__toString() . ', Base prefix: ' . $baseUriPrefixString);
+            }
+
+            return $finalUri->__toString();
+
+        } catch (\League\Uri\Contracts\UriException | \InvalidArgumentException $e) {
+            throw new TalerException('Failed to build URL: ' . $e->getMessage(), 0, $e);
+        }
     }
 
     /**
