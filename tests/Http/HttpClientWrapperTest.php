@@ -304,4 +304,38 @@ class HttpClientWrapperTest extends TestCase
         $lastRequest = $this->mockHandler->getLastRequest();
         $this->assertEquals(self::BASE_URL . '/users', (string)$lastRequest->getUri());
     }
+
+    /**
+     * @test
+     * @dataProvider maliciousUrlProvider
+     */
+    public function it_throws_exception_for_malicious_url(string $maliciousEndpoint): void
+    {
+        $wrapper = $this->createWrapper();
+
+        $this->expectException(TalerException::class);
+
+        $errorMessage = $maliciousEndpoint === '..%2Fmalicious'
+            ? 'Encoded slashes are not allowed in endpoints.'
+            : 'Endpoint results in a URL outside the configured base path';
+
+        $this->expectExceptionMessage($errorMessage);
+
+        $wrapper->request('GET', $maliciousEndpoint);
+
+    }
+
+    /**
+     * @return array<string, array<string>>
+     */
+    public function maliciousUrlProvider(): array
+    {
+        return [
+            'Path traversal' => ['../malicious'],
+            'Localhost' => ['http://localhost'],
+            'Internal service' => ['http://internal-service'],
+            'Absolute path' => ['/etc/passwd'],
+            'Encoded slashes' => ['..%2Fmalicious'], // %2F = /
+        ];
+    }
 }
