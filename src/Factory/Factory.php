@@ -16,7 +16,6 @@ class Factory
      *     base_url: string,
      *     token?: string,
      *     client?: ClientInterface|null,
-     *     clientOptions?: array<string, string>,
      *     wrapResponse?: bool
      * } $options Configuration options for creating Taler instance
      * @throws InvalidArgumentException when base_url is empty
@@ -25,7 +24,6 @@ class Factory
     {
         $token = $options['token'] ?? '';
         $client = $options['client'] ?? null;
-        $clientOptions = $options['clientOptions'] ?? [];
         $wrapResponse = $options['wrapResponse'] ?? true;
 
         $config = new TalerConfig(
@@ -36,7 +34,6 @@ class Factory
         return new Taler(
             $config,
             $client,
-            $clientOptions,
             $wrapResponse
         );
     }

@@ -19,11 +19,10 @@ class Taler
     public function __construct(
         TalerConfig $config,
         ?ClientInterface $client = null,
-        array $clientOptions = [],
         bool $wrapResponse = true
     )
     {
-        $this->httpClientWrapper = new HttpClientWrapper($config, $client, $clientOptions, $wrapResponse);
+        $this->httpClientWrapper = new HttpClientWrapper($config, $client);
     }
 
     public function getHttpClientWrapper(): HttpClientWrapper

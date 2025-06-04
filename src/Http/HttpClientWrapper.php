@@ -2,14 +2,16 @@
 
 namespace Taler\Http;
 
-use GuzzleHttp\Client as GuzzleClient;
-use GuzzleHttp\Promise\PromiseInterface;
 use League\Uri\Uri;
-use Taler\Http\Response;
-use Psr\Http\Client\ClientInterface;
-use Psr\Http\Message\ResponseInterface;
+use Taler\Http\Response as TalerResponse;
 use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
+use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
+use PsrDiscovery\Discover;
 
 class HttpClientWrapper
 {
@@ -19,45 +21,50 @@ class HttpClientWrapper
     /**
      * @param TalerConfig $config
      * @param ClientInterface|null $client
-     * @param array<string, mixed> $clientOptions
      * @param bool $wrapResponse
      */
     public function __construct(
         private TalerConfig $config,
         private ?ClientInterface $client = null,
-        private array $clientOptions = [],
+        private ?RequestFactoryInterface $requestFactory = null,
+        private ?StreamFactoryInterface $streamFactory = null,
         public bool $wrapResponse = true
     )
     {
-        $this->loadClient($client);
-        $this->ensureClientSupported();
+        $this->client = $client ?? Discover::httpClient();
+        $this->requestFactory = $requestFactory ?? Discover::httpRequestFactory();
+        $this->streamFactory = $streamFactory ?? Discover::httpStreamFactory();
+
+        if (!$this->client || !$this->requestFactory || !$this->streamFactory) {
+            throw new \RuntimeException(
+                'Required PSR-18 HTTP Client or PSR-17 Factory implementations not found. ' .
+                'Please install a compatible package (e.g., guzzlehttp/guzzle) or provide your own implementations.'
+            );
+        }
+
     }
 
     /**
-     * @param string $method The HTTP request verb
-     * @param string $endpoint The Taler API endpoint
-     * @param array<string, mixed> $options An array of options for the request
+     * Send a HTTP request.
+     *
+     * @param string $method HTTP method (GET, POST, etc.)
+     * @param string $endpoint Endpoint path (relative to base URL)
+     * @param array<string, string|string[]> $headers
+     * @param string|null $body Request body, if any
      * @return ResponseInterface
-     * @throws TalerException When request fails and wrapResponse is true
-     * @throws \RuntimeException When client does not support request method
-     * @throws \Throwable When request fails and wrapResponse is false
      */
-    public function request(string $method, string $endpoint, array $options = []): ResponseInterface
+    public function request(
+        string $method,
+        string $endpoint,
+        array $headers = [],
+        ?string $body = null
+    ): ResponseInterface
     {
-        $url = $this->buildUrl($endpoint);
-
-        $options = array_merge($this->clientOptions, $options);
-        $options['headers']['User-Agent'] = $this->userAgent;
-
-        if ($auth = $this->config->getAuthToken()) {
-            $options['headers']['Authorization'] = $auth;
-        }
-
-        $request = new \GuzzleHttp\Psr7\Request($method, $url, $options['headers'] ?? [], $options['body'] ?? null);
+        $request = $this->createRequest($method, $endpoint, $headers, $body);
 
         try {
             if ($this->wrapResponse) {
-                return new Response($this->client->sendRequest($request));
+                return new TalerResponse($this->client->sendRequest($request));
             }
 
             return $this->client->sendRequest($request);
@@ -71,46 +78,81 @@ class HttpClientWrapper
     }
 
     /**
-     * @param string $method The HTTP request verb
-     * @param string $endpoint The Taler API endpoint
-     * @param array<string, mixed> $options An array of options for the request
-     * @return PromiseInterface
-     * @throws \RuntimeException When async requests are not supported
+     * Send a HTTP request.
+     *
+     * @param string $method HTTP method (GET, POST, etc.)
+     * @param string $endpoint Endpoint path (relative to base URL)
+     * @param array<string, string|string[]> $headers Additional headers
+     * @param string|null $body Request body, if any
+     * @return mixed
      */
-    public function requestAsync(string $method, string $endpoint, array $options = []): PromiseInterface
+    public function requestAsync(
+        string $method,
+        string $endpoint,
+        array $headers = [],
+        ?string $body = null
+    )
     {
-        $this->ensureAsyncSupported();
-
-        $url = $this->buildUrl($endpoint);
-
-        $options = array_merge($this->clientOptions, $options);
-        $options['headers']['User-Agent'] = $this->userAgent;
-
-        if ($auth = $this->config->getAuthToken()) {
-            $options['headers']['Authorization'] = $auth;
-        }
-
-        /**
-         * Note: This type hint is added to help static analysis tools (like PHPStan or Psalm)
-         * correctly infer that $client is a \GuzzleHttp\Client instance.
-         *
-         * PSR-* HTTP client interfaces (like PSR-18's ClientInterface) do not define
-         * a requestAsync() method - this is only available on Guzzle's client.
-         *
-         * @var \GuzzleHttp\Client $client
-         */
-        $client = $this->client;
-
-        $promise = $client->requestAsync($method, $url, $options);
-
-        if ($this->wrapResponse) {
-            return $promise->then(
-                fn($response) => new Response($response),
-                fn($e) => throw new TalerException($e->getMessage(), $e->getCode())
+        if (!$this->client instanceof \Http\Client\HttpAsyncClient) {
+            throw new \RuntimeException(
+                'The provided HTTP client does not support async requests.'
             );
         }
 
-        return $promise;
+        $request = $this->createRequest($method, $endpoint, $headers, $body);
+
+        try {
+            return $this->client->sendAsyncRequest($request);
+        } catch (\Throwable $e) {
+            if ($this->wrapResponse) {
+                throw new TalerException($e->getMessage(), $e->getCode());
+            }
+
+            throw $e;
+        }
+    }
+
+    /**
+     * Creates a HTTP request.
+     *
+     * @param string $method HTTP method (GET, POST, etc.)
+     * @param string $endpoint Endpoint path (relative to base URL)
+     * @param array<string, string|string[]> $headers Additional headers
+     * @param string|null $body Request body, if any
+     * @return RequestInterface
+     */
+
+    private function createRequest(
+        string $method,
+        string $endpoint,
+        array $headers,
+        ?string $body = null
+    ): RequestInterface
+    {
+        $url = $this->buildUrl($endpoint);
+
+        $headers['User-Agent'] = $this->userAgent;
+
+        if ($authToken = $this->config->getAuthToken()) {
+            $headers['Authorization'] = $authToken;
+        }
+
+        if ($body !== null && !isset($headers['Content-Type'])) {
+            $headers['Content-Type'] = 'application/json';
+        }
+
+        $request = $this->requestFactory->createRequest($method, $url);
+
+        foreach ($headers as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
+
+        if ($body !== null) {
+            $stream = $this->streamFactory->createStream($body);
+            $request = $request->withBody($stream);
+        }
+
+        return $request;
     }
 
     private function buildUrl(string $endpoint): string
@@ -148,31 +190,5 @@ class HttpClientWrapper
     private function getBaseUrl(): string
     {
         return rtrim($this->config->getBaseUrl(), '/') . '/';
-    }
-
-    /**
-     * @param ClientInterface|null $client
-     */
-    private function loadClient(?ClientInterface $client): void
-    {
-        $this->client = $client ?? new GuzzleClient($this->clientOptions);
-    }
-
-    private function ensureClientSupported(): void
-    {
-        if($this->client instanceof ClientInterface) {
-            return;
-        }
-
-        throw new \RuntimeException('Http Client must implement ClientInterface');
-    }
-
-    private function ensureAsyncSupported(): void
-    {
-        if (method_exists($this->client, 'requestAsync')) {
-            return;
-        }
-
-        throw new \RuntimeException('The configured HTTP client does not support async requests (missing requestAsync).');
     }
 }
