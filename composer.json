@@ -17,12 +17,24 @@
   },
   "require": {
     "php": "^8.1",
-    "guzzlehttp/guzzle": "^7.0",
+    "psr/http-client": "^1.0",
+    "psr/http-client-implementation": "*",
+    "psr/http-factory": "^1.0",
+    "psr-discovery/http-client-implementations": "^1.0",
+    "psr-discovery/http-factory-implementations":  "^1.0",
     "league/uri": "^7.5"
   },
   "require-dev": {
+    "guzzlehttp/guzzle": "^7.0",
     "phpunit/phpunit": "^10.5",
-    "phpstan/phpstan": "^2.1"
+    "phpstan/phpstan": "^2.1",
+    "symfony/var-dumper": "^6.4",
+    "php-http/httplug": "^2.4",
+    "php-http/mock-client": "^1.6",
+    "nyholm/psr7": "^1.8"
+  },
+  "suggest": {
+    "php-http/async-client-implementation": "For async HTTP requests (e.g., symfony/http-client, php-http/guzzle7-adapter)"
   },
   "minimum-stability": "stable",
   "license": "MIT",
@@ -31,5 +43,10 @@
       "name": "Miro",
       "email": "mirrorps.foss@gmail.com"
     }
-  ]
+  ],
+  "config": {
+    "allow-plugins": {
+      "php-http/discovery": true
+    }
+  }
 }

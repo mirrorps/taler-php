@@ -33,6 +33,12 @@ Install TalerPHP via Composer:
 composer require mirrorps/taler-php
 ```
 
+Requirements
+```
+• A PSR-18 HTTP client implementation (e.g., Guzzle, Symfony HttpClient)
+• A PSR-17 HTTP factory implementation (e.g., Nyholm/psr7, guzzlehttp/psr7 version 2 or higher)
+• Optional: For async request support, you need a client that implements the `HttpAsyncClient` interface from `php-http/httplug`
+```
 ---
 
 ## Usage
