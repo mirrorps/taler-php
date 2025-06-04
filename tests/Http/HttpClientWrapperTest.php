@@ -14,9 +14,9 @@ use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
 class HttpClientWrapperTest extends TestCase
 {
-    private $mockClient;
-    private $factory;
-    private $config;
+    private \Http\Mock\Client $mockClient;
+    private \Nyholm\Psr7\Factory\Psr17Factory $factory;
+    private TalerConfig $config;
 
     private const BASE_URL = 'https://backend.demo.taler.net/instances/sandbox/';
     private const AUTH_TOKEN = 'Bearer secret-token:sandbox';
@@ -34,7 +34,7 @@ class HttpClientWrapperTest extends TestCase
     }
 
 
-    protected function getWrapper($wrapResponse = true): HttpClientWrapper
+    protected function getWrapper(bool $wrapResponse = true): HttpClientWrapper
     {
         return new HttpClientWrapper(
             $this->config,
