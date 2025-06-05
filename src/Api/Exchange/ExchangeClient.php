@@ -6,6 +6,8 @@ use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Dto\ErrorDetail;
 use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
+use Taler\Api\Exchange\Dto\TrackTransferResponse;
+use Taler\Exception\TalerException;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
 
@@ -57,13 +59,33 @@ class ExchangeClient
      * 
      * @param string $wtid The wire transfer identifier
      * @param array<string, string> $headers Optional request headers
-     * @return array<string, mixed>|null
+     * @return TrackTransferResponse|array<string, mixed>
+     * 
+     * @see https://docs.taler.net/core/api-exchange.html#get--transfers-$WTID
      */
-    public function getTransfer(string $wtid, array $headers = []): ?array
+    public function getTransfer(string $wtid, array $headers = []): TrackTransferResponse|array
     {
         $response = $this->client->request('GET', "transfers/{$wtid}", $headers);
 
-        return json_decode((string)$response->getBody(), true);
+        if (!$this->taler->getWrappedResponse()) {
+            return json_decode((string)$response->getBody(), true);
+        }
+
+        return $this->handleTransferResponse($response);
+    }
+
+    /**
+     * Handle the transfer response and return the appropriate DTO
+     */
+    private function handleTransferResponse(ResponseInterface $response): TrackTransferResponse
+    {
+        $data = json_decode((string)$response->getBody(), true);
+        
+        if ($response->getStatusCode() !== 200) {
+            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
+        }
+
+        return TrackTransferResponse::fromArray($data);
     }
 
     /**
@@ -114,7 +136,7 @@ class ExchangeClient
             200 => TrackTransactionResponse::fromArray($data),
             202 => TrackTransactionAcceptedResponse::fromArray($data),
             403 => ErrorDetail::fromArray($data),
-            default => throw new \RuntimeException('Unexpected response status code: ' . $response->getStatusCode())
+            default => throw new TalerException('Unexpected response status code: ' . $response->getStatusCode())
         };
     }
 }
