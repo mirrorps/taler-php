@@ -51,7 +51,6 @@ $taler = Factory::create([
     'token'    => 'Bearer token'
 ]);
 
-// Now you can use $taler to interact with the Taler backend
 ```
 
 ---
