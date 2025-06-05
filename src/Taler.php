@@ -3,9 +3,9 @@
 namespace Taler;
 
 use Psr\Http\Client\ClientInterface;
-use Taler\Exchange\ExchangeClient;
-use Taler\Http\HttpClientWrapper;
+use Taler\API\Exchange\ExchangeClient;
 use Taler\Config\TalerConfig;
+use Taler\Http\HttpClientWrapper;
 
 class Taler
 {

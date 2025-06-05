@@ -1,6 +1,6 @@
 <?php
 
-namespace Taler\Exchange;
+namespace Taler\Api\Exchange;
 
 use Taler\Http\HttpClientWrapper;
 
@@ -19,7 +19,7 @@ class ExchangeClient
     {
         $response = $this->client->request('GET', 'config', $headers);
 
-        return json_decode((string)$response->getBody(), true) ?? null;
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
@@ -32,7 +32,7 @@ class ExchangeClient
     {
         $response = $this->client->request('GET', 'keys', $headers);
 
-        return json_decode((string)$response->getBody(), true) ?? null;
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
@@ -45,7 +45,7 @@ class ExchangeClient
     {
         $response = $this->client->request('GET', 'management/keys', $headers);
 
-        return json_decode((string)$response->getBody(), true) ?? null;
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
@@ -59,7 +59,7 @@ class ExchangeClient
     {
         $response = $this->client->request('GET', "transfers/{$wtid}", $headers);
 
-        return json_decode((string)$response->getBody(), true) ?? null;
+        return json_decode((string)$response->getBody(), true);
     }
 
     /**
@@ -92,6 +92,6 @@ class ExchangeClient
     {
         $response = $this->client->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
 
-        return json_decode((string)$response->getBody(), true) ?? null;
+        return json_decode((string)$response->getBody(), true);
     }
 }
