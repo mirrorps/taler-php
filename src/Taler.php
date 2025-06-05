@@ -3,6 +3,7 @@
 namespace Taler;
 
 use Psr\Http\Client\ClientInterface;
+use Taler\Exchange\ExchangeClient;
 use Taler\Http\HttpClientWrapper;
 use Taler\Config\TalerConfig;
 
@@ -28,5 +29,10 @@ class Taler
     public function getHttpClientWrapper(): HttpClientWrapper
     {
         return $this->httpClientWrapper;
+    }
+
+    public function exchange(): ExchangeClient
+    {
+        return new ExchangeClient($this->httpClientWrapper);
     }
 }
