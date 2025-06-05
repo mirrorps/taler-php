@@ -29,8 +29,6 @@ class ExchangeClient
     }
 
     /**
-     * Retrieve the exchange's signing keys
-     * 
      * @param array<string, string> $headers Optional request headers
      * @return array<string, mixed>|null
      */
