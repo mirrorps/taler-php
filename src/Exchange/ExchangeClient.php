@@ -14,9 +14,9 @@ class ExchangeClient
     /**
      * @return array<string, mixed>|null
      */
-    public function getConfig(): ?array
+    public function getConfig(array $headers = []): ?array
     {
-        $response = $this->client->request('GET', 'config');
+        $response = $this->client->request('GET', 'config', $headers);
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
@@ -25,9 +25,9 @@ class ExchangeClient
      * 
      * @return array<string, mixed>|null
      */
-    public function getKeys(): ?array
+    public function getKeys(array $headers = []): ?array
     {
-        $response = $this->client->request('GET', 'keys');
+        $response = $this->client->request('GET', 'keys', $headers);
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
@@ -36,9 +36,9 @@ class ExchangeClient
      * 
      * @return array<string, mixed>|null
      */
-    public function getManagementKeys(): ?array
+    public function getManagementKeys(array $headers = []): ?array
     {
-        $response = $this->client->request('GET', 'management/keys');
+        $response = $this->client->request('GET', 'management/keys', $headers);
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
@@ -48,15 +48,15 @@ class ExchangeClient
      * @param string $wtid The wire transfer identifier
      * @return array<string, mixed>|null
      */
-    public function getTransfer(string $wtid): ?array
+    public function getTransfer(string $wtid, array $headers = []): ?array
     {
-        $response = $this->client->request('GET', "transfers/{$wtid}");
+        $response = $this->client->request('GET', "transfers/{$wtid}", $headers);
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
     /**
-     * @param $H_WIRE string (the hash of the merchant’s payment details)
-     * @param $MERCHANT_PUB string (the merchant’s public key (EdDSA))
+     * @param $H_WIRE string (the hash of the merchant's payment details)
+     * @param $MERCHANT_PUB string (the merchant's public key (EdDSA))
      * @param $H_CONTRACT_TERMS string (the hash of the contract terms that were paid)
      * @param $COIN_PUB string (the public key of the coin used for the payment)
      *
@@ -77,9 +77,10 @@ class ExchangeClient
         string $merchant_sig,
         ?string $timeout_ms = null,
         ?int $lpt = null,
+        array $headers = []
     ): ?array
     {
-        $response = $this->client->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", []);
+        $response = $this->client->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 }
