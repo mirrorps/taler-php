@@ -12,33 +12,39 @@ class ExchangeClient
     }
 
     /**
+     * @param array<string, string> $headers Optional request headers
      * @return array<string, mixed>|null
      */
     public function getConfig(array $headers = []): ?array
     {
         $response = $this->client->request('GET', 'config', $headers);
+
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
     /**
      * Retrieve the exchange's signing keys
      * 
+     * @param array<string, string> $headers Optional request headers
      * @return array<string, mixed>|null
      */
     public function getKeys(array $headers = []): ?array
     {
         $response = $this->client->request('GET', 'keys', $headers);
+
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
     /**
      * Retrieve the exchange's management keys
      * 
+     * @param array<string, string> $headers Optional request headers
      * @return array<string, mixed>|null
      */
     public function getManagementKeys(array $headers = []): ?array
     {
         $response = $this->client->request('GET', 'management/keys', $headers);
+
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
@@ -46,28 +52,32 @@ class ExchangeClient
      * Retrieve details about a specific wire transfer
      * 
      * @param string $wtid The wire transfer identifier
+     * @param array<string, string> $headers Optional request headers
      * @return array<string, mixed>|null
      */
     public function getTransfer(string $wtid, array $headers = []): ?array
     {
         $response = $this->client->request('GET', "transfers/{$wtid}", $headers);
+
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 
     /**
-     * @param $H_WIRE string (the hash of the merchant's payment details)
-     * @param $MERCHANT_PUB string (the merchant's public key (EdDSA))
-     * @param $H_CONTRACT_TERMS string (the hash of the contract terms that were paid)
-     * @param $COIN_PUB string (the public key of the coin used for the payment)
-     *
+     * @param string $H_WIRE (the hash of the merchant's payment details)
+     * @param string $MERCHANT_PUB (the merchant's public key (EdDSA))
+     * @param string $H_CONTRACT_TERMS (the hash of the contract terms that were paid)
+     * @param string $COIN_PUB (the public key of the coin used for the payment)
+     * 
      * Query params:
-     * @param $merchant_sig string (EdDSA signature of the merchant made with purpose TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION over a TALER_DepositTrackPS, affirming that it is really the merchant who requires obtaining the wire transfer identifier)
-     * @param $timeout_ms int|float [Optional] (If specified, the exchange will wait up to NUMBER milliseconds for completion of a deposit operation before sending the HTTP response)
-     * @param $lpt int [Optional] (Specifies what status change we are long-polling for. Use 1 to wait for the a 202 state where kyc_ok is false or a 200 OK response. 2 to wait exclusively for a 200 OK response)
+     * 
+     * @param string $merchant_sig (EdDSA signature of the merchant made with purpose TALER_SIGNATURE_MERCHANT_TRACK_TRANSACTION over a TALER_DepositTrackPS, affirming that it is really the merchant who requires obtaining the wire transfer identifier)
+     * @param string|null $timeout_ms [Optional] (If specified, the exchange will wait up to NUMBER milliseconds for completion of a deposit operation before sending the HTTP response)
+     * @param int|null $lpt [Optional] (Specifies what status change we are long-polling for. Use 1 to wait for the a 202 state where kyc_ok is false or a 200 OK response. 2 to wait exclusively for a 200 OK response)
+     * @param array<string, string> $headers Optional request headers
      *
      * @return array<string, mixed>|null
      *
-     * https://docs.taler.net/core/api-exchange.html#get--deposits-$H_WIRE-$MERCHANT_PUB-$H_CONTRACT_TERMS-$COIN_PUB
+     * @see https://docs.taler.net/core/api-exchange.html#get--deposits-$H_WIRE-$MERCHANT_PUB-$H_CONTRACT_TERMS-$COIN_PUB
      */
     public function getDeposits(
         string $H_WIRE,
@@ -81,6 +91,7 @@ class ExchangeClient
     ): ?array
     {
         $response = $this->client->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
+
         return json_decode((string)$response->getBody(), true) ?? null;
     }
 }
