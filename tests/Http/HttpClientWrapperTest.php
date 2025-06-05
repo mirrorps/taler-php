@@ -12,6 +12,7 @@ use Http\Mock\Client as MockClient;
 use Psr\Http\Message\ResponseInterface;
 use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
+
 class HttpClientWrapperTest extends TestCase
 {
     private \Http\Mock\Client $mockClient;
