@@ -2,11 +2,17 @@
 
 namespace Taler\Api\Exchange;
 
+use Psr\Http\Message\ResponseInterface;
+use Taler\Api\Dto\ErrorDetail;
+use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
+use Taler\Api\Exchange\Dto\TrackTransactionResponse;
 use Taler\Http\HttpClientWrapper;
+use Taler\Taler;
 
 class ExchangeClient
 {
     public function __construct(
+        private Taler $taler,
         private HttpClientWrapper $client
     ) {
     }
@@ -75,7 +81,7 @@ class ExchangeClient
      * @param int|null $lpt [Optional] (Specifies what status change we are long-polling for. Use 1 to wait for the a 202 state where kyc_ok is false or a 200 OK response. 2 to wait exclusively for a 200 OK response)
      * @param array<string, string> $headers Optional request headers
      *
-     * @return array<string, mixed>|null
+     * @return TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail|array<string, mixed>
      *
      * @see https://docs.taler.net/core/api-exchange.html#get--deposits-$H_WIRE-$MERCHANT_PUB-$H_CONTRACT_TERMS-$COIN_PUB
      */
@@ -88,10 +94,29 @@ class ExchangeClient
         ?string $timeout_ms = null,
         ?int $lpt = null,
         array $headers = []
-    ): ?array
+    ): TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail|array
     {
         $response = $this->client->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
+        
+        if (!$this->taler->getWrappedResponse()) {
+            return json_decode((string)$response->getBody(), true);
+        }
 
-        return json_decode((string)$response->getBody(), true);
+        return $this->handleDepositsResponse($response);
+    }
+
+    /**
+     * Handle the deposits response and return the appropriate DTO
+     */
+    private function handleDepositsResponse(ResponseInterface $response): TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail
+    {
+        $data = json_decode((string)$response->getBody(), true);
+        
+        return match ($response->getStatusCode()) {
+            200 => TrackTransactionResponse::fromArray($data),
+            202 => TrackTransactionAcceptedResponse::fromArray($data),
+            403 => ErrorDetail::fromArray($data),
+            default => throw new \RuntimeException('Unexpected response status code: ' . $response->getStatusCode())
+        };
     }
 }
