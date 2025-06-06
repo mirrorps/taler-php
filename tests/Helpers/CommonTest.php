@@ -10,6 +10,8 @@ class CommonTest extends TestCase
     public function test_is_valid_base_url_accepts_valid_urls(): void
     {
         $this->assertTrue(isValidUrl('https://example.com'));
+        $this->assertTrue(isValidUrl('https://api.taler.net'));
+        $this->assertTrue(isValidUrl('https://demo.taler.net/instances/sandbox'));
     }
 
     public function test_is_valid_base_url_rejects_invalid_urls(): void
