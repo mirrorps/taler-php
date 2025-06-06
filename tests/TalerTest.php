@@ -13,7 +13,8 @@ use Taler\Taler;
 class TalerTest extends TestCase
 {
     private TalerConfig $config;
-    private ClientInterface|MockObject $httpClient;
+    /** @var ClientInterface&MockObject */
+    private $httpClient;
     private Taler $taler;
 
     private const BASE_URL = 'https://api.taler.net';
@@ -23,7 +24,6 @@ class TalerTest extends TestCase
         $this->config = new TalerConfig(self::BASE_URL);
         $this->config->setAttribute('wrapResponse', true);
 
-        /** @var ClientInterface&MockObject */
         $this->httpClient = $this->createMock(ClientInterface::class);
         $this->taler = new Taler($this->config, $this->httpClient);
     }
