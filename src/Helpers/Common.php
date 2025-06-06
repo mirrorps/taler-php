@@ -3,7 +3,7 @@
 namespace Taler\Helpers;
 
 if (!function_exists('isValidUrl')) {
-    function isValidUrl(string $url, $httpsOnly = true): bool
+    function isValidUrl(string $url, bool $httpsOnly = true): bool
     {
         // Remove illegal characters from the URL
         $sanitizedUrl = filter_var($url, FILTER_SANITIZE_URL);
