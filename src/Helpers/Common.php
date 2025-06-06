@@ -25,6 +25,12 @@ if (!function_exists('isValidUrl')) {
             return false;
         }
 
+        // Get host from URL
+        $host = parse_url($sanitizedUrl, PHP_URL_HOST);
+        if ($host === false || $host === null) {
+            return false;
+        }
+
         return true;
     }
 }
