@@ -15,12 +15,10 @@ class Taler
     /**
      * @param TalerConfig $config
      * @param ClientInterface|null $client
-     * @param bool $wrapResponse
      */
     public function __construct(
         protected TalerConfig $config,
-        protected ?ClientInterface $client = null,
-        protected bool $wrapResponse = true
+        protected ?ClientInterface $client = null
     )
     {
         $this->httpClientWrapper = new HttpClientWrapper($config, $client);
@@ -34,11 +32,6 @@ class Taler
     public function getConfig(): TalerConfig
     {
         return $this->config;
-    }
-
-    public function getWrappedResponse(): bool
-    {
-        return $this->wrapResponse;
     }
 
     public function exchange(): ExchangeClient

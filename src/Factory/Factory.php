@@ -28,13 +28,13 @@ class Factory
 
         $config = new TalerConfig(
             baseUrl: $options['base_url'],
-            authToken: $token
+            authToken: $token,
+            wrapResponse: $wrapResponse
         );
 
         return new Taler(
             $config,
-            $client,
-            $wrapResponse
+            $client
         );
     }
 }
