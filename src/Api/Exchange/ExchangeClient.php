@@ -3,6 +3,7 @@
 namespace Taler\Api\Exchange;
 
 use Psr\Http\Message\ResponseInterface;
+use Taler\Api\Base\BaseApiClient;
 use Taler\Api\Dto\ErrorDetail;
 use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
@@ -11,14 +12,8 @@ use Taler\Exception\TalerException;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
 
-class ExchangeClient
+class ExchangeClient extends BaseApiClient
 {
-    public function __construct(
-        private Taler $taler,
-        private HttpClientWrapper $client
-    ) {
-    }
-
     /**
      * @param array<string, string> $headers Optional request headers
      * @return array<string, mixed>|null
@@ -27,9 +22,11 @@ class ExchangeClient
      */
     public function getConfig(array $headers = []): ?array
     {
-        $response = $this->client->request('GET', 'config', $headers);
+        $this->setResponse(
+            $this->getClient()->request('GET', 'config', $headers)
+        );
 
-        return json_decode((string)$response->getBody(), true);
+        return json_decode((string)$this->getResponse()->getBody(), true);
     }
 
     /**
@@ -40,7 +37,7 @@ class ExchangeClient
      */
     public function getConfigAsync(array $headers = []): mixed
     {
-        return $this->client->requestAsync('GET', 'config', $headers);
+        return $this->getClient()->requestAsync('GET', 'config', $headers);
     }
 
     /**
@@ -51,9 +48,11 @@ class ExchangeClient
      */
     public function getKeys(array $headers = []): ?array
     {
-        $response = $this->client->request('GET', 'keys', $headers);
+        $this->setResponse(
+            $this->getClient()->request('GET', 'keys', $headers)
+        );
 
-        return json_decode((string)$response->getBody(), true);
+        return json_decode((string)$this->getResponse()->getBody(), true);
     }
 
     /**
@@ -64,7 +63,7 @@ class ExchangeClient
      */
     public function getKeysAsync(array $headers = []): mixed
     {
-        return $this->client->requestAsync('GET', 'keys', $headers);
+        return $this->getClient()->requestAsync('GET', 'keys', $headers);
     }
 
     /**
@@ -75,9 +74,11 @@ class ExchangeClient
      */
     public function getManagementKeys(array $headers = []): ?array
     {
-        $response = $this->client->request('GET', 'management/keys', $headers);
+        $this->setResponse(
+            $this->getClient()->request('GET', 'management/keys', $headers)
+        );
 
-        return json_decode((string)$response->getBody(), true);
+        return json_decode((string)$this->getResponse()->getBody(), true);
     }
 
     /**
@@ -88,7 +89,7 @@ class ExchangeClient
      */
     public function getManagementKeysAsync(array $headers = []): mixed
     {
-        return $this->client->requestAsync('GET', 'management/keys', $headers);
+        return $this->getClient()->requestAsync('GET', 'management/keys', $headers);
     }
 
     /**
@@ -102,13 +103,15 @@ class ExchangeClient
      */
     public function getTransfer(string $wtid, array $headers = []): TrackTransferResponse|array
     {
-        $response = $this->client->request('GET', "transfers/{$wtid}", $headers);
+        $this->setResponse(
+            $this->getClient()->request('GET', "transfers/{$wtid}", $headers)
+        );
 
-        if (!$this->taler->getWrappedResponse()) {
-            return json_decode((string)$response->getBody(), true);
+        if (!$this->getTaler()->getWrappedResponse()) {
+            return json_decode((string)$this->getResponse()->getBody(), true);
         }
 
-        return $this->handleTransferResponse($response);
+        return $this->handleTransferResponse($this->getResponse());
     }
 
     /**
@@ -122,7 +125,7 @@ class ExchangeClient
      */
     public function getTransferAsync(string $wtid, array $headers = []): mixed
     {
-        return $this->client->requestAsync('GET', "transfers/{$wtid}", $headers);
+        return $this->getClient()->requestAsync('GET', "transfers/{$wtid}", $headers);
     }
 
     /**
@@ -131,7 +134,7 @@ class ExchangeClient
     private function handleTransferResponse(ResponseInterface $response): TrackTransferResponse
     {
         $data = json_decode((string)$response->getBody(), true);
-        
+
         if ($response->getStatusCode() !== 200) {
             throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
         }
@@ -169,13 +172,15 @@ class ExchangeClient
         array $headers = []
     ): TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail|array
     {
-        $response = $this->client->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
+        $this->setResponse(
+            $this->getClient()->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers)
+        );
         
-        if (!$this->taler->getWrappedResponse()) {
-            return json_decode((string)$response->getBody(), true);
+        if (!$this->getTaler()->getWrappedResponse()) {
+            return json_decode((string)$this->getResponse()->getBody(), true);
         }
 
-        return $this->handleDepositsResponse($response);
+        return $this->handleDepositsResponse($this->getResponse());
     }
 
     /**
@@ -208,7 +213,7 @@ class ExchangeClient
         array $headers = []
     ): mixed
     {
-        return $this->client->requestAsync('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
+        return $this->getClient()->requestAsync('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
     }
 
     /**

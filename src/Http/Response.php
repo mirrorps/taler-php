@@ -2,7 +2,6 @@
 
 namespace Taler\Http;
 
-use Psr\Http\Message\MessageInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
