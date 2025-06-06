@@ -13,7 +13,7 @@ abstract class AbstractApiClient extends BaseApiClient
      * @param callable(ResponseInterface): T $handler The response handler function
      * @return T|array<string, mixed>
      */
-    protected function handleWrappedResponse(callable $handler): mixed
+    public function handleWrappedResponse(callable $handler): mixed
     {
         $response = $this->getResponse();
 
