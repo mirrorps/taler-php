@@ -13,6 +13,7 @@ use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
 use Taler\Api\Exchange\Dto\TrackTransferResponse;
 use Taler\Api\Exchange\ExchangeClient;
+use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
@@ -25,6 +26,7 @@ class ExchangeClientTest extends TestCase
     private ResponseInterface&MockObject $response;
     private StreamInterface&MockObject $stream;
     private Promise&MockObject $promise;
+    private TalerConfig&MockObject $config;
 
     protected function setUp(): void
     {
@@ -33,6 +35,9 @@ class ExchangeClientTest extends TestCase
         $this->response = $this->createMock(ResponseInterface::class);
         $this->stream = $this->createMock(StreamInterface::class);
         $this->promise = $this->createMock(Promise::class);
+        
+        $this->config = $this->createMock(TalerConfig::class);
+        $this->taler->method('getConfig')->willReturn($this->config);
         
         $this->client = new ExchangeClient($this->taler, $this->httpClient);
     }
@@ -151,7 +156,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockResponse($expectedData, 200);
         
-        $this->taler->method('getWrappedResponse')
+        $this->config->method('getWrapResponse')
             ->willReturn(true);
 
         $this->httpClient->expects($this->once())
@@ -186,7 +191,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockAsyncResponse($expectedData, 200);
         
-        $this->taler->method('getWrappedResponse')
+        $this->config->method('getWrapResponse')
             ->willReturn(true);
 
         $this->httpClient->expects($this->once())
@@ -199,6 +204,7 @@ class ExchangeClientTest extends TestCase
         
         $response = $promise->wait();
         $result = TrackTransferResponse::fromArray(json_decode((string)$response->getBody(), true));
+
         $this->assertInstanceOf(TrackTransferResponse::class, $result);
         $this->assertEquals('10', $result->total);
         $this->assertEquals('test-merchant', $result->merchant_pub);
@@ -208,8 +214,7 @@ class ExchangeClientTest extends TestCase
     {
         $this->setupMockResponse(['error' => 'test'], 404);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $this->httpClient->method('request')
             ->willReturn($this->response);
@@ -222,8 +227,7 @@ class ExchangeClientTest extends TestCase
     {
         $this->setupMockAsyncResponse(['error' => 'test'], 404);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $this->httpClient->method('requestAsync')
             ->willReturn($this->promise);
@@ -248,8 +252,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockResponse($expectedData, 200);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $this->httpClient->expects($this->once())
             ->method('request')
@@ -278,8 +281,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockAsyncResponse($expectedData, 200);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $this->httpClient->expects($this->once())
             ->method('requestAsync')
@@ -315,7 +317,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockResponse($expectedData, 202);
         
-        $this->taler->method('getWrappedResponse')
+        $this->config->method('getWrapResponse')
             ->willReturn(true);
 
         $result = $this->client->getDeposits(
@@ -340,8 +342,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockAsyncResponse($expectedData, 202);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $promise = $this->client->getDepositsAsync(
             'h_wire',
@@ -372,7 +373,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockResponse($expectedData, 403);
         
-        $this->taler->method('getWrappedResponse')
+        $this->config->method('getWrapResponse')
             ->willReturn(true);
 
         $result = $this->client->getDeposits(
@@ -396,8 +397,7 @@ class ExchangeClientTest extends TestCase
         ];
         $this->setupMockAsyncResponse($expectedData, 403);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $promise = $this->client->getDepositsAsync(
             'h_wire',
@@ -423,8 +423,7 @@ class ExchangeClientTest extends TestCase
     {
         $this->setupMockResponse(['error' => 'test'], 500);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $this->expectException(TalerException::class);
         $this->client->getDeposits(
@@ -440,8 +439,7 @@ class ExchangeClientTest extends TestCase
     {
         $this->setupMockAsyncResponse(['error' => 'test'], 500);
         
-        $this->taler->method('getWrappedResponse')
-            ->willReturn(true);
+        $this->config->method('getWrapResponse')->willReturn(true);
 
         $promise = $this->client->getDepositsAsync(
             'h_wire',
