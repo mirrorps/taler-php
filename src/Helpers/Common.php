@@ -2,8 +2,8 @@
 
 namespace Taler\Helpers;
 
-if (!function_exists('isValidBaseUrl')) {
-    function isValidBaseUrl(string $url): bool
+if (!function_exists('isValidUrl')) {
+    function isValidUrl(string $url, $httpsOnly = true): bool
     {
         // Remove illegal characters from the URL
         $sanitizedUrl = filter_var($url, FILTER_SANITIZE_URL);
@@ -16,14 +16,12 @@ if (!function_exists('isValidBaseUrl')) {
             return false;
         }
 
-        // Restrict to https only
         $scheme = parse_url($sanitizedUrl, PHP_URL_SCHEME);
         if ($scheme === false) {
             return false;
         }
 
-
-        if ($scheme !== 'https') {
+        if ($httpsOnly === true && $scheme !== 'https') {
             return false;
         }
 
