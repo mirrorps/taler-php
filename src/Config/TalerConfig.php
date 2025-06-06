@@ -8,7 +8,8 @@ class TalerConfig
 {
     public function __construct(
         private string $baseUrl,
-        private string $authToken = ''
+        private string $authToken = '',
+        private bool $wrapResponse = true
     ) {
         $this->validate();
     }
@@ -21,6 +22,11 @@ class TalerConfig
     public function getAuthToken(): string
     {
         return $this->authToken;
+    }
+
+    public function getWrapResponse(): bool
+    {
+        return $this->wrapResponse;
     }
 
     private function validate(): void

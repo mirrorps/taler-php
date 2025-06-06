@@ -107,7 +107,7 @@ class ExchangeClient extends BaseApiClient
             $this->getClient()->request('GET', "transfers/{$wtid}", $headers)
         );
 
-        if (!$this->getTaler()->getWrappedResponse()) {
+        if (!$this->getTaler()->getConfig()->getWrapResponse()) {
             return json_decode((string)$this->getResponse()->getBody(), true);
         }
 
@@ -176,7 +176,7 @@ class ExchangeClient extends BaseApiClient
             $this->getClient()->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers)
         );
         
-        if (!$this->getTaler()->getWrappedResponse()) {
+        if (!$this->getTaler()->getConfig()->getWrapResponse()) {
             return json_decode((string)$this->getResponse()->getBody(), true);
         }
 
