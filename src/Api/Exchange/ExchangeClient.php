@@ -5,28 +5,45 @@ namespace Taler\Api\Exchange;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Base\BaseApiClient;
 use Taler\Api\Dto\ErrorDetail;
+use Taler\Api\Exchange\Dto\ExchangeVersionResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
 use Taler\Api\Exchange\Dto\TrackTransferResponse;
 use Taler\Exception\TalerException;
-use Taler\Http\HttpClientWrapper;
-use Taler\Taler;
 
 class ExchangeClient extends BaseApiClient
 {
     /**
      * @param array<string, string> $headers Optional request headers
-     * @return array<string, mixed>|null
+     * @return ExchangeVersionResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getConfig(array $headers = []): ?array
+    public function getConfig(array $headers = []): ExchangeVersionResponse|array
     {
         $this->setResponse(
             $this->getClient()->request('GET', 'config', $headers)
         );
 
-        return json_decode((string)$this->getResponse()->getBody(), true);
+        if (!$this->getTaler()->getConfig()->getWrapResponse()) {
+            return json_decode((string)$this->getResponse()->getBody(), true);
+        }
+
+        return $this->handleConfigResponse($this->getResponse());
+    }
+
+    /**
+     * Handle the config response and return the appropriate DTO
+     */
+    private function handleConfigResponse(ResponseInterface $response): ExchangeVersionResponse
+    {
+        $data = json_decode((string)$response->getBody(), true);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
+        }
+
+        return ExchangeVersionResponse::fromArray($data);
     }
 
     /**
