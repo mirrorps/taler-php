@@ -2,7 +2,7 @@
 
 namespace Taler\Config;
 
-use function Taler\Helpers\isValidBaseUrl;
+use function Taler\Helpers\isValidUrl;
 
 class TalerConfig
 {
@@ -63,7 +63,7 @@ class TalerConfig
             throw new \InvalidArgumentException('Missing required "base_url" in options.');
         }
 
-        if (!isValidBaseUrl($this->baseUrl)) {
+        if (!isValidUrl($this->baseUrl)) {
             throw new \InvalidArgumentException('Invalid base URL provided, only https schema is allowed');
         }
     }
