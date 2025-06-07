@@ -1,8 +1,10 @@
 <?php
 
-namespace Taler\Api\Dto;
+namespace Taler\Api\Exchange\Dto;
 
 use Taler\Api\Contract\AccountRestriction;
+use Taler\Api\Dto\DenyAllAccountRestriction;
+use Taler\Api\Dto\RegexAccountRestriction;
 
 /**
  * DTO for the exchange wire account details
