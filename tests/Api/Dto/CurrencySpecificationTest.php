@@ -7,6 +7,16 @@ use Taler\Api\Dto\CurrencySpecification;
 
 class CurrencySpecificationTest extends TestCase
 {
+    /**
+     * @var array{
+     *     name: string,
+     *     currency: string,
+     *     num_fractional_input_digits: int,
+     *     num_fractional_normal_digits: int,
+     *     num_fractional_trailing_zero_digits: int,
+     *     alt_unit_names: array<int|numeric-string, string>
+     * }
+     */
     private array $validData = [
         'name' => 'US Dollar',
         'currency' => 'USD',
