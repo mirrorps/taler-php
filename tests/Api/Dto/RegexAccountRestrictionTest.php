@@ -11,7 +11,7 @@ class RegexAccountRestrictionTest extends TestCase
     private const SAMPLE_HUMAN_HINT = 'Only SEPA accounts are allowed';
 
     /**
-     * @var array<non-empty-string, non-empty-string>
+     * @var array<string, string>
      */
     private const SAMPLE_I18N = [
         'de' => 'Nur SEPA-Konten sind erlaubt',
@@ -49,6 +49,7 @@ class RegexAccountRestrictionTest extends TestCase
     public function testFromArrayWithRequiredFields(): void
     {
         $data = [
+            'type' => 'regex',
             'payto_regex' => self::SAMPLE_PAYTO_REGEX,
             'human_hint' => self::SAMPLE_HUMAN_HINT
         ];
@@ -63,6 +64,7 @@ class RegexAccountRestrictionTest extends TestCase
     public function testFromArrayWithAllFields(): void
     {
         $data = [
+            'type' => 'regex',
             'payto_regex' => self::SAMPLE_PAYTO_REGEX,
             'human_hint' => self::SAMPLE_HUMAN_HINT,
             'human_hint_i18n' => self::SAMPLE_I18N
@@ -78,6 +80,7 @@ class RegexAccountRestrictionTest extends TestCase
     public function testFromArrayWithNullI18n(): void
     {
         $data = [
+            'type' => 'regex',
             'payto_regex' => self::SAMPLE_PAYTO_REGEX,
             'human_hint' => self::SAMPLE_HUMAN_HINT,
             'human_hint_i18n' => null

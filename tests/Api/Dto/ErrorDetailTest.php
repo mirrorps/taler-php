@@ -7,6 +7,22 @@ use Taler\Api\Dto\ErrorDetail;
 
 class ErrorDetailTest extends TestCase
 {
+    /**
+     * @var array{
+     *     code: int,
+     *     hint: string,
+     *     detail: string,
+     *     parameter: string,
+     *     path: string,
+     *     offset: string,
+     *     index: string,
+     *     object: string,
+     *     currency: string,
+     *     type_expected: string,
+     *     type_actual: string,
+     *     extra: array<string, string>
+     * }
+     */
     private array $fullData = [
         'code' => 1001,
         'hint' => 'Invalid input',
@@ -73,6 +89,7 @@ class ErrorDetailTest extends TestCase
 
     public function testFromArrayWithRequiredOnly(): void
     {
+        /** @var array{code: int} $data */
         $data = ['code' => 1001];
         $error = ErrorDetail::fromArray($data);
 
@@ -110,6 +127,7 @@ class ErrorDetailTest extends TestCase
 
     public function testFromArrayWithPartialParameters(): void
     {
+        /** @var array{code: int, hint: string, detail: string} $data */
         $data = [
             'code' => 1001,
             'hint' => 'Invalid input',

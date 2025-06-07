@@ -13,4 +13,13 @@ class DenyAllAccountRestrictionTest extends TestCase
 
         $this->assertSame('deny', $restriction->getType());
     }
+
+    public function testFromArray(): void
+    {
+        $data = ['type' => 'deny'];
+
+        $restriction = DenyAllAccountRestriction::fromArray($data);
+
+        $this->assertSame('deny', $restriction->getType());
+    }
 }

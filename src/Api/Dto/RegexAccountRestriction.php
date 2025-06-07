@@ -2,6 +2,8 @@
 
 namespace Taler\Api\Dto;
 
+use Taler\Api\Contract\AccountRestriction;
+
 /**
  * DTO for regex-based account restrictions in the exchange wire account details
  *
@@ -11,7 +13,7 @@ namespace Taler\Api\Dto;
  * @see https://www.gnu.org/software/findutils/manual/html_node/find_html/posix_002degrep-regular-expression-syntax.html
  * @see https://docs.taler.net/core/api-exchange.html
  */
-class RegexAccountRestriction
+class RegexAccountRestriction implements AccountRestriction
 {
     private const TYPE = 'regex';
 
@@ -31,13 +33,35 @@ class RegexAccountRestriction
      * Creates a new instance from an array of data
      *
      * @param array{
-     *     payto_regex: string,
-     *     human_hint: string,
+     *     type?: string,
+     *     payto_regex?: string,
+     *     human_hint?: string,
      *     human_hint_i18n?: array<string, string>|null
      * } $data
+     * @throws \InvalidArgumentException if type is missing or not 'regex', or if required fields are missing
      */
     public static function fromArray(array $data): self
     {
+        if (!isset($data['type'])) {
+            throw new \InvalidArgumentException('Missing type field');
+        }
+
+        if ($data['type'] !== self::TYPE) {
+            throw new \InvalidArgumentException(sprintf(
+                'Invalid type for RegexAccountRestriction: expected "%s", got "%s"',
+                self::TYPE,
+                $data['type']
+            ));
+        }
+
+        if (!isset($data['payto_regex'])) {
+            throw new \InvalidArgumentException('Missing payto_regex field');
+        }
+
+        if (!isset($data['human_hint'])) {
+            throw new \InvalidArgumentException('Missing human_hint field');
+        }
+
         return new self(
             payto_regex: $data['payto_regex'],
             human_hint: $data['human_hint'],
