@@ -18,7 +18,7 @@ class RegexAccountRestriction
     /**
      * @param string $payto_regex Regular expression that the payto://-URI of the partner account must follow
      * @param string $human_hint Hint for a human to understand the restriction
-     * @param array<non-empty-string, non-empty-string>|null $human_hint_i18n Map from IETF BCP 47 language tags to localized human hints
+     * @param array<string, string>|null $human_hint_i18n Map from IETF BCP 47 language tags to localized human hints
      */
     public function __construct(
         public readonly string $payto_regex,
@@ -33,7 +33,7 @@ class RegexAccountRestriction
      * @param array{
      *     payto_regex: string,
      *     human_hint: string,
-     *     human_hint_i18n?: array<non-empty-string, non-empty-string>|null
+     *     human_hint_i18n?: array<string, string>|null
      * } $data
      */
     public static function fromArray(array $data): self
