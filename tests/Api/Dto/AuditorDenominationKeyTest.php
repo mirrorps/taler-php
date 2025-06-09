@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
