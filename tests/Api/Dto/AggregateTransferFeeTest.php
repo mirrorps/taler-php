@@ -4,20 +4,21 @@ namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\AggregateTransferFee;
+use Taler\Api\Dto\RelativeTime;
 
 class AggregateTransferFeeTest extends TestCase
 {
     private const SAMPLE_WIRE_FEE = 'TALER:0.50';
     private const SAMPLE_CLOSING_FEE = 'TALER:0.25';
-    private const SAMPLE_START_DATE = '2024-03-20T00:00:00Z';
-    private const SAMPLE_END_DATE = '2024-03-21T00:00:00Z';
+    private const SAMPLE_START_DATE_US = 1710979200000000; // 2024-03-20T00:00:00Z in microseconds
+    private const SAMPLE_END_DATE_US = 1711065600000000; // 2024-03-21T00:00:00Z in microseconds
     private const SAMPLE_SIG = 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
     /** @var array{
      *     wire_fee?: string,
      *     closing_fee?: string,
-     *     start_date?: string,
-     *     end_date?: string,
+     *     start_date?: array{d_us: int},
+     *     end_date?: array{d_us: int},
      *     sig?: string
      * }
      */
@@ -28,8 +29,8 @@ class AggregateTransferFeeTest extends TestCase
         $this->validData = [
             'wire_fee' => self::SAMPLE_WIRE_FEE,
             'closing_fee' => self::SAMPLE_CLOSING_FEE,
-            'start_date' => self::SAMPLE_START_DATE,
-            'end_date' => self::SAMPLE_END_DATE,
+            'start_date' => ['d_us' => self::SAMPLE_START_DATE_US],
+            'end_date' => ['d_us' => self::SAMPLE_END_DATE_US],
             'sig' => self::SAMPLE_SIG
         ];
     }
@@ -39,15 +40,17 @@ class AggregateTransferFeeTest extends TestCase
         $fee = new AggregateTransferFee(
             wire_fee: self::SAMPLE_WIRE_FEE,
             closing_fee: self::SAMPLE_CLOSING_FEE,
-            start_date: self::SAMPLE_START_DATE,
-            end_date: self::SAMPLE_END_DATE,
+            start_date: new RelativeTime(self::SAMPLE_START_DATE_US),
+            end_date: new RelativeTime(self::SAMPLE_END_DATE_US),
             sig: self::SAMPLE_SIG
         );
 
         $this->assertSame(self::SAMPLE_WIRE_FEE, $fee->wire_fee);
         $this->assertSame(self::SAMPLE_CLOSING_FEE, $fee->closing_fee);
-        $this->assertSame(self::SAMPLE_START_DATE, $fee->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE, $fee->end_date);
+        $this->assertInstanceOf(RelativeTime::class, $fee->start_date);
+        $this->assertSame(self::SAMPLE_START_DATE_US, $fee->start_date->d_us);
+        $this->assertInstanceOf(RelativeTime::class, $fee->end_date);
+        $this->assertSame(self::SAMPLE_END_DATE_US, $fee->end_date->d_us);
         $this->assertSame(self::SAMPLE_SIG, $fee->sig);
     }
 
@@ -57,8 +60,10 @@ class AggregateTransferFeeTest extends TestCase
 
         $this->assertSame(self::SAMPLE_WIRE_FEE, $fee->wire_fee);
         $this->assertSame(self::SAMPLE_CLOSING_FEE, $fee->closing_fee);
-        $this->assertSame(self::SAMPLE_START_DATE, $fee->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE, $fee->end_date);
+        $this->assertInstanceOf(RelativeTime::class, $fee->start_date);
+        $this->assertSame(self::SAMPLE_START_DATE_US, $fee->start_date->d_us);
+        $this->assertInstanceOf(RelativeTime::class, $fee->end_date);
+        $this->assertSame(self::SAMPLE_END_DATE_US, $fee->end_date->d_us);
         $this->assertSame(self::SAMPLE_SIG, $fee->sig);
     }
 
