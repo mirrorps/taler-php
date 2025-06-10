@@ -138,8 +138,8 @@ class ExchangeKeysResponse
      *         wire_fee: string,
      *         closing_fee: string,
      *         wad_fee: string,
-     *         start_date: array{d_us: int|string},
-     *         end_date: array{d_us: int|string},
+     *         start_date: array{t_s: int|string}|string,
+     *         end_date: array{t_s: int|string}|string,
      *         sig: string
      *     }>>,
      *     wads: array<int, array{

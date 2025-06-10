@@ -12,15 +12,15 @@ class AggregateTransferFee
     /**
      * @param string $wire_fee Per transfer wire transfer fee
      * @param string $closing_fee Per transfer closing fee
-     * @param RelativeTime $start_date What date (inclusive) does this fee go into effect
-     * @param RelativeTime $end_date What date (exclusive) does this fee stop going into effect
+     * @param Timestamp|string $start_date What date (inclusive) does this fee go into effect
+     * @param Timestamp|string $end_date What date (exclusive) does this fee stop going into effect
      * @param string $sig Signature of TALER_MasterWireFeePS with purpose TALER_SIGNATURE_MASTER_WIRE_FEES
      */
     public function __construct(
         public readonly string $wire_fee,
         public readonly string $closing_fee,
-        public readonly RelativeTime $start_date,
-        public readonly RelativeTime $end_date,
+        public readonly Timestamp|string $start_date,
+        public readonly Timestamp|string $end_date,
         public readonly string $sig,
     ) {
     }
@@ -31,8 +31,8 @@ class AggregateTransferFee
      * @param array{
      *     wire_fee?: string,
      *     closing_fee?: string,
-     *     start_date?: array{d_us: int|string},
-     *     end_date?: array{d_us: int|string},
+     *     start_date?: array{t_s: int|string}|string,
+     *     end_date?: array{t_s: int|string}|string,
      *     sig?: string
      * } $data
      * @throws \InvalidArgumentException if required fields are missing or invalid
@@ -59,12 +59,40 @@ class AggregateTransferFee
             throw new \InvalidArgumentException('Missing sig field');
         }
 
+        // Handle flexible timestamp format - could be string or RelativeTime
+        $startDate = self::parseTimestamp($data['start_date']);
+        $endDate = self::parseTimestamp($data['end_date']);
+
         return new self(
             wire_fee: $data['wire_fee'],
             closing_fee: $data['closing_fee'],
-            start_date: RelativeTime::fromArray($data['start_date']),
-            end_date: RelativeTime::fromArray($data['end_date']),
+            start_date: $startDate,
+            end_date: $endDate,
             sig: $data['sig']
         );
+    }
+
+    /**
+     * Parse timestamp data that could be a string or Timestamp array
+     *
+     * @param mixed $timestampData
+     * @return Timestamp|string
+     * @throws \InvalidArgumentException
+     */
+    private static function parseTimestamp(mixed $timestampData): Timestamp|string
+    {
+        if (is_string($timestampData)) {
+            // Return string timestamps as-is (ISO format)
+            return $timestampData;
+        }
+
+        if (is_array($timestampData)) {
+            if (isset($timestampData['t_s'])) {
+                // Parse as Timestamp if it has t_s key
+                return Timestamp::fromArray($timestampData);
+            }
+        }
+
+        throw new \InvalidArgumentException('Invalid timestamp format: ' . var_export($timestampData, true));
     }
 } 
