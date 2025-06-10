@@ -207,9 +207,9 @@ class ExchangeKeysResponse
      *     }>,
      *     signkeys: array<int, array{
      *         key: string,
-     *         stamp_start: string,
-     *         stamp_expire: string,
-     *         stamp_end: string,
+     *         stamp_start: array{t_s: int|string},
+     *         stamp_expire: array{t_s: int|string},
+     *         stamp_end: array{t_s: int|string},
      *         master_sig: string
      *     }>,
      *     extensions?: array<string, array{

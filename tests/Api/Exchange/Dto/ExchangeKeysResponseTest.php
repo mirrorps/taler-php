@@ -144,9 +144,9 @@ class ExchangeKeysResponseTest extends TestCase
      *     }>,
      *     signkeys: array<int, array{
      *         key: string,
-     *         stamp_start: string,
-     *         stamp_expire: string,
-     *         stamp_end: string,
+     *         stamp_start: array{t_s: int|string},
+     *         stamp_expire: array{t_s: int|string},
+     *         stamp_end: array{t_s: int|string},
      *         master_sig: string
      *     }>,
      *     extensions: array<string, array{
@@ -289,9 +289,9 @@ class ExchangeKeysResponseTest extends TestCase
             'signkeys' => [
                 [
                     'key' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                    'stamp_start' => '2024-03-20T00:00:00Z',
-                    'stamp_expire' => '2024-03-21T00:00:00Z',
-                    'stamp_end' => '2024-03-22T00:00:00Z',
+                    'stamp_start' => ['t_s' => 1710979200],
+                    'stamp_expire' => ['t_s' => 1711065600],
+                    'stamp_end' => ['t_s' => 1711152000],
                     'master_sig' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                 ]
             ],
