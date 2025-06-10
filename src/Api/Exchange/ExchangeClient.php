@@ -5,6 +5,7 @@ namespace Taler\Api\Exchange;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\Dto\ErrorDetail;
+use Taler\Api\Exchange\Dto\ExchangeKeysResponse;
 use Taler\Api\Exchange\Dto\ExchangeVersionResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
@@ -43,6 +44,20 @@ class ExchangeClient extends AbstractApiClient
     }
 
     /**
+     * Handle the keys response and return the appropriate DTO
+     */
+    private function handleKeysResponse(ResponseInterface $response): ExchangeKeysResponse
+    {
+        $data = json_decode((string)$response->getBody(), true);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
+        }
+
+        return ExchangeKeysResponse::fromArray($data);
+    }
+
+    /**
      * @param array<string, string> $headers Optional request headers
      * @return mixed
      * @throws TalerException
@@ -55,17 +70,17 @@ class ExchangeClient extends AbstractApiClient
 
     /**
      * @param array<string, string> $headers Optional request headers
-     * @return array<string, mixed>|null
+     * @return ExchangeKeysResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getKeys(array $headers = []): ?array
+    public function getKeys(array $headers = []): ExchangeKeysResponse|array
     {
         $this->setResponse(
             $this->getClient()->request('GET', 'keys', $headers)
         );
 
-        return json_decode((string)$this->getResponse()->getBody(), true);
+        return $this->handleWrappedResponse($this->handleKeysResponse(...));
     }
 
     /**
