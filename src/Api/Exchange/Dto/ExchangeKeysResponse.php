@@ -188,8 +188,8 @@ class ExchangeKeysResponse
      *     exchange_pub: string,
      *     recoup: array<int, array{h_denom_pub: string}>,
      *     global_fees: array<int, array{
-     *         start_date: string,
-     *         end_date: string,
+     *         start_date: array{t_s: int|string},
+     *         end_date: array{t_s: int|string},
      *         history_fee: string,
      *         account_fee: string,
      *         purse_fee: string,

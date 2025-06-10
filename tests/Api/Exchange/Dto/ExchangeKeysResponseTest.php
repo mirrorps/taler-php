@@ -122,8 +122,8 @@ class ExchangeKeysResponseTest extends TestCase
      *     exchange_pub: string,
      *     recoup: array<int, array{h_denom_pub: string}>,
      *     global_fees: array<int, array{
-     *         start_date: string,
-     *         end_date: string,
+     *         start_date: array{t_s: int|string},
+     *         end_date: array{t_s: int|string},
      *         history_fee: string,
      *         account_fee: string,
      *         purse_fee: string,
@@ -261,8 +261,8 @@ class ExchangeKeysResponseTest extends TestCase
             ],
             'global_fees' => [
                 [
-                    'start_date' => '2024-03-20T00:00:00Z',
-                    'end_date' => '2024-03-21T00:00:00Z',
+                    'start_date' => ['t_s' => 1710979200],
+                    'end_date' => ['t_s' => 1711065600],
                     'history_fee' => 'EUR:0.01',
                     'account_fee' => 'EUR:0.01',
                     'purse_fee' => 'EUR:0.01',

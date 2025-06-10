@@ -5,11 +5,12 @@ namespace Taler\Tests\Api\Dto;
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\GlobalFees;
 use Taler\Api\Dto\RelativeTime;
+use Taler\Api\Dto\Timestamp;
 
 class GlobalFeesTest extends TestCase
 {
-    private const SAMPLE_START_DATE = '2024-03-20T00:00:00Z';
-    private const SAMPLE_END_DATE = '2024-03-21T00:00:00Z';
+    private const SAMPLE_START_DATE_S = 1710979200; // 2024-03-20T00:00:00Z in seconds
+    private const SAMPLE_END_DATE_S = 1711065600; // 2024-03-21T00:00:00Z in seconds
     private const SAMPLE_HISTORY_FEE = 'TALER:0.50';
     private const SAMPLE_ACCOUNT_FEE = 'TALER:10.00';
     private const SAMPLE_PURSE_FEE = 'TALER:5.00';
@@ -17,13 +18,15 @@ class GlobalFeesTest extends TestCase
 
     public function testConstructorWithValidData(): void
     {
+        $startDate = new Timestamp(self::SAMPLE_START_DATE_S);
+        $endDate = new Timestamp(self::SAMPLE_END_DATE_S);
         $historyExpiration = new RelativeTime(3600000000); // 1 hour in microseconds
         $purseTimeout = new RelativeTime(7200000000); // 2 hours in microseconds
         $purseAccountLimit = 5;
 
         $globalFees = new GlobalFees(
-            start_date: self::SAMPLE_START_DATE,
-            end_date: self::SAMPLE_END_DATE,
+            start_date: $startDate,
+            end_date: $endDate,
             history_fee: self::SAMPLE_HISTORY_FEE,
             account_fee: self::SAMPLE_ACCOUNT_FEE,
             purse_fee: self::SAMPLE_PURSE_FEE,
@@ -33,8 +36,8 @@ class GlobalFeesTest extends TestCase
             master_sig: self::SAMPLE_MASTER_SIG
         );
 
-        $this->assertSame(self::SAMPLE_START_DATE, $globalFees->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE, $globalFees->end_date);
+        $this->assertSame($startDate, $globalFees->start_date);
+        $this->assertSame($endDate, $globalFees->end_date);
         $this->assertSame(self::SAMPLE_HISTORY_FEE, $globalFees->history_fee);
         $this->assertSame(self::SAMPLE_ACCOUNT_FEE, $globalFees->account_fee);
         $this->assertSame(self::SAMPLE_PURSE_FEE, $globalFees->purse_fee);
@@ -46,6 +49,8 @@ class GlobalFeesTest extends TestCase
 
     public function testConstructorWithNegativePurseAccountLimit(): void
     {
+        $startDate = new Timestamp(self::SAMPLE_START_DATE_S);
+        $endDate = new Timestamp(self::SAMPLE_END_DATE_S);
         $historyExpiration = new RelativeTime(3600000000); // 1 hour in microseconds
         $purseTimeout = new RelativeTime(7200000000); // 2 hours in microseconds
 
@@ -53,8 +58,8 @@ class GlobalFeesTest extends TestCase
         $this->expectExceptionMessage('purse_account_limit must be non-negative');
 
         new GlobalFees(
-            start_date: self::SAMPLE_START_DATE,
-            end_date: self::SAMPLE_END_DATE,
+            start_date: $startDate,
+            end_date: $endDate,
             history_fee: self::SAMPLE_HISTORY_FEE,
             account_fee: self::SAMPLE_ACCOUNT_FEE,
             purse_fee: self::SAMPLE_PURSE_FEE,
@@ -68,8 +73,8 @@ class GlobalFeesTest extends TestCase
     public function testFromArrayWithValidData(): void
     {
         $data = [
-            'start_date' => self::SAMPLE_START_DATE,
-            'end_date' => self::SAMPLE_END_DATE,
+            'start_date' => ['t_s' => self::SAMPLE_START_DATE_S],
+            'end_date' => ['t_s' => self::SAMPLE_END_DATE_S],
             'history_fee' => self::SAMPLE_HISTORY_FEE,
             'account_fee' => self::SAMPLE_ACCOUNT_FEE,
             'purse_fee' => self::SAMPLE_PURSE_FEE,
@@ -81,8 +86,10 @@ class GlobalFeesTest extends TestCase
 
         $globalFees = GlobalFees::fromArray($data);
 
-        $this->assertSame(self::SAMPLE_START_DATE, $globalFees->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE, $globalFees->end_date);
+        $this->assertInstanceOf(Timestamp::class, $globalFees->start_date);
+        $this->assertSame(self::SAMPLE_START_DATE_S, $globalFees->start_date->t_s);
+        $this->assertInstanceOf(Timestamp::class, $globalFees->end_date);
+        $this->assertSame(self::SAMPLE_END_DATE_S, $globalFees->end_date->t_s);
         $this->assertSame(self::SAMPLE_HISTORY_FEE, $globalFees->history_fee);
         $this->assertSame(self::SAMPLE_ACCOUNT_FEE, $globalFees->account_fee);
         $this->assertSame(self::SAMPLE_PURSE_FEE, $globalFees->purse_fee);
