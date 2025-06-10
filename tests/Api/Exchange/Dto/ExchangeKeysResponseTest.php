@@ -36,7 +36,7 @@ class ExchangeKeysResponseTest extends TestCase
     private const SAMPLE_MASTER_PUBLIC_KEY = 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
     private const SAMPLE_EXCHANGE_SIG = 'EDDSABBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB';
     private const SAMPLE_EXCHANGE_PUB = 'EDDSACCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC';
-    private const SAMPLE_LIST_ISSUE_DATE = '2024-03-20T00:00:00Z';
+    private const SAMPLE_LIST_ISSUE_DATE = ['t_s' => 1710979200];
     private const SAMPLE_EXTENSIONS_SIG = 'EDDSADDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD';
 
     /**
@@ -132,7 +132,7 @@ class ExchangeKeysResponseTest extends TestCase
      *         purse_account_limit: int,
      *         master_sig: string
      *     }>,
-     *     list_issue_date: string,
+     *     list_issue_date: array{t_s: int|string},
      *     auditors: array<int, array{
      *         auditor_pub: string,
      *         auditor_url: string,
@@ -343,7 +343,7 @@ class ExchangeKeysResponseTest extends TestCase
         $this->assertInstanceOf(Recoup::class, $response->recoup[0]);
         $this->assertCount(1, $response->global_fees);
         $this->assertInstanceOf(GlobalFees::class, $response->global_fees[0]);
-        $this->assertSame(self::SAMPLE_LIST_ISSUE_DATE, $response->list_issue_date);
+        $this->assertSame(self::SAMPLE_LIST_ISSUE_DATE['t_s'], $response->list_issue_date->t_s);
         $this->assertCount(1, $response->auditors);
         $this->assertInstanceOf(AuditorKeys::class, $response->auditors[0]);
         $this->assertCount(1, $response->signkeys);
