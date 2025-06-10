@@ -1,9 +1,10 @@
 <?php
 
-namespace Tests\Api\Dto;
+namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\DenomGroupCsAgeRestricted;
+use Taler\Api\Dto\Timestamp;
 
 class DenomGroupCsAgeRestrictedTest extends TestCase
 {
@@ -13,10 +14,10 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
     private const SAMPLE_FEE_REFRESH = 'TALER:0.15';
     private const SAMPLE_FEE_REFUND = 'TALER:0.10';
     private const SAMPLE_MASTER_SIG = 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-    private const SAMPLE_START_TIME = '2024-03-20T00:00:00Z';
-    private const SAMPLE_EXPIRE_WITHDRAW = '2024-03-21T00:00:00Z';
-    private const SAMPLE_EXPIRE_DEPOSIT = '2024-03-22T00:00:00Z';
-    private const SAMPLE_EXPIRE_LEGAL = '2024-03-23T00:00:00Z';
+    private const SAMPLE_START_TIME = 1716153600;
+    private const SAMPLE_EXPIRE_WITHDRAW = 1716240000;
+    private const SAMPLE_EXPIRE_DEPOSIT = 1716326400;
+    private const SAMPLE_EXPIRE_LEGAL = 1716412800;
     private const SAMPLE_CS_PUB = 'CS25519-PUB-123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
     private const SAMPLE_AGE_MASK = '0000000000000000000000000000000000000000000000000000000000000001';
 
@@ -30,10 +31,10 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
      *     age_mask: string,
      *     denoms: array<int, array{
      *         master_sig: string,
-     *         stamp_start: string,
-     *         stamp_expire_withdraw: string,
-     *         stamp_expire_deposit: string,
-     *         stamp_expire_legal: string,
+     *         stamp_start: Timestamp,
+     *         stamp_expire_withdraw: Timestamp,
+     *         stamp_expire_deposit: Timestamp,
+     *         stamp_expire_legal: Timestamp,
      *         cs_pub: string,
      *         lost?: bool
      *     }>
@@ -54,10 +55,10 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
             'denoms' => [
                 [
                     'master_sig' => self::SAMPLE_MASTER_SIG,
-                    'stamp_start' => self::SAMPLE_START_TIME,
-                    'stamp_expire_withdraw' => self::SAMPLE_EXPIRE_WITHDRAW,
-                    'stamp_expire_deposit' => self::SAMPLE_EXPIRE_DEPOSIT,
-                    'stamp_expire_legal' => self::SAMPLE_EXPIRE_LEGAL,
+                    'stamp_start' => new Timestamp(self::SAMPLE_START_TIME),
+                    'stamp_expire_withdraw' => new Timestamp(self::SAMPLE_EXPIRE_WITHDRAW),
+                    'stamp_expire_deposit' => new Timestamp(self::SAMPLE_EXPIRE_DEPOSIT),
+                    'stamp_expire_legal' => new Timestamp(self::SAMPLE_EXPIRE_LEGAL),
                     'cs_pub' => self::SAMPLE_CS_PUB
                 ]
             ]
