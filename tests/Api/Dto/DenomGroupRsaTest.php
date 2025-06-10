@@ -1,9 +1,10 @@
 <?php
 
-namespace Tests\Api\Dto;
+namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\DenomGroupRsa;
+use Taler\Api\Dto\Timestamp;
 
 class DenomGroupRsaTest extends TestCase
 {
@@ -28,10 +29,10 @@ class DenomGroupRsaTest extends TestCase
      *     cipher: string,
      *     denoms: array<int, array{
      *         master_sig: string,
-     *         stamp_start: string,
-     *         stamp_expire_withdraw: string,
-     *         stamp_expire_deposit: string,
-     *         stamp_expire_legal: string,
+     *         stamp_start: Timestamp,
+     *         stamp_expire_withdraw: Timestamp,
+     *         stamp_expire_deposit: Timestamp,
+     *         stamp_expire_legal: Timestamp,
      *         rsa_pub: string,
      *         lost?: bool
      *     }>
@@ -51,10 +52,10 @@ class DenomGroupRsaTest extends TestCase
             'denoms' => [
                 [
                     'master_sig' => self::SAMPLE_MASTER_SIG,
-                    'stamp_start' => self::SAMPLE_START_TIME,
-                    'stamp_expire_withdraw' => self::SAMPLE_EXPIRE_WITHDRAW,
-                    'stamp_expire_deposit' => self::SAMPLE_EXPIRE_DEPOSIT,
-                    'stamp_expire_legal' => self::SAMPLE_EXPIRE_LEGAL,
+                    'stamp_start' => new Timestamp(self::SAMPLE_START_TIME),
+                    'stamp_expire_withdraw' => new Timestamp(self::SAMPLE_EXPIRE_WITHDRAW),
+                    'stamp_expire_deposit' => new Timestamp(self::SAMPLE_EXPIRE_DEPOSIT),
+                    'stamp_expire_legal' => new Timestamp(self::SAMPLE_EXPIRE_LEGAL),
                     'rsa_pub' => self::SAMPLE_RSA_PUB
                 ]
             ]

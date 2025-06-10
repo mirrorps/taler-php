@@ -2,6 +2,8 @@
 
 namespace Taler\Api\Contract;
 
+use Taler\Api\Dto\Timestamp;
+
 /**
  * Common attributes for all denomination groups
  * 
@@ -51,10 +53,10 @@ interface DenomGroupCommon
      *     cipher: string,
      *     denoms: array<int, array{
      *         master_sig: string,
-     *         stamp_start: string,
-     *         stamp_expire_withdraw: string,
-     *         stamp_expire_deposit: string,
-     *         stamp_expire_legal: string,
+     *         stamp_start: Timestamp,
+     *         stamp_expire_withdraw: Timestamp,
+     *         stamp_expire_deposit: Timestamp,
+     *         stamp_expire_legal: Timestamp,
      *         lost?: bool
      *     }>,
      *     age_mask?: string
