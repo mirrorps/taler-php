@@ -12,8 +12,8 @@ namespace Taler\Api\Dto;
 class GlobalFees
 {
     /**
-     * @param string $start_date What date (inclusive) does these fees go into effect?
-     * @param string $end_date What date (exclusive) does this fees stop going into effect?
+     * @param Timestamp $start_date What date (inclusive) does these fees go into effect?
+     * @param Timestamp $end_date What date (exclusive) does this fees stop going into effect?
      * @param string $history_fee Account history fee, charged when a user wants to obtain a reserve/account history.
      * @param string $account_fee Annual fee charged for having an open account at the exchange. Charged to the account.
      *                          If the account balance is insufficient to cover this fee, the account is automatically
@@ -31,8 +31,8 @@ class GlobalFees
      * @param string $master_sig Signature of TALER_GlobalFeesPS.
      */
     public function __construct(
-        public readonly string $start_date,
-        public readonly string $end_date,
+        public readonly Timestamp $start_date,
+        public readonly Timestamp $end_date,
         public readonly string $history_fee,
         public readonly string $account_fee,
         public readonly string $purse_fee,
@@ -50,8 +50,8 @@ class GlobalFees
      * Creates a new instance from an array of data
      *
      * @param array{
-     *     start_date: string,
-     *     end_date: string,
+     *     start_date: array{t_s: int|string},
+     *     end_date: array{t_s: int|string},
      *     history_fee: string,
      *     account_fee: string,
      *     purse_fee: string,
@@ -64,8 +64,8 @@ class GlobalFees
     public static function fromArray(array $data): self
     {
         return new self(
-            start_date: $data['start_date'],
-            end_date: $data['end_date'],
+            start_date: Timestamp::fromArray($data['start_date']),
+            end_date: Timestamp::fromArray($data['end_date']),
             history_fee: $data['history_fee'],
             account_fee: $data['account_fee'],
             purse_fee: $data['purse_fee'],
