@@ -17,6 +17,7 @@ use Taler\Api\Dto\SignKey;
 use Taler\Api\Dto\ZeroLimitedOperation;
 use Taler\Api\Dto\AccountLimit;
 use Taler\Api\Dto\Recoup;
+use Taler\Api\Dto\Timestamp;
 
 /**
  * DTO for exchange keys response from the exchange API
@@ -52,7 +53,7 @@ class ExchangeKeysResponse
      * @param string $exchange_pub Public EdDSA key of the exchange that was used to generate the signature
      * @param array<int, Recoup> $recoup Denominations for which the exchange currently offers/requests recoup
      * @param array<int, GlobalFees> $global_fees Array of globally applicable fees by time range
-     * @param string $list_issue_date The date when the denomination keys were last updated (Timestamp)
+     * @param Timestamp $list_issue_date The date when the denomination keys were last updated (Timestamp)
      * @param array<int, AuditorKeys> $auditors Auditors of the exchange
      * @param array<int, SignKey> $signkeys The exchange's signing keys
      * @param array<string, ExtensionManifest>|null $extensions Optional field with dictionary of supported extensions
@@ -85,7 +86,7 @@ class ExchangeKeysResponse
         public readonly string $exchange_pub,
         public readonly array $recoup,
         public readonly array $global_fees,
-        public readonly string $list_issue_date,
+        public readonly Timestamp $list_issue_date,
         public readonly array $auditors,
         public readonly array $signkeys,
         public readonly ?array $extensions,
@@ -198,7 +199,7 @@ class ExchangeKeysResponse
      *         purse_account_limit: int,
      *         master_sig: string
      *     }>,
-     *     list_issue_date: string,
+     *     list_issue_date: array{t_s: int|string},
      *     auditors: array<int, array{
      *         auditor_pub: string,
      *         auditor_url: string,
@@ -323,7 +324,7 @@ class ExchangeKeysResponse
             exchange_pub: $data['exchange_pub'],
             recoup: $recoup,
             global_fees: $globalFees,
-            list_issue_date: $data['list_issue_date'],
+            list_issue_date: Timestamp::fromArray($data['list_issue_date']) ,
             auditors: $auditors,
             signkeys: $signkeys,
             extensions: $extensions,
