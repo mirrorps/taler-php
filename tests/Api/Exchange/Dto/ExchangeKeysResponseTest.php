@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Api\Exchange\Dto;
+namespace Taler\Tests\Api\Exchange\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Exchange\Dto\ExchangeKeysResponse;
@@ -72,8 +72,8 @@ class ExchangeKeysResponseTest extends TestCase
      *         wire_fee: string,
      *         closing_fee: string,
      *         wad_fee: string,
-     *         start_date: string,
-     *         end_date: string,
+     *         start_date: array{d_us: int},
+     *         end_date: array{d_us: int},
      *         sig: string
      *     }>>,
      *     wads: array<int, array{
@@ -197,8 +197,8 @@ class ExchangeKeysResponseTest extends TestCase
                         'wire_fee' => 'EUR:0.01',
                         'closing_fee' => 'EUR:0.01',
                         'wad_fee' => 'EUR:0.01',
-                        'start_date' => '2024-03-20T00:00:00Z',
-                        'end_date' => '2024-03-21T00:00:00Z',
+                        'start_date' => ['d_us' => 1710979200000000],
+                        'end_date' => ['d_us' => 1711065600000000],
                         'sig' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     ]
                 ]

@@ -12,15 +12,15 @@ class AggregateTransferFee
     /**
      * @param string $wire_fee Per transfer wire transfer fee
      * @param string $closing_fee Per transfer closing fee
-     * @param string $start_date What date (inclusive) does this fee go into effect
-     * @param string $end_date What date (exclusive) does this fee stop going into effect
+     * @param RelativeTime $start_date What date (inclusive) does this fee go into effect
+     * @param RelativeTime $end_date What date (exclusive) does this fee stop going into effect
      * @param string $sig Signature of TALER_MasterWireFeePS with purpose TALER_SIGNATURE_MASTER_WIRE_FEES
      */
     public function __construct(
         public readonly string $wire_fee,
         public readonly string $closing_fee,
-        public readonly string $start_date,
-        public readonly string $end_date,
+        public readonly RelativeTime $start_date,
+        public readonly RelativeTime $end_date,
         public readonly string $sig,
     ) {
     }
@@ -31,8 +31,8 @@ class AggregateTransferFee
      * @param array{
      *     wire_fee?: string,
      *     closing_fee?: string,
-     *     start_date?: string,
-     *     end_date?: string,
+     *     start_date?: array{d_us: int|string},
+     *     end_date?: array{d_us: int|string},
      *     sig?: string
      * } $data
      * @throws \InvalidArgumentException if required fields are missing or invalid
@@ -62,8 +62,8 @@ class AggregateTransferFee
         return new self(
             wire_fee: $data['wire_fee'],
             closing_fee: $data['closing_fee'],
-            start_date: $data['start_date'],
-            end_date: $data['end_date'],
+            start_date: RelativeTime::fromArray($data['start_date']),
+            end_date: RelativeTime::fromArray($data['end_date']),
             sig: $data['sig']
         );
     }
