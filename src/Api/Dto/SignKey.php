@@ -11,16 +11,16 @@ class SignKey
      * Constructor for SignKey.
      *
      * @param string $key The actual exchange's EdDSA signing public key
-     * @param string $stamp_start Initial validity date for the signing key
-     * @param string $stamp_expire Date when the exchange will stop using the signing key
-     * @param string $stamp_end Date when all signatures made by the signing key expire
+     * @param Timestamp $stamp_start Initial validity date for the signing key
+     * @param Timestamp $stamp_expire Date when the exchange will stop using the signing key
+     * @param Timestamp $stamp_end Date when all signatures made by the signing key expire
      * @param string $master_sig Signature over key and stamp_expire by the exchange master key
      */
     public function __construct(
         public readonly string $key,
-        public readonly string $stamp_start,
-        public readonly string $stamp_expire,
-        public readonly string $stamp_end,
+        public readonly Timestamp $stamp_start,
+        public readonly Timestamp $stamp_expire,
+        public readonly Timestamp $stamp_end,
         public readonly string $master_sig
     ) {
     }
@@ -30,9 +30,9 @@ class SignKey
      *
      * @param array{
      *     key: string,
-     *     stamp_start: string,
-     *     stamp_expire: string,
-     *     stamp_end: string,
+     *     stamp_start: array{t_s: int|string},
+     *     stamp_expire: array{t_s: int|string},
+     *     stamp_end: array{t_s: int|string},
      *     master_sig: string
      * } $data
      * @return self
@@ -41,9 +41,9 @@ class SignKey
     {
         return new self(
             $data['key'],
-            $data['stamp_start'],
-            $data['stamp_expire'],
-            $data['stamp_end'],
+            Timestamp::fromArray($data['stamp_start']),
+            Timestamp::fromArray($data['stamp_expire']),
+            Timestamp::fromArray($data['stamp_end']),
             $data['master_sig']
         );
     }
