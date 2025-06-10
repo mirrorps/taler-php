@@ -17,10 +17,10 @@ abstract class AbstractDenomGroup implements DenomGroupCommon
      * @param string $fee_refund Fee charged by the exchange for refunding a coin of this denomination
      * @param array<int, array{
      *     master_sig: string,
-     *     stamp_start: string,
-     *     stamp_expire_withdraw: string,
-     *     stamp_expire_deposit: string,
-     *     stamp_expire_legal: string,
+     *     stamp_start: Timestamp,
+     *     stamp_expire_withdraw: Timestamp,
+     *     stamp_expire_deposit: Timestamp,
+     *     stamp_expire_legal: Timestamp,
      *     lost?: bool
      * }> $denoms Array of denomination details
      */
@@ -64,10 +64,10 @@ abstract class AbstractDenomGroup implements DenomGroupCommon
      *
      * @return array<int, array{
      *     master_sig: string,
-     *     stamp_start: string,
-     *     stamp_expire_withdraw: string,
-     *     stamp_expire_deposit: string,
-     *     stamp_expire_legal: string,
+     *     stamp_start: Timestamp,
+     *     stamp_expire_withdraw: Timestamp,
+     *     stamp_expire_deposit: Timestamp,
+     *     stamp_expire_legal: Timestamp,
      *     lost?: bool
      * }>
      */
