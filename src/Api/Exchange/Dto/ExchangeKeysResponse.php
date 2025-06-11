@@ -139,8 +139,8 @@ class ExchangeKeysResponse
      *         wire_fee: string,
      *         closing_fee: string,
      *         wad_fee: string,
-     *         start_date: array{t_s: int|string}|string,
-     *         end_date: array{t_s: int|string}|string,
+     *         start_date: array{t_s: int|string},
+     *         end_date: array{t_s: int|string},
      *         sig: string
      *     }>>,
      *     wads: array<int, array{
@@ -148,8 +148,8 @@ class ExchangeKeysResponse
      *         partner_master_pub: string,
      *         wad_fee: string,
      *         wad_frequency: array{d_us: int|string},
-     *         start_date: string,
-     *         end_date: string,
+     *         start_date: array{t_s: int|string},
+     *         end_date: array{t_s: int|string},
      *         master_sig: string
      *     }>,
      *     rewards_allowed: bool,
@@ -175,10 +175,10 @@ class ExchangeKeysResponse
      *         cipher: string,
      *         denoms: array<int, array{
      *             master_sig: string,
-     *             stamp_start: string,
-     *             stamp_expire_withdraw: string,
-     *             stamp_expire_deposit: string,
-     *             stamp_expire_legal: string,
+     *             stamp_start: array{t_s: int|string},
+     *             stamp_expire_withdraw: array{t_s: int|string},
+     *             stamp_expire_deposit: array{t_s: int|string},
+     *             stamp_expire_legal: array{t_s: int|string},
      *             rsa_pub?: string,
      *             cs_pub?: string,
      *             lost?: bool
@@ -263,7 +263,7 @@ class ExchangeKeysResponse
         foreach ($data['denominations'] as $denomData) {
             $denominations[] = self::createDenominationGroup($denomData);
         }
-
+        
         // Process recoup
         $recoup = [];
         foreach ($data['recoup'] as $recoupData) {
@@ -344,10 +344,10 @@ class ExchangeKeysResponse
      *     cipher: string,
      *     denoms: array<int, array{
      *         master_sig: string,
-     *         stamp_start: string,
-     *         stamp_expire_withdraw: string,
-     *         stamp_expire_deposit: string,
-     *         stamp_expire_legal: string,
+     *         stamp_start: array{t_s: int|string},
+     *         stamp_expire_withdraw: array{t_s: int|string},
+     *         stamp_expire_deposit: array{t_s: int|string},
+     *         stamp_expire_legal: array{t_s: int|string},
      *         rsa_pub?: string,
      *         cs_pub?: string,
      *         lost?: bool

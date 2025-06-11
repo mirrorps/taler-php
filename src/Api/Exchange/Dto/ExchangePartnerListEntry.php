@@ -3,6 +3,7 @@
 namespace Taler\Api\Exchange\Dto;
 
 use Taler\Api\Dto\RelativeTime;
+use Taler\Api\Dto\Timestamp;
 
 /**
  * DTO for exchange partner list entry
@@ -16,8 +17,8 @@ class ExchangePartnerListEntry
      * @param string $partner_master_pub Public master key of the partner exchange (EdDSA)
      * @param string $wad_fee Per exchange-to-exchange transfer (wad) fee
      * @param RelativeTime $wad_frequency Exchange-to-exchange wad (wire) transfer frequency
-     * @param string $start_date When did this partnership begin (under these conditions)
-     * @param string $end_date How long is this partnership expected to last
+     * @param Timestamp $start_date When did this partnership begin (under these conditions)
+     * @param Timestamp $end_date How long is this partnership expected to last
      * @param string $master_sig Signature using the exchange's offline key over TALER_WadPartnerSignaturePS with purpose TALER_SIGNATURE_MASTER_PARTNER_DETAILS
      */
     public function __construct(
@@ -25,8 +26,8 @@ class ExchangePartnerListEntry
         public readonly string $partner_master_pub,
         public readonly string $wad_fee,
         public readonly RelativeTime $wad_frequency,
-        public readonly string $start_date,
-        public readonly string $end_date,
+        public readonly Timestamp $start_date,
+        public readonly Timestamp $end_date,
         public readonly string $master_sig,
     ) {
     }
@@ -39,8 +40,8 @@ class ExchangePartnerListEntry
      *     partner_master_pub: string,
      *     wad_fee: string,
      *     wad_frequency: array{d_us: int|string},
-     *     start_date: string,
-     *     end_date: string,
+     *     start_date: array{t_s: int|string},
+     *     end_date: array{t_s: int|string},
      *     master_sig: string
      * } $data
      */
@@ -51,8 +52,8 @@ class ExchangePartnerListEntry
             partner_master_pub: $data['partner_master_pub'],
             wad_fee: $data['wad_fee'],
             wad_frequency: RelativeTime::fromArray($data['wad_frequency']),
-            start_date: $data['start_date'],
-            end_date: $data['end_date'],
+            start_date: Timestamp::fromArray($data['start_date']),
+            end_date: Timestamp::fromArray($data['end_date']),
             master_sig: $data['master_sig']
         );
     }

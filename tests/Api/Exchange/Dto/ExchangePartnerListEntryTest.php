@@ -1,9 +1,10 @@
 <?php
 
-namespace Tests\Api\Exchange\Dto;
+namespace Taler\Tests\Api\Exchange\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\RelativeTime;
+use Taler\Api\Dto\Timestamp;
 use Taler\Api\Exchange\Dto\ExchangePartnerListEntry;
 
 class ExchangePartnerListEntryTest extends TestCase
@@ -11,8 +12,8 @@ class ExchangePartnerListEntryTest extends TestCase
     private const SAMPLE_PARTNER_BASE_URL = 'https://exchange.partner.com';
     private const SAMPLE_PARTNER_MASTER_PUB = 'ED25519-PUB-NMLKJIHGFEDCBA987654321';
     private const SAMPLE_WAD_FEE = 'TALER:0.50';
-    private const SAMPLE_START_DATE = '2024-03-20T00:00:00Z';
-    private const SAMPLE_END_DATE = '2024-03-21T00:00:00Z';
+    private const SAMPLE_START_DATE = 1716153600;
+    private const SAMPLE_END_DATE = 1716240000;
     private const SAMPLE_MASTER_SIG = 'ED25519-SIG-ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     /** @var array{
@@ -20,8 +21,8 @@ class ExchangePartnerListEntryTest extends TestCase
      *     partner_master_pub: string,
      *     wad_fee: string,
      *     wad_frequency: array{d_us: int},
-     *     start_date: string,
-     *     end_date: string,
+     *     start_date: array{t_s: int|string},
+     *     end_date: array{t_s: int|string},
      *     master_sig: string
      * }
      */
@@ -34,8 +35,8 @@ class ExchangePartnerListEntryTest extends TestCase
             'partner_master_pub' => self::SAMPLE_PARTNER_MASTER_PUB,
             'wad_fee' => self::SAMPLE_WAD_FEE,
             'wad_frequency' => ['d_us' => 3600000000], // 1 hour in microseconds
-            'start_date' => self::SAMPLE_START_DATE,
-            'end_date' => self::SAMPLE_END_DATE,
+            'start_date' => ['t_s' => self::SAMPLE_START_DATE],
+            'end_date' => ['t_s' => self::SAMPLE_END_DATE],
             'master_sig' => self::SAMPLE_MASTER_SIG
         ];
     }
@@ -48,8 +49,8 @@ class ExchangePartnerListEntryTest extends TestCase
             partner_master_pub: self::SAMPLE_PARTNER_MASTER_PUB,
             wad_fee: self::SAMPLE_WAD_FEE,
             wad_frequency: $wadFrequency,
-            start_date: self::SAMPLE_START_DATE,
-            end_date: self::SAMPLE_END_DATE,
+            start_date: Timestamp::fromArray(['t_s' => self::SAMPLE_START_DATE]),
+            end_date: Timestamp::fromArray(['t_s' => self::SAMPLE_END_DATE]),
             master_sig: self::SAMPLE_MASTER_SIG
         );
 
@@ -57,8 +58,8 @@ class ExchangePartnerListEntryTest extends TestCase
         $this->assertSame(self::SAMPLE_PARTNER_MASTER_PUB, $entry->partner_master_pub);
         $this->assertSame(self::SAMPLE_WAD_FEE, $entry->wad_fee);
         $this->assertSame($wadFrequency, $entry->wad_frequency);
-        $this->assertSame(self::SAMPLE_START_DATE, $entry->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE, $entry->end_date);
+        $this->assertSame(self::SAMPLE_START_DATE, $entry->start_date->t_s);
+        $this->assertSame(self::SAMPLE_END_DATE, $entry->end_date->t_s);
         $this->assertSame(self::SAMPLE_MASTER_SIG, $entry->master_sig);
     }
 
@@ -70,8 +71,8 @@ class ExchangePartnerListEntryTest extends TestCase
         $this->assertSame(self::SAMPLE_PARTNER_MASTER_PUB, $entry->partner_master_pub);
         $this->assertSame(self::SAMPLE_WAD_FEE, $entry->wad_fee);
         $this->assertSame(3600000000, $entry->wad_frequency->d_us);
-        $this->assertSame(self::SAMPLE_START_DATE, $entry->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE, $entry->end_date);
+        $this->assertSame(self::SAMPLE_START_DATE, $entry->start_date->t_s);
+        $this->assertSame(self::SAMPLE_END_DATE, $entry->end_date->t_s);
         $this->assertSame(self::SAMPLE_MASTER_SIG, $entry->master_sig);
     }
 
