@@ -31,10 +31,10 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
      *     age_mask: string,
      *     denoms: array<int, array{
      *         master_sig: string,
-     *         stamp_start: Timestamp,
-     *         stamp_expire_withdraw: Timestamp,
-     *         stamp_expire_deposit: Timestamp,
-     *         stamp_expire_legal: Timestamp,
+     *         stamp_start: array{t_s: int|string},
+     *         stamp_expire_withdraw: array{t_s: int|string},
+     *         stamp_expire_deposit: array{t_s: int|string},
+     *         stamp_expire_legal: array{t_s: int|string},
      *         cs_pub: string,
      *         lost?: bool
      *     }>
@@ -55,10 +55,10 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
             'denoms' => [
                 [
                     'master_sig' => self::SAMPLE_MASTER_SIG,
-                    'stamp_start' => new Timestamp(self::SAMPLE_START_TIME),
-                    'stamp_expire_withdraw' => new Timestamp(self::SAMPLE_EXPIRE_WITHDRAW),
-                    'stamp_expire_deposit' => new Timestamp(self::SAMPLE_EXPIRE_DEPOSIT),
-                    'stamp_expire_legal' => new Timestamp(self::SAMPLE_EXPIRE_LEGAL),
+                    'stamp_start' => ['t_s' => self::SAMPLE_START_TIME],
+                    'stamp_expire_withdraw' => ['t_s' => self::SAMPLE_EXPIRE_WITHDRAW],
+                    'stamp_expire_deposit' => ['t_s' => self::SAMPLE_EXPIRE_DEPOSIT],
+                    'stamp_expire_legal' => ['t_s' => self::SAMPLE_EXPIRE_LEGAL],
                     'cs_pub' => self::SAMPLE_CS_PUB
                 ]
             ]

@@ -53,10 +53,10 @@ interface DenomGroupCommon
      *     cipher: string,
      *     denoms: array<int, array{
      *         master_sig: string,
-     *         stamp_start: Timestamp,
-     *         stamp_expire_withdraw: Timestamp,
-     *         stamp_expire_deposit: Timestamp,
-     *         stamp_expire_legal: Timestamp,
+     *         stamp_start: array{t_s: int|string},
+     *         stamp_expire_withdraw: array{t_s: int|string},
+     *         stamp_expire_deposit: array{t_s: int|string},
+     *         stamp_expire_legal: array{t_s: int|string},
      *         lost?: bool
      *     }>,
      *     age_mask?: string

@@ -72,27 +72,27 @@ class ExchangeKeysResponseTest extends TestCase
      *         wire_fee: string,
      *         closing_fee: string,
      *         wad_fee: string,
-     *         start_date: array{t_s: int}|string,
-     *         end_date: array{t_s: int}|string,
+     *         start_date: array{t_s: int|string},
+     *         end_date: array{t_s: int|string},
      *         sig: string
      *     }>>,
      *     wads: array<int, array{
      *         partner_base_url: string,
      *         partner_master_pub: string,
      *         wad_fee: string,
-     *         wad_frequency: array{d_us: int},
-     *         start_date: string,
-     *         end_date: string,
+     *         wad_frequency: RelativeTime,
+     *         start_date: array{t_s: int|string},
+     *         end_date: array{t_s: int|string},
      *         master_sig: string
      *     }>,
      *     rewards_allowed: bool,
      *     kyc_enabled: bool,
      *     master_public_key: string,
-     *     reserve_closing_delay: array{d_us: int},
+     *     reserve_closing_delay: RelativeTime,
      *     wallet_balance_limit_without_kyc: array<int, string>,
      *     hard_limits: array<int, array{
      *         operation_type: string,
-     *         timeframe: array{d_us: int},
+     *         timeframe: RelativeTime,
      *         threshold: string,
      *         soft_limit: bool
      *     }>,
@@ -108,10 +108,10 @@ class ExchangeKeysResponseTest extends TestCase
      *         cipher: string,
      *         denoms: array<int, array{
      *             master_sig: string,
-     *             stamp_start: string,
-     *             stamp_expire_withdraw: string,
-     *             stamp_expire_deposit: string,
-     *             stamp_expire_legal: string,
+     *             stamp_start: array{t_s: int|string},
+     *             stamp_expire_withdraw: array{t_s: int|string},
+     *             stamp_expire_deposit: array{t_s: int|string},
+     *             stamp_expire_legal: array{t_s: int|string},
      *             rsa_pub?: string,
      *             cs_pub?: string,
      *             lost?: bool
@@ -127,8 +127,8 @@ class ExchangeKeysResponseTest extends TestCase
      *         history_fee: string,
      *         account_fee: string,
      *         purse_fee: string,
-     *         purse_timeout: array{d_us: int},
-     *         history_expiration: array{d_us: int},
+     *         purse_timeout: RelativeTime,
+     *         history_expiration: RelativeTime,
      *         purse_account_limit: int,
      *         master_sig: string
      *     }>,
@@ -197,8 +197,8 @@ class ExchangeKeysResponseTest extends TestCase
                         'wire_fee' => 'EUR:0.01',
                         'closing_fee' => 'EUR:0.01',
                         'wad_fee' => 'EUR:0.01',
-                        'start_date' => '2024-03-20T00:00:00Z',
-                        'end_date' => '2024-03-21T00:00:00Z',
+                        'start_date' => ['t_s' => 1716153600],
+                        'end_date' => ['t_s' => 1716240000],
                         'sig' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                     ]
                 ]
@@ -209,8 +209,8 @@ class ExchangeKeysResponseTest extends TestCase
                     'partner_master_pub' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
                     'wad_fee' => 'EUR:0.01',
                     'wad_frequency' => ['d_us' => 86400000000],
-                    'start_date' => '2024-03-20T00:00:00Z',
-                    'end_date' => '2024-03-21T00:00:00Z',
+                    'start_date' => ['t_s' => 1716153600],
+                    'end_date' => ['t_s' => 1716240000],
                     'master_sig' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA'
                 ]
             ],
@@ -243,10 +243,10 @@ class ExchangeKeysResponseTest extends TestCase
                     'denoms' => [
                         [
                             'master_sig' => 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA',
-                            'stamp_start' => '2024-03-20T00:00:00Z',
-                            'stamp_expire_withdraw' => '2024-03-21T00:00:00Z',
-                            'stamp_expire_deposit' => '2024-03-22T00:00:00Z',
-                            'stamp_expire_legal' => '2024-03-23T00:00:00Z',
+                            'stamp_start' => ['t_s' => 1710979200],
+                            'stamp_expire_withdraw' => ['t_s' => 1711065600],
+                            'stamp_expire_deposit' => ['t_s' => 1711152000],
+                            'stamp_expire_legal' => ['t_s' => 1711238400],
                             'rsa_pub' => 'RSA-PUB-123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'
                         ]
                     ]
