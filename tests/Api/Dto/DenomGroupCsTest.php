@@ -3,8 +3,8 @@
 namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
+use Taler\Api\Dto\DenomCommon;
 use Taler\Api\Dto\DenomGroupCs;
-use Taler\Api\Dto\Timestamp;
 
 class DenomGroupCsTest extends TestCase
 {
@@ -70,8 +70,13 @@ class DenomGroupCsTest extends TestCase
             fee_deposit: self::SAMPLE_FEE_DEPOSIT,
             fee_refresh: self::SAMPLE_FEE_REFRESH,
             fee_refund: self::SAMPLE_FEE_REFUND,
-            denoms: $this->validData['denoms']
+            denoms: array_map(
+                fn(array $denom) => DenomCommon::fromArray($denom),
+                $this->validData['denoms']
+            ),
         );
+
+        $denoms[] = DenomCommon::fromArray($this->validData['denoms'][0]);
 
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
@@ -79,20 +84,22 @@ class DenomGroupCsTest extends TestCase
         $this->assertSame(self::SAMPLE_FEE_REFRESH, $group->getFeeRefresh());
         $this->assertSame(self::SAMPLE_FEE_REFUND, $group->getFeeRefund());
         $this->assertSame('CS', $group->getCipher());
-        $this->assertSame($this->validData['denoms'], $group->getDenoms());
+        $this->assertEquals($denoms, $group->getDenoms());
     }
 
     public function testFromArrayWithValidData(): void
     {
         $group = DenomGroupCs::fromArray($this->validData);
 
+        $denoms[] = DenomCommon::fromArray($this->validData['denoms'][0]);
+
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
         $this->assertSame(self::SAMPLE_FEE_DEPOSIT, $group->getFeeDeposit());
         $this->assertSame(self::SAMPLE_FEE_REFRESH, $group->getFeeRefresh());
         $this->assertSame(self::SAMPLE_FEE_REFUND, $group->getFeeRefund());
         $this->assertSame('CS', $group->getCipher());
-        $this->assertSame($this->validData['denoms'], $group->getDenoms());
+        $this->assertEquals($denoms, $group->getDenoms());
     }
 
     public function testFromArrayWithInvalidCipher(): void
@@ -112,7 +119,6 @@ class DenomGroupCsTest extends TestCase
 
         $group = DenomGroupCs::fromArray($data);
         $denoms = $group->getDenoms();
-        $this->assertArrayHasKey('lost', $denoms[0]);
-        $this->assertTrue($denoms[0]['lost'] ?? false);
+        $this->assertTrue($denoms[0]->lost ?? false);
     }
 } 

@@ -15,15 +15,7 @@ class DenomGroupCs extends AbstractDenomGroup
      * @param string $fee_deposit Fee charged by the exchange for depositing a coin of this denomination
      * @param string $fee_refresh Fee charged by the exchange for refreshing a coin of this denomination
      * @param string $fee_refund Fee charged by the exchange for refunding a coin of this denomination
-     * @param array<int, array{
-     *     master_sig: string,
-     *     stamp_start: array{t_s: int|string},
-     *     stamp_expire_withdraw: array{t_s: int|string},
-     *     stamp_expire_deposit: array{t_s: int|string},
-     *     stamp_expire_legal: array{t_s: int|string},
-     *     cs_pub: string,
-     *     lost?: bool
-     * }> $denoms Array of denomination details with CS public keys
+     * @param array<int, DenomCommon> $denoms Array of denomination details
      */
     public function __construct(
         string $value,
@@ -31,15 +23,27 @@ class DenomGroupCs extends AbstractDenomGroup
         string $fee_deposit,
         string $fee_refresh,
         string $fee_refund,
-        array $denoms,
+        protected readonly array $denoms,
     ) {
-        parent::__construct($value, $fee_withdraw, $fee_deposit, $fee_refresh, $fee_refund, $denoms);
+        parent::__construct(
+            $value,
+            $fee_withdraw,
+            $fee_deposit,
+            $fee_refresh,
+            $fee_refund
+        );
     }
 
     public function getCipher(): string
     {
         return self::CIPHER;
     }
+
+    public function getDenoms(): array
+    {
+        return $this->denoms;
+    }
+
 
     /**
      * Creates a new instance from an array of data
@@ -78,7 +82,10 @@ class DenomGroupCs extends AbstractDenomGroup
             fee_deposit: $data['fee_deposit'],
             fee_refresh: $data['fee_refresh'],
             fee_refund: $data['fee_refund'],
-            denoms: $data['denoms']
+            denoms: array_map(
+                fn(array $denom) => DenomCommon::fromArray($denom),
+                $data['denoms']
+            ),
         );
     }
 } 
