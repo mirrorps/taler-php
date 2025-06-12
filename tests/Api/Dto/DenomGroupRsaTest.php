@@ -3,6 +3,7 @@
 namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
+use Taler\Api\Dto\DenomCommon;
 use Taler\Api\Dto\DenomGroupRsa;
 use Taler\Api\Dto\Timestamp;
 
@@ -14,10 +15,10 @@ class DenomGroupRsaTest extends TestCase
     private const SAMPLE_FEE_REFRESH = 'TALER:0.15';
     private const SAMPLE_FEE_REFUND = 'TALER:0.10';
     private const SAMPLE_MASTER_SIG = 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
-    private const SAMPLE_START_TIME = '2024-03-20T00:00:00Z';
-    private const SAMPLE_EXPIRE_WITHDRAW = '2024-03-21T00:00:00Z';
-    private const SAMPLE_EXPIRE_DEPOSIT = '2024-03-22T00:00:00Z';
-    private const SAMPLE_EXPIRE_LEGAL = '2024-03-23T00:00:00Z';
+    private const SAMPLE_START_TIME = 1710929400;
+    private const SAMPLE_EXPIRE_WITHDRAW = 1710929400;
+    private const SAMPLE_EXPIRE_DEPOSIT = 1710929400;
+    private const SAMPLE_EXPIRE_LEGAL = 1710929400;
     private const SAMPLE_RSA_PUB = 'RSA-PUB-123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
     /** @var array{
@@ -70,8 +71,13 @@ class DenomGroupRsaTest extends TestCase
             fee_deposit: self::SAMPLE_FEE_DEPOSIT,
             fee_refresh: self::SAMPLE_FEE_REFRESH,
             fee_refund: self::SAMPLE_FEE_REFUND,
-            denoms: $this->validData['denoms']
+            denoms: array_map(
+        fn(array $denom) => DenomCommon::fromArray($denom),
+                $this->validData['denoms']
+            ),
         );
+
+        $denoms[] = DenomCommon::fromArray($this->validData['denoms'][0]);
 
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
@@ -79,20 +85,22 @@ class DenomGroupRsaTest extends TestCase
         $this->assertSame(self::SAMPLE_FEE_REFRESH, $group->getFeeRefresh());
         $this->assertSame(self::SAMPLE_FEE_REFUND, $group->getFeeRefund());
         $this->assertSame('RSA', $group->getCipher());
-        $this->assertSame($this->validData['denoms'], $group->getDenoms());
+        $this->assertEquals($denoms, $group->getDenoms());
     }
 
     public function testFromArrayWithValidData(): void
     {
         $group = DenomGroupRsa::fromArray($this->validData);
 
+        $denoms[] = DenomCommon::fromArray($this->validData['denoms'][0]);
+
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
         $this->assertSame(self::SAMPLE_FEE_DEPOSIT, $group->getFeeDeposit());
         $this->assertSame(self::SAMPLE_FEE_REFRESH, $group->getFeeRefresh());
         $this->assertSame(self::SAMPLE_FEE_REFUND, $group->getFeeRefund());
         $this->assertSame('RSA', $group->getCipher());
-        $this->assertSame($this->validData['denoms'], $group->getDenoms());
+        $this->assertEquals($denoms, $group->getDenoms());
     }
 
     public function testFromArrayWithInvalidCipher(): void
@@ -112,7 +120,6 @@ class DenomGroupRsaTest extends TestCase
 
         $group = DenomGroupRsa::fromArray($data);
         $denoms = $group->getDenoms();
-        $this->assertArrayHasKey('lost', $denoms[0]);
-        $this->assertTrue($denoms[0]['lost'] ?? false);
+        $this->assertTrue($denoms[0]->lost ?? false);
     }
 } 
