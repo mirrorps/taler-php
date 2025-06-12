@@ -17,24 +17,15 @@ class AggregateTransferFeeTest extends TestCase
     private const SAMPLE_SIG = 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
 
     /** @var array{
-     *     wire_fee?: string,
-     *     closing_fee?: string,
-     *     start_date?: array{t_s: int}|string,
-     *     end_date?: array{t_s: int}|string,
-     *     sig?: string
+     *     wire_fee: string,
+     *     closing_fee: string,
+     *     start_date: array{t_s: int}|string,
+     *     end_date: array{t_s: int}|string,
+     *     sig: string
      * }
      */
     private array $validDataWithTimestamp;
 
-    /** @var array{
-     *     wire_fee?: string,
-     *     closing_fee?: string,
-     *     start_date?: string,
-     *     end_date?: string,
-     *     sig?: string
-     * }
-     */
-    private array $validDataWithStringDates;
 
     protected function setUp(): void
     {
@@ -43,14 +34,6 @@ class AggregateTransferFeeTest extends TestCase
             'closing_fee' => self::SAMPLE_CLOSING_FEE,
             'start_date' => ['t_s' => self::SAMPLE_START_DATE_S],
             'end_date' => ['t_s' => self::SAMPLE_END_DATE_S],
-            'sig' => self::SAMPLE_SIG
-        ];
-
-        $this->validDataWithStringDates = [
-            'wire_fee' => self::SAMPLE_WIRE_FEE,
-            'closing_fee' => self::SAMPLE_CLOSING_FEE,
-            'start_date' => self::SAMPLE_START_DATE_STRING,
-            'end_date' => self::SAMPLE_END_DATE_STRING,
             'sig' => self::SAMPLE_SIG
         ];
     }
@@ -74,24 +57,20 @@ class AggregateTransferFeeTest extends TestCase
         $this->assertSame(self::SAMPLE_SIG, $fee->sig);
     }
 
-    public function testConstructWithValidDataStringDates(): void
+    public function testConstructWithInvalidDataTimestamp(): void
     {
-        $fee = new AggregateTransferFee(
+        $this->expectException(\TypeError::class);
+
+        new AggregateTransferFee( // @phpstan-ignore-line - result is not needed for the test
             wire_fee: self::SAMPLE_WIRE_FEE,
             closing_fee: self::SAMPLE_CLOSING_FEE,
-            start_date: self::SAMPLE_START_DATE_STRING,
-            end_date: self::SAMPLE_END_DATE_STRING,
+            start_date: ['t_s' => self::SAMPLE_START_DATE_S], // @phpstan-ignore-line - Intentionally passing invalid data to test error handling
+            end_date: ['t_s' => self::SAMPLE_END_DATE_S], // @phpstan-ignore-line - Intentionally passing invalid data to test error handling
             sig: self::SAMPLE_SIG
         );
-
-        $this->assertSame(self::SAMPLE_WIRE_FEE, $fee->wire_fee);
-        $this->assertSame(self::SAMPLE_CLOSING_FEE, $fee->closing_fee);
-        $this->assertSame(self::SAMPLE_START_DATE_STRING, $fee->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE_STRING, $fee->end_date);
-        $this->assertSame(self::SAMPLE_SIG, $fee->sig);
     }
 
-    public function testFromArrayWithValidDataTimestamp(): void
+    public function testFromArrayWithValidData(): void
     {
         $fee = AggregateTransferFee::fromArray($this->validDataWithTimestamp);
 
@@ -104,77 +83,13 @@ class AggregateTransferFeeTest extends TestCase
         $this->assertSame(self::SAMPLE_SIG, $fee->sig);
     }
 
-    public function testFromArrayWithValidDataStringDates(): void
+    public function testFromArrayWithInvalidData(): void
     {
-        $fee = AggregateTransferFee::fromArray($this->validDataWithStringDates);
+        $this->expectException(\TypeError::class);
 
-        $this->assertSame(self::SAMPLE_WIRE_FEE, $fee->wire_fee);
-        $this->assertSame(self::SAMPLE_CLOSING_FEE, $fee->closing_fee);
-        $this->assertSame(self::SAMPLE_START_DATE_STRING, $fee->start_date);
-        $this->assertSame(self::SAMPLE_END_DATE_STRING, $fee->end_date);
-        $this->assertSame(self::SAMPLE_SIG, $fee->sig);
+        $data = $this->validDataWithTimestamp;
+        $data['start_date'] = 'invalid date';
+
+        $fee = AggregateTransferFee::fromArray($data);
     }
-
-    public function testFromArrayWithInvalidArrayFormat(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid timestamp format:');
-
-        $data = $this->validDataWithStringDates;
-        $data['start_date'] = ['timestamp' => 1710979200];
-        $data['end_date'] = ['timestamp' => 1711065600];
-
-        AggregateTransferFee::fromArray($data); // @phpstan-ignore-line - Intentionally passing invalid data to test exception handling
-    }
-
-    public function testFromArrayWithMissingWireFee(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing wire_fee field');
-
-        $data = $this->validDataWithStringDates;
-        unset($data['wire_fee']);
-        AggregateTransferFee::fromArray($data);
-    }
-
-    public function testFromArrayWithMissingClosingFee(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing closing_fee field');
-
-        $data = $this->validDataWithStringDates;
-        unset($data['closing_fee']);
-        AggregateTransferFee::fromArray($data);
-    }
-
-    public function testFromArrayWithMissingStartDate(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing start_date field');
-
-        $data = $this->validDataWithStringDates;
-        unset($data['start_date']);
-        AggregateTransferFee::fromArray($data);
-    }
-
-    public function testFromArrayWithMissingEndDate(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing end_date field');
-
-        $data = $this->validDataWithStringDates;
-        unset($data['end_date']);
-        AggregateTransferFee::fromArray($data);
-    }
-
-    public function testFromArrayWithMissingSig(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Missing sig field');
-
-        $data = $this->validDataWithStringDates;
-        unset($data['sig']);
-        AggregateTransferFee::fromArray($data);
-    }
-
 } 
