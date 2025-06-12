@@ -3,6 +3,7 @@
 namespace Taler\Tests\Api\Exchange\Dto;
 
 use PHPUnit\Framework\TestCase;
+use Taler\Api\Dto\Timestamp;
 use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 
 class TrackTransactionAcceptedResponseTest extends TestCase
@@ -10,14 +11,14 @@ class TrackTransactionAcceptedResponseTest extends TestCase
     /** @var array{
      *     requirement_row: int,
      *     kyc_ok: bool,
-     *     execution_time: string,
+     *     execution_time: array{t_s: int|string},
      *     account_pub: string
      * }
      */
     private array $fullData = [
         'requirement_row' => 42,
         'kyc_ok' => true,
-        'execution_time' => '2024-03-15T14:30:00Z',
+        'execution_time' => ['t_s' => 1710510600],
         'account_pub' => 'ABCDEF123456'
     ];
 
@@ -26,13 +27,13 @@ class TrackTransactionAcceptedResponseTest extends TestCase
         $response = new TrackTransactionAcceptedResponse(
             requirement_row: $this->fullData['requirement_row'],
             kyc_ok: $this->fullData['kyc_ok'],
-            execution_time: $this->fullData['execution_time'],
+            execution_time: new Timestamp($this->fullData['execution_time']['t_s']),
             account_pub: $this->fullData['account_pub']
         );
 
         $this->assertSame($this->fullData['requirement_row'], $response->requirement_row);
         $this->assertSame($this->fullData['kyc_ok'], $response->kyc_ok);
-        $this->assertSame($this->fullData['execution_time'], $response->execution_time);
+        $this->assertSame($this->fullData['execution_time']['t_s'], $response->execution_time->t_s);
         $this->assertSame($this->fullData['account_pub'], $response->account_pub);
     }
 
@@ -41,13 +42,13 @@ class TrackTransactionAcceptedResponseTest extends TestCase
         $response = new TrackTransactionAcceptedResponse(
             requirement_row: null,
             kyc_ok: $this->fullData['kyc_ok'],
-            execution_time: $this->fullData['execution_time'],
+            execution_time: new Timestamp($this->fullData['execution_time']['t_s']),
             account_pub: null
         );
 
         $this->assertNull($response->requirement_row);
         $this->assertSame($this->fullData['kyc_ok'], $response->kyc_ok);
-        $this->assertSame($this->fullData['execution_time'], $response->execution_time);
+        $this->assertSame($this->fullData['execution_time']['t_s'], $response->execution_time->t_s);
         $this->assertNull($response->account_pub);
     }
 
@@ -57,7 +58,7 @@ class TrackTransactionAcceptedResponseTest extends TestCase
 
         $this->assertSame($this->fullData['requirement_row'], $response->requirement_row);
         $this->assertSame($this->fullData['kyc_ok'], $response->kyc_ok);
-        $this->assertSame($this->fullData['execution_time'], $response->execution_time);
+        $this->assertSame($this->fullData['execution_time']['t_s'], $response->execution_time->t_s);
         $this->assertSame($this->fullData['account_pub'], $response->account_pub);
     }
 
@@ -65,19 +66,19 @@ class TrackTransactionAcceptedResponseTest extends TestCase
     {
         /** @var array{
          *     kyc_ok: bool,
-         *     execution_time: string
+         *     execution_time: array{t_s: int|string}
          * } $data
          */
         $data = [
             'kyc_ok' => false,
-            'execution_time' => '2024-03-15T14:30:00Z'
+            'execution_time' => ['t_s' => 1710510600]
         ];
 
         $response = TrackTransactionAcceptedResponse::fromArray($data);
 
         $this->assertNull($response->requirement_row);
         $this->assertSame($data['kyc_ok'], $response->kyc_ok);
-        $this->assertSame($data['execution_time'], $response->execution_time);
+        $this->assertSame($data['execution_time']['t_s'], $response->execution_time->t_s);
         $this->assertNull($response->account_pub);
     }
 
@@ -86,14 +87,14 @@ class TrackTransactionAcceptedResponseTest extends TestCase
         /** @var array{
          *     requirement_row: null,
          *     kyc_ok: bool,
-         *     execution_time: string,
+         *     execution_time: array{t_s: int|string},
          *     account_pub: null
          * } $data
          */
         $data = [
             'requirement_row' => null,
             'kyc_ok' => true,
-            'execution_time' => '2024-03-15T14:30:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'account_pub' => null
         ];
 
@@ -101,7 +102,7 @@ class TrackTransactionAcceptedResponseTest extends TestCase
 
         $this->assertNull($response->requirement_row);
         $this->assertTrue($response->kyc_ok);
-        $this->assertSame($data['execution_time'], $response->execution_time);
+        $this->assertSame($data['execution_time']['t_s'], $response->execution_time->t_s);
         $this->assertNull($response->account_pub);
     }
 } 
