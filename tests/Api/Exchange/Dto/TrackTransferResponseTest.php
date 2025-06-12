@@ -3,6 +3,7 @@
 namespace Taler\Tests\Api\Exchange\Dto;
 
 use PHPUnit\Framework\TestCase;
+use Taler\Api\Dto\Timestamp;
 use Taler\Api\Exchange\Dto\TrackTransferResponse;
 use Taler\Api\Exchange\Dto\TrackTransferDetail;
 
@@ -12,7 +13,7 @@ class TrackTransferResponseTest extends TestCase
     private const SAMPLE_WIRE_FEE = 'TALER:0.50';
     private const SAMPLE_MERCHANT_PUB = '2Z5J4WXKMQK4A8RNXPTV1YBKM4506HXGWRZ7AAR4QX4QBVAJPX70';
     private const SAMPLE_H_PAYTO = 'AABBCCDDEEFF00112233445566778899AABBCCDDEEFF00112233445566778899';
-    private const SAMPLE_EXECUTION_TIME = '2024-03-20T10:30:00.000Z';
+    private const SAMPLE_EXECUTION_TIME = ['t_s' => 1710929400]; // 2024-03-20T10:30:00.000Z
     private const SAMPLE_EXCHANGE_SIG = 'EDDSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
     private const SAMPLE_EXCHANGE_PUB = '2Z5J4WXKMQK4A8RNXPTV1YBKM4506HXGWRZ7AAR4QX4QBVAJPX70';
 
@@ -47,7 +48,7 @@ class TrackTransferResponseTest extends TestCase
             wire_fee: self::SAMPLE_WIRE_FEE,
             merchant_pub: self::SAMPLE_MERCHANT_PUB,
             h_payto: self::SAMPLE_H_PAYTO,
-            execution_time: self::SAMPLE_EXECUTION_TIME,
+            execution_time: new Timestamp(self::SAMPLE_EXECUTION_TIME['t_s']),
             deposits: [$depositDetail],
             exchange_sig: self::SAMPLE_EXCHANGE_SIG,
             exchange_pub: self::SAMPLE_EXCHANGE_PUB
@@ -57,7 +58,7 @@ class TrackTransferResponseTest extends TestCase
         $this->assertSame(self::SAMPLE_WIRE_FEE, $response->wire_fee);
         $this->assertSame(self::SAMPLE_MERCHANT_PUB, $response->merchant_pub);
         $this->assertSame(self::SAMPLE_H_PAYTO, $response->h_payto);
-        $this->assertSame(self::SAMPLE_EXECUTION_TIME, $response->execution_time);
+        $this->assertSame(self::SAMPLE_EXECUTION_TIME['t_s'], $response->execution_time->t_s);
         $this->assertSame(self::SAMPLE_EXCHANGE_SIG, $response->exchange_sig);
         $this->assertSame(self::SAMPLE_EXCHANGE_PUB, $response->exchange_pub);
         
@@ -89,7 +90,7 @@ class TrackTransferResponseTest extends TestCase
          *     wire_fee: string,
          *     merchant_pub: string,
          *     h_payto: string,
-         *     execution_time: string,
+         *     execution_time: array{t_s: int|string},
          *     deposits: array<int, array{h_contract_terms: string, coin_pub: string, deposit_value: string, deposit_fee: string, refund_total?: string|null}>,
          *     exchange_sig: string,
          *     exchange_pub: string
@@ -112,7 +113,7 @@ class TrackTransferResponseTest extends TestCase
         $this->assertSame(self::SAMPLE_WIRE_FEE, $response->wire_fee);
         $this->assertSame(self::SAMPLE_MERCHANT_PUB, $response->merchant_pub);
         $this->assertSame(self::SAMPLE_H_PAYTO, $response->h_payto);
-        $this->assertSame(self::SAMPLE_EXECUTION_TIME, $response->execution_time);
+        $this->assertSame(self::SAMPLE_EXECUTION_TIME['t_s'], $response->execution_time->t_s);
         $this->assertSame(self::SAMPLE_EXCHANGE_SIG, $response->exchange_sig);
         $this->assertSame(self::SAMPLE_EXCHANGE_PUB, $response->exchange_pub);
         
@@ -136,7 +137,7 @@ class TrackTransferResponseTest extends TestCase
          *     wire_fee: string,
          *     merchant_pub: string,
          *     h_payto: string,
-         *     execution_time: string,
+         *     execution_time: array{t_s: int|string},
          *     deposits: array<int, array{h_contract_terms: string, coin_pub: string, deposit_value: string, deposit_fee: string, refund_total?: string|null}>,
          *     exchange_sig: string,
          *     exchange_pub: string
