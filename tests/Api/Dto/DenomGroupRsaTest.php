@@ -5,7 +5,6 @@ namespace Taler\Tests\Api\Dto;
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\DenomCommon;
 use Taler\Api\Dto\DenomGroupRsa;
-use Taler\Api\Dto\Timestamp;
 
 class DenomGroupRsaTest extends TestCase
 {
