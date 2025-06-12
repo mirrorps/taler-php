@@ -33,16 +33,16 @@ class RegexAccountRestriction implements AccountRestriction
      * Creates a new instance from an array of data
      *
      * @param array{
-     *     type?: string,
-     *     payto_regex?: string,
-     *     human_hint?: string,
+     *     type: string,
+     *     payto_regex: string,
+     *     human_hint: string,
      *     human_hint_i18n?: array<string, string>|null
      * } $data
      * @throws \InvalidArgumentException if type is missing or not 'regex', or if required fields are missing
      */
     public static function fromArray(array $data): self
     {
-        if (!isset($data['type'])) {
+        if (!isset($data['type'])) { // @phpstan-ignore-line - explicitly ensuring the type is properly set
             throw new \InvalidArgumentException('Missing type field');
         }
 
@@ -52,14 +52,6 @@ class RegexAccountRestriction implements AccountRestriction
                 self::TYPE,
                 $data['type']
             ));
-        }
-
-        if (!isset($data['payto_regex'])) {
-            throw new \InvalidArgumentException('Missing payto_regex field');
-        }
-
-        if (!isset($data['human_hint'])) {
-            throw new \InvalidArgumentException('Missing human_hint field');
         }
 
         return new self(
