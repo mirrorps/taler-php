@@ -3,6 +3,7 @@
 namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
+use Taler\Api\Dto\DenomCommon;
 use Taler\Api\Dto\DenomGroupCsAgeRestricted;
 use Taler\Api\Dto\Timestamp;
 
@@ -67,14 +68,27 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
 
     public function testConstructWithValidData(): void
     {
+        $denoms = array_map(
+            fn(array $denom) => new DenomCommon(
+                master_sig: $denom['master_sig'],
+                stamp_start: new Timestamp($denom['stamp_start']['t_s']),
+                stamp_expire_withdraw: new Timestamp($denom['stamp_expire_withdraw']['t_s']),
+                stamp_expire_deposit: new Timestamp($denom['stamp_expire_deposit']['t_s']),
+                stamp_expire_legal: new Timestamp($denom['stamp_expire_legal']['t_s']),
+                lost: $denom['lost'] ?? null
+            ),
+            $this->validData['denoms']
+        );
+
+
         $group = new DenomGroupCsAgeRestricted(
             value: self::SAMPLE_VALUE,
             fee_withdraw: self::SAMPLE_FEE_WITHDRAW,
             fee_deposit: self::SAMPLE_FEE_DEPOSIT,
             fee_refresh: self::SAMPLE_FEE_REFRESH,
             fee_refund: self::SAMPLE_FEE_REFUND,
-            age_mask: self::SAMPLE_AGE_MASK,
-            denoms: $this->validData['denoms']
+            denoms: $denoms,
+            age_mask: self::SAMPLE_AGE_MASK
         );
 
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
@@ -84,12 +98,24 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
         $this->assertSame(self::SAMPLE_FEE_REFUND, $group->getFeeRefund());
         $this->assertSame('CS+age_restricted', $group->getCipher());
         $this->assertSame(self::SAMPLE_AGE_MASK, $group->getAgeMask());
-        $this->assertSame($this->validData['denoms'], $group->getDenoms());
+        $this->assertEquals($denoms, $group->getDenoms());
     }
 
     public function testFromArrayWithValidData(): void
     {
         $group = DenomGroupCsAgeRestricted::fromArray($this->validData);
+
+        $denoms = array_map(
+            fn(array $denom) => new DenomCommon(
+                master_sig: $denom['master_sig'],
+                stamp_start: new Timestamp($denom['stamp_start']['t_s']),
+                stamp_expire_withdraw: new Timestamp($denom['stamp_expire_withdraw']['t_s']),
+                stamp_expire_deposit: new Timestamp($denom['stamp_expire_deposit']['t_s']),
+                stamp_expire_legal: new Timestamp($denom['stamp_expire_legal']['t_s']),
+                lost: $denom['lost'] ?? null
+            ),
+            $this->validData['denoms']
+        );
 
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
@@ -98,7 +124,7 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
         $this->assertSame(self::SAMPLE_FEE_REFUND, $group->getFeeRefund());
         $this->assertSame('CS+age_restricted', $group->getCipher());
         $this->assertSame(self::SAMPLE_AGE_MASK, $group->getAgeMask());
-        $this->assertSame($this->validData['denoms'], $group->getDenoms());
+        $this->assertEquals($denoms, $group->getDenoms());
     }
 
     public function testFromArrayWithInvalidCipher(): void
@@ -118,7 +144,6 @@ class DenomGroupCsAgeRestrictedTest extends TestCase
 
         $group = DenomGroupCsAgeRestricted::fromArray($data);
         $denoms = $group->getDenoms();
-        $this->assertArrayHasKey('lost', $denoms[0]);
-        $this->assertTrue($denoms[0]['lost'] ?? false);
+        $this->assertTrue($denoms[0]->lost ?? false);
     }
 } 
