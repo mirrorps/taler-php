@@ -2,6 +2,8 @@
 
 namespace Taler\Api\Exchange\Dto;
 
+use Taler\Api\Dto\Timestamp;
+
 /**
  * DTO for the track transaction response from the exchange API
  * 
@@ -11,14 +13,14 @@ class TrackTransactionResponse
 {
     /**
      * @param string $wtid Raw wire transfer identifier of the deposit (Base32)
-     * @param string $execution_time When was the wire transfer given to the bank (Timestamp)
+     * @param Timestamp $execution_time When was the wire transfer given to the bank (Timestamp)
      * @param string $coin_contribution The contribution of this coin to the total (without fees)
      * @param string $exchange_sig Binary-only Signature with purpose TALER_SIGNATURE_EXCHANGE_CONFIRM_WIRE over a TALER_ConfirmWirePS
      * @param string $exchange_pub Public EdDSA key of the exchange used to generate the signature
      */
     public function __construct(
         public readonly string $wtid,
-        public readonly string $execution_time,
+        public readonly Timestamp $execution_time,
         public readonly string $coin_contribution,
         public readonly string $exchange_sig,
         public readonly string $exchange_pub,
@@ -30,7 +32,7 @@ class TrackTransactionResponse
      *
      * @param array{
      *     wtid: string,
-     *     execution_time: string,
+     *     execution_time: array{t_s: int|string},
      *     coin_contribution: string,
      *     exchange_sig: string,
      *     exchange_pub: string
@@ -40,7 +42,7 @@ class TrackTransactionResponse
     {
         return new self(
             wtid: $data['wtid'],
-            execution_time: $data['execution_time'],
+            execution_time: Timestamp::fromArray($data['execution_time']),
             coin_contribution: $data['coin_contribution'],
             exchange_sig: $data['exchange_sig'],
             exchange_pub: $data['exchange_pub']
