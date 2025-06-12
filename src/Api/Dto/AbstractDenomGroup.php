@@ -2,12 +2,12 @@
 
 namespace Taler\Api\Dto;
 
-use Taler\Api\Contract\DenomGroupCommon;
+use Taler\Api\Contract\DenomGroupCommonContract;
 
 /**
  * Abstract base class for denomination groups
  */
-abstract class AbstractDenomGroup implements DenomGroupCommon
+abstract class AbstractDenomGroup implements DenomGroupCommonContract
 {
     /**
      * @param string $value How much are coins of this denomination worth
@@ -15,14 +15,6 @@ abstract class AbstractDenomGroup implements DenomGroupCommon
      * @param string $fee_deposit Fee charged by the exchange for depositing a coin of this denomination
      * @param string $fee_refresh Fee charged by the exchange for refreshing a coin of this denomination
      * @param string $fee_refund Fee charged by the exchange for refunding a coin of this denomination
-     * @param array<int, array{
-     *     master_sig: string,
-     *     stamp_start: array{t_s: int|string},
-     *     stamp_expire_withdraw: array{t_s: int|string},
-     *     stamp_expire_deposit: array{t_s: int|string},
-     *     stamp_expire_legal: array{t_s: int|string},
-     *     lost?: bool
-     * }> $denoms Array of denomination details
      */
     public function __construct(
         protected readonly string $value,
@@ -30,7 +22,6 @@ abstract class AbstractDenomGroup implements DenomGroupCommon
         protected readonly string $fee_deposit,
         protected readonly string $fee_refresh,
         protected readonly string $fee_refund,
-        protected readonly array $denoms,
     ) {
     }
 
@@ -62,19 +53,9 @@ abstract class AbstractDenomGroup implements DenomGroupCommon
     /**
      * Get the denomination details
      *
-     * @return array<int, array{
-     *     master_sig: string,
-     *     stamp_start: Timestamp,
-     *     stamp_expire_withdraw: Timestamp,
-     *     stamp_expire_deposit: Timestamp,
-     *     stamp_expire_legal: Timestamp,
-     *     lost?: bool
-     * }>
+     * @return array<int, DenomCommon>
      */
-    public function getDenoms(): array
-    {
-        return $this->denoms;
-    }
+    abstract public function getDenoms(): array;
 
     abstract public function getCipher(): string;
 } 
