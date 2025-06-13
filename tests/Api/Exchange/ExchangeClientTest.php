@@ -142,7 +142,7 @@ class ExchangeClientTest extends TestCase
             'wire_fee' => '1',
             'merchant_pub' => 'test-merchant',
             'h_payto' => 'test-payto-hash',
-            'execution_time' => '2024-01-01T00:00:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'deposits' => [
                 [
                     'h_contract_terms' => 'test-contract',
@@ -177,7 +177,7 @@ class ExchangeClientTest extends TestCase
             'wire_fee' => '1',
             'merchant_pub' => 'test-merchant',
             'h_payto' => 'test-payto-hash',
-            'execution_time' => '2024-01-01T00:00:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'deposits' => [
                 [
                     'h_contract_terms' => 'test-contract',
@@ -245,7 +245,7 @@ class ExchangeClientTest extends TestCase
     {
         $expectedData = [
             'wtid' => 'test-wtid',
-            'execution_time' => '2024-01-01T00:00:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'coin_contribution' => '10',
             'exchange_sig' => 'test-sig',
             'exchange_pub' => 'test-pub'
@@ -274,7 +274,7 @@ class ExchangeClientTest extends TestCase
     {
         $expectedData = [
             'wtid' => 'test-wtid',
-            'execution_time' => '2024-01-01T00:00:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'coin_contribution' => '10',
             'exchange_sig' => 'test-sig',
             'exchange_pub' => 'test-pub'
@@ -312,7 +312,7 @@ class ExchangeClientTest extends TestCase
         $expectedData = [
             'requirement_row' => 1,
             'kyc_ok' => false,
-            'execution_time' => '2024-01-01T00:00:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'account_pub' => 'test-pub'
         ];
         $this->setupMockResponse($expectedData, 202);
@@ -337,7 +337,7 @@ class ExchangeClientTest extends TestCase
         $expectedData = [
             'requirement_row' => 1,
             'kyc_ok' => false,
-            'execution_time' => '2024-01-01T00:00:00Z',
+            'execution_time' => ['t_s' => 1710510600],
             'account_pub' => 'test-pub'
         ];
         $this->setupMockAsyncResponse($expectedData, 202);

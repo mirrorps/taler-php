@@ -80,7 +80,7 @@ class ExchangeKeysResponseTest extends TestCase
      *         partner_base_url: string,
      *         partner_master_pub: string,
      *         wad_fee: string,
-     *         wad_frequency: RelativeTime,
+     *         wad_frequency: array{d_us: int|string},
      *         start_date: array{t_s: int|string},
      *         end_date: array{t_s: int|string},
      *         master_sig: string
@@ -88,11 +88,11 @@ class ExchangeKeysResponseTest extends TestCase
      *     rewards_allowed: bool,
      *     kyc_enabled: bool,
      *     master_public_key: string,
-     *     reserve_closing_delay: RelativeTime,
+     *     reserve_closing_delay: array{d_us: int|string},
      *     wallet_balance_limit_without_kyc: array<int, string>,
      *     hard_limits: array<int, array{
      *         operation_type: string,
-     *         timeframe: RelativeTime,
+     *         timeframe: array{d_us: int|string},
      *         threshold: string,
      *         soft_limit: bool
      *     }>,
@@ -127,8 +127,8 @@ class ExchangeKeysResponseTest extends TestCase
      *         history_fee: string,
      *         account_fee: string,
      *         purse_fee: string,
-     *         purse_timeout: RelativeTime,
-     *         history_expiration: RelativeTime,
+     *         purse_timeout: array{d_us: int|string},
+     *         history_expiration: array{d_us: int|string},
      *         purse_account_limit: int,
      *         master_sig: string
      *     }>,
