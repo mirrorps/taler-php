@@ -138,7 +138,6 @@ class ExchangeKeysResponse
      *     wire_fees: array<string, array<int, array{
      *         wire_fee: string,
      *         closing_fee: string,
-     *         wad_fee: string,
      *         start_date: array{t_s: int|string},
      *         end_date: array{t_s: int|string},
      *         sig: string
