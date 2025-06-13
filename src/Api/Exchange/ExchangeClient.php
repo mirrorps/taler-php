@@ -44,20 +44,6 @@ class ExchangeClient extends AbstractApiClient
     }
 
     /**
-     * Handle the keys response and return the appropriate DTO
-     */
-    private function handleKeysResponse(ResponseInterface $response): ExchangeKeysResponse
-    {
-        $data = json_decode((string)$response->getBody(), true);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
-        }
-
-        return ExchangeKeysResponse::fromArray($data);
-    }
-
-    /**
      * @param array<string, string> $headers Optional request headers
      * @return mixed
      * @throws TalerException
@@ -81,6 +67,20 @@ class ExchangeClient extends AbstractApiClient
         );
 
         return $this->handleWrappedResponse($this->handleKeysResponse(...));
+    }
+
+    /**
+     * Handle the keys response and return the appropriate DTO
+     */
+    private function handleKeysResponse(ResponseInterface $response): ExchangeKeysResponse
+    {
+        $data = json_decode((string)$response->getBody(), true);
+
+        if ($response->getStatusCode() !== 200) {
+            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
+        }
+
+        return ExchangeKeysResponse::fromArray($data);
     }
 
     /**
