@@ -95,6 +95,6 @@ class AggregateTransferFeeTest extends TestCase
         $data = $this->validData;
         $data['start_date'] = (array)new \stdClass();
 
-        AggregateTransferFee::fromArray($data);
+        AggregateTransferFee::fromArray($data); //@phpstan-ignore-line - testing error case
     }
 } 
