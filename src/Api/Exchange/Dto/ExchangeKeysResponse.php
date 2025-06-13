@@ -2,7 +2,7 @@
 
 namespace Taler\Api\Exchange\Dto;
 
-use Taler\Api\Contract\DenomGroupCommon;
+use Taler\Api\Contract\DenomGroupCommonContract;
 use Taler\Api\Dto\AggregateTransferFee;
 use Taler\Api\Dto\AuditorKeys;
 use Taler\Api\Dto\CurrencySpecification;
@@ -48,7 +48,7 @@ class ExchangeKeysResponse
      * @param array<int, string>|null $wallet_balance_limit_without_kyc Threshold amounts beyond which wallet should trigger KYC
      * @param array<int, AccountLimit> $hard_limits Array of limits that apply to all accounts
      * @param array<int, ZeroLimitedOperation> $zero_limits Array of limits with a soft threshold of zero
-     * @param array<int, DenomGroupCommon> $denominations Denominations offered by this exchange
+     * @param array<int, DenomGroupCommonContract> $denominations Denominations offered by this exchange
      * @param string $exchange_sig Compact EdDSA signature over the concatenation of all master_sigs
      * @param string $exchange_pub Public EdDSA key of the exchange that was used to generate the signature
      * @param array<int, Recoup> $recoup Denominations for which the exchange currently offers/requests recoup
@@ -354,10 +354,10 @@ class ExchangeKeysResponse
      *     }>,
      *     age_mask?: string
      * } $data
-     * @return DenomGroupCommon
+     * @return DenomGroupCommonContract
      * @throws \InvalidArgumentException When cipher type is not supported
      */
-    private static function createDenominationGroup(array $data): DenomGroupCommon
+    private static function createDenominationGroup(array $data): DenomGroupCommonContract
     {
         return match ($data['cipher']) {
             'RSA' => DenomGroupRsa::fromArray($data), // @phpstan-ignore-line - Dynamic factory pattern requires runtime type checking
