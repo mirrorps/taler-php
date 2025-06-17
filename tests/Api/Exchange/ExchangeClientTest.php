@@ -39,6 +39,8 @@ class ExchangeClientTest extends TestCase
         $this->config = $this->createMock(TalerConfig::class);
         $this->taler->method('getConfig')->willReturn($this->config);
         
+        $this->promise->method('then')->willReturnSelf();
+        
         $this->client = new ExchangeClient($this->taler, $this->httpClient);
     }
 
