@@ -174,7 +174,12 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getTransferAsync(string $wtid, array $headers = []): mixed
     {
-        return $this->getClient()->requestAsync('GET', "transfers/{$wtid}", $headers);
+        return $this->getClient()
+            ->requestAsync('GET', "transfers/{$wtid}", $headers)
+            ->then(function (ResponseInterface $response) {
+                $data = json_decode($response->getBody()->getContents(), true);
+                return TrackTransferResponse::fromArray($data);
+            });
     }
 
     /**
