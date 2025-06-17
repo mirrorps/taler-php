@@ -91,7 +91,12 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getKeysAsync(array $headers = []): mixed
     {
-        return $this->getClient()->requestAsync('GET', 'keys', $headers);
+        return $this->getClient()
+            ->requestAsync('GET', 'keys', $headers)
+            ->then(function (ResponseInterface $response) {
+                $data = json_decode($response->getBody()->getContents(), true);
+                return ExchangeKeysResponse::fromArray($data);
+            });
     }
 
     /**
