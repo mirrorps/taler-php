@@ -52,7 +52,12 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getConfigAsync(array $headers = []): mixed
     {
-        return $this->getClient()->requestAsync('GET', 'config', $headers);
+        return $this->getClient()
+            ->requestAsync('GET', 'config', $headers)
+            ->then(function (ResponseInterface $response) {
+                $data = json_decode($response->getBody()->getContents(), true);
+                return ExchangeVersionResponse::fromArray($data);
+            });
     }
 
     /**
