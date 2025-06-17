@@ -263,7 +263,9 @@ class ExchangeClient extends AbstractApiClient
         array $headers = []
     ): mixed
     {
-        return $this->getClient()->requestAsync('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers);
+        return $this->getClient()
+            ->requestAsync('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers)
+            ->then(fn (ResponseInterface $response) => $this->handleDepositsResponse($response));
     }
 
     /**
