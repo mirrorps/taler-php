@@ -3,6 +3,7 @@
 namespace Taler\Api\Base;
 
 use Psr\Http\Message\ResponseInterface;
+use Taler\Exception\TalerException;
 
 abstract class AbstractApiClient extends BaseApiClient
 {
@@ -27,5 +28,25 @@ abstract class AbstractApiClient extends BaseApiClient
         }
 
         return $decoded;
+    }
+
+    /**
+     * Parse response body and check status code
+     *
+     * @template T of array
+     * @param ResponseInterface $response
+     * @param int $expectedStatusCode
+     * @return T
+     * @throws TalerException
+     */
+    protected function parseResponseBody(ResponseInterface $response, int $expectedStatusCode = 200): array
+    {
+        $data = json_decode((string)$response->getBody(), true);
+
+        if ($response->getStatusCode() !== $expectedStatusCode) {
+            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
+        }
+
+        return $data;
     }
 } 
