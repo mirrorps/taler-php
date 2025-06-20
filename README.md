@@ -59,6 +59,16 @@ $taler = Factory::create([
 
 - `base_url`: The URL of your Taler backend instance.
 - `token`: Your authentication token ( ⚠️ do **not** hardcode; use environment variables or secure storage in your application).
+- `wrapResponse`: (Optional) Boolean flag to control DTO wrapping of responses. Defaults to `true`. When set to `false`, methods return raw array responses from Taler.
+
+Example:
+```php
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token',
+    'wrapResponse' => true // Optional, defaults to true
+]);
+```
 
 ---
 
