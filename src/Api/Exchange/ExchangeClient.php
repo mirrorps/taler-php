@@ -23,25 +23,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getConfig(array $headers = []): ExchangeVersionResponse|array
     {
-        $this->setResponse(
-            $this->getClient()->request('GET', 'config', $headers)
-        );
-
-        return $this->handleWrappedResponse($this->handleConfigResponse(...));
-    }
-
-    /**
-     * Handle the config response and return the appropriate DTO
-     */
-    private function handleConfigResponse(ResponseInterface $response): ExchangeVersionResponse
-    {
-        $data = json_decode((string)$response->getBody(), true);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
-        }
-
-        return ExchangeVersionResponse::fromArray($data);
+        return Actions\Config::run($this, $headers);
     }
 
     /**
@@ -52,12 +34,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getConfigAsync(array $headers = []): mixed
     {
-        return $this->getClient()
-            ->requestAsync('GET', 'config', $headers)
-            ->then(function (ResponseInterface $response) {
-                $data = json_decode($response->getBody()->getContents(), true);
-                return ExchangeVersionResponse::fromArray($data);
-            });
+        return Actions\Config::runAsync($this, $headers);
     }
 
     /**
