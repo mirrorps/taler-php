@@ -45,25 +45,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getKeys(array $headers = []): ExchangeKeysResponse|array
     {
-        $this->setResponse(
-            $this->getClient()->request('GET', 'keys', $headers)
-        );
-
-        return $this->handleWrappedResponse($this->handleKeysResponse(...));
-    }
-
-    /**
-     * Handle the keys response and return the appropriate DTO
-     */
-    private function handleKeysResponse(ResponseInterface $response): ExchangeKeysResponse
-    {
-        $data = json_decode((string)$response->getBody(), true);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
-        }
-
-        return ExchangeKeysResponse::fromArray($data);
+        return Actions\Keys::run($this, $headers);
     }
 
     /**
@@ -74,12 +56,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getKeysAsync(array $headers = []): mixed
     {
-        return $this->getClient()
-            ->requestAsync('GET', 'keys', $headers)
-            ->then(function (ResponseInterface $response) {
-                $data = json_decode($response->getBody()->getContents(), true);
-                return ExchangeKeysResponse::fromArray($data);
-            });
+        return Actions\Keys::runAsync($this, $headers);
     }
 
     /**
