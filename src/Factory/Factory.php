@@ -3,6 +3,7 @@
 namespace Taler\Factory;
 
 use Psr\Http\Client\ClientInterface;
+use Psr\SimpleCache\CacheInterface;
 use Taler\Config\TalerConfig;
 use Taler\Taler;
 use InvalidArgumentException;
@@ -16,6 +17,7 @@ class Factory
      *     base_url: string,
      *     token?: string,
      *     client?: ClientInterface|null,
+     *     cache?: CacheInterface|null,
      *     wrapResponse?: bool
      * } $options Configuration options for creating Taler instance
      * @throws InvalidArgumentException when base_url is empty
@@ -24,6 +26,7 @@ class Factory
     {
         $token = $options['token'] ?? '';
         $client = $options['client'] ?? null;
+        $cache = $options['cache'] ?? null;
         $wrapResponse = $options['wrapResponse'] ?? true;
 
         $config = new TalerConfig(
@@ -34,7 +37,8 @@ class Factory
 
         return new Taler(
             $config,
-            $client
+            $client,
+            $cache
         );
     }
 }

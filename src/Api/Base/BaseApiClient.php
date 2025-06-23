@@ -6,7 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
 
-class BaseApiClient
+abstract class BaseApiClient
 {
     private ResponseInterface $response;
 

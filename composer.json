@@ -22,7 +22,8 @@
     "psr/http-factory": "^1.0",
     "psr-discovery/http-client-implementations": "^1.0",
     "psr-discovery/http-factory-implementations":  "^1.0",
-    "league/uri": "^7.5"
+    "league/uri": "^7.5",
+    "psr/simple-cache": "^3.0"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "^7.0",
