@@ -8,7 +8,12 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use Psr\SimpleCache\CacheInterface;
+use Taler\Api\Cache\CacheWrapper;
 use Taler\Api\Dto\ErrorDetail;
+use Taler\Api\Dto\FutureKeysResponse;
+use Taler\Api\Exchange\Dto\ExchangeKeysResponse;
+use Taler\Api\Exchange\Dto\ExchangeVersionResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
 use Taler\Api\Exchange\Dto\TrackTransferResponse;
@@ -27,6 +32,8 @@ class ExchangeClientTest extends TestCase
     private StreamInterface&MockObject $stream;
     private Promise&MockObject $promise;
     private TalerConfig&MockObject $config;
+    private CacheWrapper&MockObject $cacheWrapper;
+    private CacheInterface&MockObject $cache;
 
     protected function setUp(): void
     {
@@ -35,9 +42,15 @@ class ExchangeClientTest extends TestCase
         $this->response = $this->createMock(ResponseInterface::class);
         $this->stream = $this->createMock(StreamInterface::class);
         $this->promise = $this->createMock(Promise::class);
-        
         $this->config = $this->createMock(TalerConfig::class);
+        $this->cacheWrapper = $this->createMock(CacheWrapper::class);
+        $this->cache = $this->createMock(CacheInterface::class);
+        
         $this->taler->method('getConfig')->willReturn($this->config);
+        $this->taler->method('getCacheWrapper')->willReturn($this->cacheWrapper);
+        $this->cacheWrapper->method('getTtl')->willReturn(null);
+        $this->cacheWrapper->method('getCache')->willReturn($this->cache);
+        $this->config->method('getWrapResponse')->willReturn(true);
         
         $this->promise->method('then')->willReturnSelf();
         
@@ -46,7 +59,22 @@ class ExchangeClientTest extends TestCase
 
     public function testGetConfig(): void
     {
-        $expectedData = ['some' => 'config'];
+        $expectedData = [
+            'version' => '1.0.0',
+            'name' => 'taler-exchange',
+            'currency' => 'EUR',
+            'currency_specification' => [
+                'name' => 'Euro',
+                'currency' => 'EUR',
+                'num_fractional_input_digits' => 2,
+                'num_fractional_normal_digits' => 2,
+                'num_fractional_trailing_zero_digits' => 2,
+                'alt_unit_names' => [
+                    '0' => 'EUR'
+                ]
+            ],
+            'supported_kyc_requirements' => []
+        ];
         $this->setupMockResponse($expectedData);
 
         $this->httpClient->expects($this->once())
@@ -55,7 +83,9 @@ class ExchangeClientTest extends TestCase
             ->willReturn($this->response);
 
         $result = $this->client->getConfig();
-        $this->assertEquals($expectedData, $result);
+        $this->assertInstanceOf(ExchangeVersionResponse::class, $result);
+        $this->assertEquals('1.0.0', $result->version);
+        $this->assertEquals('EUR', $result->currency);
     }
 
     public function testGetConfigAsync(): void
@@ -77,7 +107,43 @@ class ExchangeClientTest extends TestCase
 
     public function testGetKeys(): void
     {
-        $expectedData = ['key1' => 'value1'];
+        $expectedData = [
+            'version' => '1.0.0',
+            'base_url' => 'https://exchange.test',
+            'currency' => 'EUR',
+            'currency_specification' => [
+                'name' => 'Euro',
+                'currency' => 'EUR',
+                'num_fractional_input_digits' => 2,
+                'num_fractional_normal_digits' => 2,
+                'num_fractional_trailing_zero_digits' => 2,
+                'alt_unit_names' => [
+                    '0' => 'EUR'
+                ]
+            ],
+            'stefan_abs' => '0',
+            'stefan_log' => '0',
+            'stefan_lin' => 0.0,
+            'asset_type' => 'fiat',
+            'accounts' => [],
+            'wire_fees' => [],
+            'wads' => [],
+            'rewards_allowed' => false,
+            'kyc_enabled' => false,
+            'master_public_key' => 'test-master-key',
+            'reserve_closing_delay' => ['d_us' => 3600000000],
+            'wallet_balance_limit_without_kyc' => [],
+            'hard_limits' => [],
+            'zero_limits' => [],
+            'denominations' => [],
+            'exchange_sig' => 'test-sig',
+            'exchange_pub' => 'test-pub',
+            'recoup' => [],
+            'global_fees' => [],
+            'list_issue_date' => ['t_s' => 1710510600],
+            'auditors' => [],
+            'signkeys' => []
+        ];
         $this->setupMockResponse($expectedData);
 
         $this->httpClient->expects($this->once())
@@ -86,7 +152,9 @@ class ExchangeClientTest extends TestCase
             ->willReturn($this->response);
 
         $result = $this->client->getKeys();
-        $this->assertEquals($expectedData, $result);
+        $this->assertInstanceOf(ExchangeKeysResponse::class, $result);
+        $this->assertEquals('test-master-key', $result->master_public_key);
+        $this->assertEquals('test-pub', $result->exchange_pub);
     }
 
     public function testGetKeysAsync(): void
@@ -108,7 +176,13 @@ class ExchangeClientTest extends TestCase
 
     public function testGetManagementKeys(): void
     {
-        $expectedData = ['management_key' => 'value'];
+        $expectedData = [
+            'future_denoms' => [],
+            'future_signkeys' => [],
+            'master_pub' => 'test-master-pub',
+            'denom_secmod_public_key' => 'test-denom-key',
+            'signkey_secmod_public_key' => 'test-signkey-key'
+        ];
         $this->setupMockResponse($expectedData);
 
         $this->httpClient->expects($this->once())
@@ -117,7 +191,8 @@ class ExchangeClientTest extends TestCase
             ->willReturn($this->response);
 
         $result = $this->client->getManagementKeys();
-        $this->assertEquals($expectedData, $result);
+        $this->assertInstanceOf(FutureKeysResponse::class, $result);
+        $this->assertEquals('test-master-pub', $result->getMasterPub());
     }
 
     public function testGetManagementKeysAsync(): void

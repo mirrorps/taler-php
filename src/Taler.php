@@ -3,13 +3,16 @@
 namespace Taler;
 
 use Psr\Http\Client\ClientInterface;
+use Psr\SimpleCache\CacheInterface;
 use Taler\Api\Exchange\ExchangeClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
+use Taler\Api\Cache\CacheWrapper;
 
 class Taler
 {
     protected HttpClientWrapper $httpClientWrapper;
+    protected ?CacheWrapper $cacheWrapper;
     protected ExchangeClient $exchange;
 
     /**
@@ -22,10 +25,12 @@ class Taler
      */
     public function __construct(
         protected TalerConfig $config,
-        protected ?ClientInterface $client = null
+        protected ?ClientInterface $client = null,
+        protected ?CacheInterface $cache = null
     )
     {
         $this->httpClientWrapper = new HttpClientWrapper($config, $client);
+        $this->cacheWrapper = $cache ? new CacheWrapper($cache) : null;
     }
 
     /**
@@ -36,6 +41,11 @@ class Taler
     public function getHttpClientWrapper(): HttpClientWrapper
     {
         return $this->httpClientWrapper;
+    }
+
+    public function getCacheWrapper(): ?CacheWrapper
+    {
+        return $this->cacheWrapper;
     }
 
     /**
@@ -77,6 +87,24 @@ class Taler
     public function config(array $config): self
     {
         $this->getConfig()->setAttributes($config);
+        return $this;
+    }
+
+    /**
+     * Enable caching for the next API call with specified TTL in minutes
+     *
+     * @param int $minutes Time to live in minutes
+     * @return static
+     */
+    public function cache(int $minutes): static
+    {
+        $cacheWrapper = $this->getCacheWrapper();
+
+        if($cacheWrapper === null) {
+            throw new \Exception('Cache is not set');
+        }
+
+        $cacheWrapper->setTtl($minutes * 60); // Convert to seconds
         return $this;
     }
 }
