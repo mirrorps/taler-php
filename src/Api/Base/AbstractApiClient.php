@@ -39,7 +39,7 @@ abstract class AbstractApiClient extends BaseApiClient
      * @return T
      * @throws TalerException
      */
-    protected function parseResponseBody(ResponseInterface $response, int $expectedStatusCode = 200): array
+    public function parseResponseBody(ResponseInterface $response, int $expectedStatusCode = 200): array
     {
         $data = json_decode((string)$response->getBody(), true);
 
