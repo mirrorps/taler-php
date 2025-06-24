@@ -74,7 +74,7 @@ class Config
      *     shopping_url: string|null,
      *     aml_spa_dialect: string|null
      * } $result */
-            $result = $exchangeClient->handleWrappedResponse($config->handleConfigResponse(...));
+            $result = $exchangeClient->handleWrappedResponse($config->handleResponse(...));
             
             // If caching was enabled, store in cache
             if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
@@ -99,7 +99,7 @@ class Config
     /**
      * Handle the config response and return the appropriate DTO
      */
-    private function handleConfigResponse(ResponseInterface $response): ExchangeVersionResponse
+    private function handleResponse(ResponseInterface $response): ExchangeVersionResponse
     {
         /** @var array{
          *     version: string,
@@ -138,7 +138,7 @@ class Config
             ->requestAsync('GET', 'config', $headers)
             ->then(function (ResponseInterface $response) use ($config) {
                 $config->exchangeClient->setResponse($response);
-                return $config->exchangeClient->handleWrappedResponse($config->handleConfigResponse(...));
+                return $config->exchangeClient->handleWrappedResponse($config->handleResponse(...));
             });
     }
 }

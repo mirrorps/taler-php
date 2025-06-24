@@ -67,25 +67,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getManagementKeys(array $headers = []): FutureKeysResponse|array
     {
-        $this->setResponse(
-            $this->getClient()->request('GET', 'management/keys', $headers)
-        );
-
-        return $this->handleWrappedResponse($this->handleManagementKeysResponse(...));
-    }
-
-    /**
-     * Handle the management keys response and return the appropriate DTO
-     */
-    private function handleManagementKeysResponse(ResponseInterface $response): FutureKeysResponse
-    {
-        $data = json_decode((string)$response->getBody(), true);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
-        }
-
-        return FutureKeysResponse::createFromArray($data);
+        return Actions\ManagementKeys::run($this, $headers);
     }
 
     /**
@@ -96,12 +78,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getManagementKeysAsync(array $headers = []): mixed
     {
-        return $this->getClient()
-            ->requestAsync('GET', 'management/keys', $headers)
-            ->then(function (ResponseInterface $response) {
-                $data = json_decode($response->getBody()->getContents(), true);
-                return FutureKeysResponse::createFromArray($data);
-            });
+        return Actions\ManagementKeys::runAsync($this, $headers);
     }
 
     /**
