@@ -139,11 +139,17 @@ class ExchangeClient extends AbstractApiClient
         array $headers = []
     ): TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail|array
     {
-        $this->setResponse(
-            $this->getClient()->request('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers)
+        return Actions\Deposits::run(
+            $this,
+            $H_WIRE,
+            $MERCHANT_PUB,
+            $H_CONTRACT_TERMS,
+            $COIN_PUB,
+            $merchant_sig,
+            $timeout_ms,
+            $lpt,
+            $headers
         );
-        
-        return $this->handleWrappedResponse($this->handleDepositsResponse(...));
     }
 
     /**
@@ -176,23 +182,16 @@ class ExchangeClient extends AbstractApiClient
         array $headers = []
     ): mixed
     {
-        return $this->getClient()
-            ->requestAsync('GET', "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}", $headers)
-            ->then(fn (ResponseInterface $response) => $this->handleDepositsResponse($response));
-    }
-
-    /**
-     * Handle the deposits response and return the appropriate DTO
-     */
-    private function handleDepositsResponse(ResponseInterface $response): TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail
-    {
-        $data = json_decode((string)$response->getBody(), true);
-        
-        return match ($response->getStatusCode()) {
-            200 => TrackTransactionResponse::fromArray($data),
-            202 => TrackTransactionAcceptedResponse::fromArray($data),
-            403 => ErrorDetail::fromArray($data),
-            default => throw new TalerException('Unexpected response status code: ' . $response->getStatusCode())
-        };
+        return Actions\Deposits::runAsync(
+            $this,
+            $H_WIRE,
+            $MERCHANT_PUB,
+            $H_CONTRACT_TERMS,
+            $COIN_PUB,
+            $merchant_sig,
+            $timeout_ms,
+            $lpt,
+            $headers
+        );
     }
 }
