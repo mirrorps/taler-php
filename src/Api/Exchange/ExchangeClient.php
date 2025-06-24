@@ -92,11 +92,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getTransfer(string $wtid, array $headers = []): TrackTransferResponse|array
     {
-        $this->setResponse(
-            $this->getClient()->request('GET', "transfers/{$wtid}", $headers)
-        );
-
-        return $this->handleWrappedResponse($this->handleTransferResponse(...));
+        return Actions\Transfer::run($this, $wtid, $headers);
     }
 
     /**
@@ -110,26 +106,7 @@ class ExchangeClient extends AbstractApiClient
      */
     public function getTransferAsync(string $wtid, array $headers = []): mixed
     {
-        return $this->getClient()
-            ->requestAsync('GET', "transfers/{$wtid}", $headers)
-            ->then(function (ResponseInterface $response) {
-                $data = json_decode($response->getBody()->getContents(), true);
-                return TrackTransferResponse::fromArray($data);
-            });
-    }
-
-    /**
-     * Handle the transfer response and return the appropriate DTO
-     */
-    private function handleTransferResponse(ResponseInterface $response): TrackTransferResponse
-    {
-        $data = json_decode((string)$response->getBody(), true);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
-        }
-
-        return TrackTransferResponse::fromArray($data);
+        return Actions\Transfer::runAsync($this, $wtid, $headers);
     }
 
     /**
