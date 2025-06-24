@@ -96,7 +96,7 @@ class Taler
      * @param int $minutes Time to live in minutes
      * @return static
      */
-    public function cache(int $minutes): static
+    public function cache(int $minutes, ?string $cacheKey = null): static
     {
         $cacheWrapper = $this->getCacheWrapper();
 
@@ -105,6 +105,24 @@ class Taler
         }
 
         $cacheWrapper->setTtl($minutes * 60); // Convert to seconds
+        
+        if($cacheKey !== null) {
+            $cacheWrapper->setCacheKey($cacheKey);
+        }
+
+        return $this;
+    }
+
+    public function cacheDelete(string $cacheKey): static
+    {
+        $cacheWrapper = $this->getCacheWrapper();
+
+        if($cacheWrapper === null) {
+            throw new \Exception('Cache is not set');
+        }
+
+        $cacheWrapper->getCache()->delete($cacheKey);
+
         return $this;
     }
 }

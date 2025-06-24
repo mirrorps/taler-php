@@ -41,14 +41,13 @@ class Config
         $config = new self($exchangeClient);
 
         try {
-            $cacheKey = 'exchange_config';
+            $cacheKey = $exchangeClient->getTaler()->getCacheWrapper()?->getCacheKey() ?? 'exchange_config';
             
             // If caching is enabled, try to get from cache
             if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
-
-                $cachedResult = $exchangeClient->getTaler()->getCacheWrapper()->getCache()->get($cacheKey);
+                $cachedResult = $exchangeClient->getTaler()->getCacheWrapper()?->getCache()->get($cacheKey);
                 if ($cachedResult !== null) {
-                    $exchangeClient->getTaler()->getCacheWrapper()->clearCacheSettings();    
+                    $exchangeClient->getTaler()->getCacheWrapper()?->clearCacheSettings();
                     return $cachedResult;
                 }
             }
@@ -78,19 +77,19 @@ class Config
             
             // If caching was enabled, store in cache
             if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
-                $exchangeClient->getTaler()->getCacheWrapper()->getCache()->set(
+                $exchangeClient->getTaler()->getCacheWrapper()?->getCache()->set(
                     $cacheKey,
                     $result,
-                    $exchangeClient->getTaler()->getCacheWrapper()->getTtl()
+                    $exchangeClient->getTaler()->getCacheWrapper()?->getTtl()
                 );
             }
             
             // Clear cache settings for next call
-            $exchangeClient->getTaler()->getCacheWrapper()->clearCacheSettings();
+            $exchangeClient->getTaler()->getCacheWrapper()?->clearCacheSettings();
             
             return $result;
         } catch (\Throwable $e) {
-            $exchangeClient->getTaler()->getCacheWrapper()->clearCacheSettings();
+            $exchangeClient->getTaler()->getCacheWrapper()?->clearCacheSettings();
             throw $e;
         }
         
