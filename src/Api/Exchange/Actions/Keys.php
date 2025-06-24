@@ -101,9 +101,6 @@ class Keys
      */
     private function handleKeysResponse(ResponseInterface $response): ExchangeKeysResponse
     {
-        $data = $this->exchangeClient->parseResponseBody($response, 200);
-
-
         /** @var array{
          *     version: string,
          *     base_url: string,
@@ -227,6 +224,7 @@ class Keys
          *     extensions_sig?: string|null
          * } $data */
 
+        $data = $this->exchangeClient->parseResponseBody($response, 200);
 
          return ExchangeKeysResponse::fromArray($data); 
     }

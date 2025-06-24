@@ -9,6 +9,10 @@ use Taler\Exception\TalerException;
 
 class Config
 {
+    public function __construct(
+        private ExchangeClient $exchangeClient
+    ) {}
+
     /**
      * @param array<string, string> $headers HTTP headers
      * @return ExchangeVersionResponse|array{
@@ -34,21 +38,23 @@ class Config
         array $headers = []
     ): ExchangeVersionResponse|array
     {
+        $config = new self($exchangeClient);
+
         try {
             $cacheKey = 'exchange_config';
             
             // If caching is enabled, try to get from cache
             if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
 
-                $cachedResult = $exchangeClient->getTaler()->getCacheWrapper()->getCache()->get($cacheKey); //--- @phpstan-ignore-line cannot be null, checked in the if statement above
+                $cachedResult = $exchangeClient->getTaler()->getCacheWrapper()->getCache()->get($cacheKey);
                 if ($cachedResult !== null) {
                     $exchangeClient->getTaler()->getCacheWrapper()->clearCacheSettings();    
                     return $cachedResult;
                 }
             }
             
-            $exchangeClient->setResponse(
-                $exchangeClient->getClient()->request('GET', 'config', $headers)
+            $config->exchangeClient->setResponse(
+                $config->exchangeClient->getClient()->request('GET', 'config', $headers)
             );
 
     /** @var ExchangeVersionResponse|array{
@@ -68,7 +74,7 @@ class Config
      *     shopping_url: string|null,
      *     aml_spa_dialect: string|null
      * } $result */
-            $result = $exchangeClient->handleWrappedResponse(self::handleConfigResponse(...));
+            $result = $exchangeClient->handleWrappedResponse($config->handleConfigResponse(...));
             
             // If caching was enabled, store in cache
             if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
@@ -93,13 +99,26 @@ class Config
     /**
      * Handle the config response and return the appropriate DTO
      */
-    private static function handleConfigResponse(ResponseInterface $response): ExchangeVersionResponse
+    private function handleConfigResponse(ResponseInterface $response): ExchangeVersionResponse
     {
-        $data = json_decode((string)$response->getBody(), true);
-
-        if ($response->getStatusCode() !== 200) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
-        }
+        /** @var array{
+         *     version: string,
+         *     name: string,
+         *     currency: string,
+         *     currency_specification: array{
+         *         name: string,
+         *         currency: string,
+         *         num_fractional_input_digits: int,
+         *         num_fractional_normal_digits: int,
+         *         num_fractional_trailing_zero_digits: int,
+         *         alt_unit_names: array<numeric-string, string>
+         *     },
+         *     supported_kyc_requirements: array<int, string>,
+         *     implementation?: string|null,
+         *     shopping_url?: string|null,
+         *     aml_spa_dialect?: string|null
+         * } $data */
+        $data = $this->exchangeClient->parseResponseBody($response, 200);
 
         return ExchangeVersionResponse::fromArray($data);
     }
@@ -112,13 +131,14 @@ class Config
         array $headers = []
     ): mixed
     {
-        
+        $config = new self($exchangeClient);
+
         return $exchangeClient
             ->getClient()
             ->requestAsync('GET', 'config', $headers)
-            ->then(function (ResponseInterface $response) use ($exchangeClient) {
-                $exchangeClient->setResponse($response);
-                return $exchangeClient->handleWrappedResponse(self::handleConfigResponse(...));
+            ->then(function (ResponseInterface $response) use ($config) {
+                $config->exchangeClient->setResponse($response);
+                return $config->exchangeClient->handleWrappedResponse($config->handleConfigResponse(...));
             });
     }
 }
