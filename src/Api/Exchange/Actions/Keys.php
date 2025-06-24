@@ -91,7 +91,7 @@ class Keys
          *         fee_refund: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>}
          *     }>
          * } $result */
-        $result = $keys->exchangeClient->handleWrappedResponse($keys->handleKeysResponse(...));
+        $result = $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
 
         return $result;
     }
@@ -99,7 +99,7 @@ class Keys
     /**
      * Handle the keys response and return the appropriate DTO
      */
-    private function handleKeysResponse(ResponseInterface $response): ExchangeKeysResponse
+    private function handleResponse(ResponseInterface $response): ExchangeKeysResponse
     {
         /** @var array{
          *     version: string,
@@ -245,7 +245,7 @@ class Keys
             ->requestAsync('GET', 'keys', $headers)
             ->then(function (ResponseInterface $response) use ($keys) {
                 $keys->exchangeClient->setResponse($response);
-                return $keys->exchangeClient->handleWrappedResponse($keys->handleKeysResponse(...));
+                return $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
             });
     }
 } 
