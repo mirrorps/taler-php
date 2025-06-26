@@ -33,7 +33,7 @@ class Taler
         protected ?CacheInterface $cache = null
     )
     {
-        $this->httpClientWrapper = new HttpClientWrapper($config, $client);
+        $this->httpClientWrapper = new HttpClientWrapper($config, $client, $logger);
         $this->cacheWrapper = $cache ? new CacheWrapper($cache) : null;
         $this->logger ??= new NullLogger();
     }

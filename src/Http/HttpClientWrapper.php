@@ -12,6 +12,8 @@ use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use PsrDiscovery\Discover;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 
 class HttpClientWrapper
 {
@@ -26,12 +28,14 @@ class HttpClientWrapper
     public function __construct(
         private TalerConfig $config,
         private ?ClientInterface $client = null,
+        private ?LoggerInterface $logger = null,
         private ?RequestFactoryInterface $requestFactory = null,
         private ?StreamFactoryInterface $streamFactory = null,
         public bool $wrapResponse = true
     )
     {
         $this->client = $client ?? Discover::httpClient();
+        $this->logger = $logger ?? new NullLogger();
         $this->requestFactory = $requestFactory ?? Discover::httpRequestFactory();
         $this->streamFactory = $streamFactory ?? Discover::httpStreamFactory();
 
@@ -63,12 +67,16 @@ class HttpClientWrapper
         $request = $this->createRequest($method, $endpoint, $headers, $body);
 
         try {
+
             if ($this->wrapResponse) {
                 return new TalerResponse($this->client->sendRequest($request));
             }
 
             return $this->client->sendRequest($request);
         } catch (\Throwable $e) {
+
+            $this->logger->error("Taler request failed: {$e->getCode()}, {$e->getMessage()}");
+
             if ($this->wrapResponse) {
                 throw new TalerException($e->getMessage(), $e->getCode());
             }
@@ -104,6 +112,9 @@ class HttpClientWrapper
         try {
             return $this->client->sendAsyncRequest($request);
         } catch (\Throwable $e) {
+
+            $this->logger->error("Taler request failed: {$e->getCode()}, {$e->getMessage()}");
+
             if ($this->wrapResponse) {
                 throw new TalerException($e->getMessage(), $e->getCode());
             }
