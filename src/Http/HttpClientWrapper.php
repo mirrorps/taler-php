@@ -65,14 +65,18 @@ class HttpClientWrapper
     ): ResponseInterface
     {
         $request = $this->createRequest($method, $endpoint, $headers, $body);
+        $this->logRequest($request);
 
         try {
+            $response = $this->client->sendRequest($request);
+        
+            $this->logResponse($response);
 
             if ($this->wrapResponse) {
-                return new TalerResponse($this->client->sendRequest($request));
+                return new TalerResponse($response);
             }
 
-            return $this->client->sendRequest($request);
+            return $response;
         } catch (\Throwable $e) {
 
             $this->logger->error("Taler request failed: {$e->getCode()}, {$e->getMessage()}");
@@ -108,9 +112,11 @@ class HttpClientWrapper
         }
 
         $request = $this->createRequest($method, $endpoint, $headers, $body);
-
+        
+        $this->logRequest($request);
+        
         try {
-            return $this->client->sendAsyncRequest($request);
+            return $this->client->sendAsyncRequest($request); // @phpstan-ignore-line: $this->client is guaranteed to be an async client by the instanceof check above
         } catch (\Throwable $e) {
 
             $this->logger->error("Taler request failed: {$e->getCode()}, {$e->getMessage()}");
@@ -201,5 +207,20 @@ class HttpClientWrapper
     private function getBaseUrl(): string
     {
         return rtrim($this->config->getBaseUrl(), '/') . '/';
+    }
+
+    private function logRequest(RequestInterface $request): void
+    {
+        $this->logger->debug("Taler request: {$request->getUri()}, {$request->getMethod()}");
+        $this->logger->debug("Taler request headers: ", $request->getHeaders());
+        $this->logger->debug("Taler request body: {$request->getBody()->getContents()}");
+    }
+
+    private function logResponse(ResponseInterface $response): void
+    {
+        $this->logger->debug("Taler response: {$response->getStatusCode()}, {$response->getReasonPhrase()}");
+        $this->logger->debug("Taler response headers: ", $response->getHeaders());
+        $this->logger->debug("Taler response body: {$response->getBody()->getContents()}");
+        $this->logger->debug("Taler response: {$response->getStatusCode()}, {$response->getReasonPhrase()}");
     }
 }
