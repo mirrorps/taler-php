@@ -62,38 +62,68 @@ class Keys
      */
     public static function run(
         ExchangeClient $exchangeClient,
+        array $params = [],
         array $headers = []
     ): ExchangeKeysResponse|array {
         
         $keys = new self($exchangeClient);
 
-        $keys->exchangeClient->setResponse(
-            $keys->exchangeClient->getClient()->request('GET', 'keys', $headers)
-        );
+        try {
+            $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? 'exchange_keys';
+            
+            // If caching is enabled, try to get from cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cachedResult = $cacheWrapper->getCache()->get($cacheKey);
+                if ($cachedResult !== null) {
+                    $cacheWrapper->clearCacheSettings();
+                    return $cachedResult;
+                }
+            }
 
-        /** @var ExchangeKeysResponse|array{
-         *     master_public_key: string,
-         *     exchange_pub: string,
-         *     exchange_sig: string,
-         *     list_issue_date: array{t_s: int},
-         *     denominations: array<int, array{
-         *         master_sig: string,
-         *         cipher: string,
-         *         value: string,
-         *         stamp_start: array{t_s: int},
-         *         stamp_expire_withdraw: array{t_s: int},
-         *         stamp_expire_deposit: array{t_s: int},
-         *         stamp_expire_legal: array{t_s: int},
-         *         denom_pub: string,
-         *         fee_withdraw: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>},
-         *         fee_deposit: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>},
-         *         fee_refresh: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>},
-         *         fee_refund: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>}
-         *     }>
-         * } $result */
-        $result = $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
+            $keys->exchangeClient->setResponse(
+                $keys->exchangeClient->getClient()->request('GET', 'keys?' . http_build_query($params), $headers)
+            );
 
-        return $result;
+            /** @var ExchangeKeysResponse|array{
+             *     master_public_key: string,
+             *     exchange_pub: string,
+             *     exchange_sig: string,
+             *     list_issue_date: array{t_s: int},
+             *     denominations: array<int, array{
+             *         master_sig: string,
+             *         cipher: string,
+             *         value: string,
+             *         stamp_start: array{t_s: int},
+             *         stamp_expire_withdraw: array{t_s: int},
+             *         stamp_expire_deposit: array{t_s: int},
+             *         stamp_expire_legal: array{t_s: int},
+             *         denom_pub: string,
+             *         fee_withdraw: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>},
+             *         fee_deposit: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>},
+             *         fee_refresh: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>},
+             *         fee_refund: array{fees: array<int, array{start_date: array{t_s: int}, end_date: array{t_s: int}, fee: string}>}
+             *     }>
+             * } $result */
+            $result = $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
+
+            // If caching was enabled, store in cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cacheWrapper->getCache()->set(
+                    $cacheKey,
+                    $result,
+                    $cacheWrapper->getTtl()
+                );
+            }
+            
+            // Clear cache settings for next call
+            $cacheWrapper?->clearCacheSettings();
+            
+            return $result;
+        } catch (\Throwable $e) {
+            $cacheWrapper?->clearCacheSettings();
+            throw $e;
+        }
     }
 
     /**
@@ -235,6 +265,7 @@ class Keys
      */
     public static function runAsync(
         ExchangeClient $exchangeClient,
+        array $params = [],
         array $headers = []
     ): mixed {
 
