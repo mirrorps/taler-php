@@ -218,6 +218,111 @@ Array response example:
 
 
 ---
+## Logging
+
+The TalerPHP SDK supports logging through PSR-3 LoggerInterface. You can provide your own PSR-3 compatible logger (like Monolog) for logging of API interactions.
+
+### Basic Logging Setup
+
+```php
+use Monolog\Logger;
+use Monolog\Handler\StreamHandler;
+
+// Create a Monolog logger
+$logger = new Logger('taler');
+$logger->pushHandler(new StreamHandler('path/to/your.log', Logger::DEBUG));
+
+// Initialize Taler with logger
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token',
+    'logger'   => $logger
+]);
+```
+
+### What Gets Logged
+
+The SDK logs the following information:
+
+- HTTP request details (URL, method, headers, body)
+- HTTP response details (status code, headers, body)
+- Error conditions and exceptions
+- API operation failures
+
+### Log Levels Used
+
+- **DEBUG**: Detailed request/response information
+- **ERROR**: API errors, request failures, and exceptions
+
+### Example Log Output
+
+```
+[2024-03-21 10:15:30] taler.DEBUG: Taler request: https://backend.demo.taler.net/instances/sandbox/config, GET
+[2024-03-21 10:15:30] taler.DEBUG: Taler request headers: {"User-Agent":["Mirrorps_Taler_PHP"],"Authorization":["Bearer token"]}
+[2024-03-21 10:15:31] taler.DEBUG: Taler response: 200, OK
+[2024-03-21 10:15:31] taler.DEBUG: Taler response headers: {"Content-Type":["application/json"]}
+[2024-03-21 10:15:31] taler.DEBUG: Taler response body: {"version":"0.8.0","name":"taler-exchange"}
+```
+
+### Custom Logger
+
+If you want to implement your own logger, it must implement `Psr\Log\LoggerInterface`.
+
+---
+
+## Caching
+
+The TalerPHP SDK supports caching through PSR-16 SimpleCache interface. You can provide any PSR-16 compatible cache implementation to store API responses and reduce unnecessary network requests.
+
+### Basic Cache Setup
+
+```php
+use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Psr16Cache;
+
+// Create a PSR-16 cache implementation
+$filesystemAdapter = new FilesystemAdapter();
+$cache = new Psr16Cache($filesystemAdapter);
+
+// Initialize Taler with cache
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token',
+    'cache'    => $cache
+]);
+```
+
+### Using Cache with API Calls
+
+You can enable caching for specific API calls using the `cache()` method. The method accepts:
+- `minutes`: How long to cache the response (in minutes)
+- `cacheKey`: (Optional) Custom cache key. If not provided, one will be generated automatically
+
+#### Example: Caching Exchange Configuration
+
+```php
+// Cache the exchange configuration for 60 minutes
+$config = $taler->cache(60)
+    ->exchange()
+    ->getConfig();
+
+// Use a custom cache key
+$config = $taler->cache(60, 'exchange_config')
+    ->exchange()
+    ->getConfig();
+
+// Subsequent calls within the TTL will return cached data
+$cachedConfig = $taler->exchange()->getConfig();
+
+// Force delete cached data
+$taler->cacheDelete('exchange_config');
+```
+
+### Cache Implementation Requirements
+
+If you want to implement your own cache, it must implement `Psr\SimpleCache\CacheInterface`. 
+
+---
 
 ## Running Tests
 
@@ -258,3 +363,5 @@ If you have questions or need help, open an issue or start a discussion on the r
 
 - [GNU Taler](https://taler.net/)
 - All contributors and the open source community
+
+---
