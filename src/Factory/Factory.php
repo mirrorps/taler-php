@@ -3,6 +3,7 @@
 namespace Taler\Factory;
 
 use Psr\Http\Client\ClientInterface;
+use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
 use Taler\Config\TalerConfig;
 use Taler\Taler;

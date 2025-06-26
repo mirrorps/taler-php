@@ -24,6 +24,7 @@ class Taler
      * 
      * @param TalerConfig $config The configuration for the Taler client
      * @param ClientInterface|null $client Optional PSR-18 HTTP client implementation
+     * @param LoggerInterface|null $logger Optional PSR-3 logger implementation
      * @param CacheInterface|null $cache Optional PSR-16 cache implementation
      */
     public function __construct(
