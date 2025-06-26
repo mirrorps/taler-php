@@ -3,6 +3,8 @@
 namespace Taler;
 
 use Psr\Http\Client\ClientInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Taler\Api\Exchange\ExchangeClient;
 use Taler\Config\TalerConfig;
@@ -22,15 +24,18 @@ class Taler
      * 
      * @param TalerConfig $config The configuration for the Taler client
      * @param ClientInterface|null $client Optional PSR-18 HTTP client implementation
+     * @param CacheInterface|null $cache Optional PSR-16 cache implementation
      */
     public function __construct(
         protected TalerConfig $config,
         protected ?ClientInterface $client = null,
+        protected ?LoggerInterface $logger = null,
         protected ?CacheInterface $cache = null
     )
     {
         $this->httpClientWrapper = new HttpClientWrapper($config, $client);
         $this->cacheWrapper = $cache ? new CacheWrapper($cache) : null;
+        $this->logger ??= new NullLogger();
     }
 
     /**
@@ -56,6 +61,14 @@ class Taler
     public function getConfig(): TalerConfig
     {
         return $this->config;
+    }
+
+    /**
+     * Get the logger instance
+     */
+    public function getLogger(): LoggerInterface
+    {
+        return $this->logger;
     }
 
     /**

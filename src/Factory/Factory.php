@@ -28,6 +28,7 @@ class Factory
         $client = $options['client'] ?? null;
         $cache = $options['cache'] ?? null;
         $wrapResponse = $options['wrapResponse'] ?? true;
+        $logger = $options['logger'] ?? null;
 
         $config = new TalerConfig(
             baseUrl: $options['base_url'],
@@ -38,6 +39,7 @@ class Factory
         return new Taler(
             $config,
             $client,
+            $logger,
             $cache
         );
     }
