@@ -96,4 +96,22 @@ class TalerConfig
             $this->setAttribute($name, $value);
         }
     }
+
+    /**
+     * Get a string representation of the configuration
+     * 
+     * @return string The string representation of the configuration
+     */
+    public function __toString(): string
+    {
+        return json_encode([
+            'baseUrl' => $this->baseUrl,
+            'wrapResponse' => $this->wrapResponse
+        ]);
+    }
+
+    public function toHash(): string
+    {
+        return hash('sha256', $this->__toString());
+    }
 }

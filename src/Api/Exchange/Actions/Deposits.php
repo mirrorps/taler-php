@@ -57,7 +57,7 @@ class Deposits
 
         try {
             $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
-            $cacheKey = $cacheWrapper?->getCacheKey() ?? 'exchange_deposits';
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? "exchange_deposits_{$exchangeClient->getTaler()->getConfig()->toHash()}";
             
             // If caching is enabled, try to get from cache
             if ($cacheWrapper?->getTtl() !== null) {
