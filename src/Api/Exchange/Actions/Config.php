@@ -41,13 +41,15 @@ class Config
         $config = new self($exchangeClient);
 
         try {
-            $cacheKey = $exchangeClient->getTaler()->getCacheWrapper()?->getCacheKey() ?? 'exchange_config';
+            $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? 'exchange_config';
             
             // If caching is enabled, try to get from cache
-            if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
-                $cachedResult = $exchangeClient->getTaler()->getCacheWrapper()?->getCache()->get($cacheKey);
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cachedResult = $cacheWrapper->getCache()->get($cacheKey);
                 if ($cachedResult !== null) {
-                    $exchangeClient->getTaler()->getCacheWrapper()?->clearCacheSettings();
+                    dump('cache hit');
+                    $cacheWrapper->clearCacheSettings();
                     return $cachedResult;
                 }
             }
@@ -76,20 +78,20 @@ class Config
             $result = $exchangeClient->handleWrappedResponse($config->handleResponse(...));
             
             // If caching was enabled, store in cache
-            if ($exchangeClient->getTaler()->getCacheWrapper()?->getTtl() !== null) {
-                $exchangeClient->getTaler()->getCacheWrapper()?->getCache()->set(
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cacheWrapper->getCache()->set(
                     $cacheKey,
                     $result,
-                    $exchangeClient->getTaler()->getCacheWrapper()?->getTtl()
+                    $cacheWrapper->getTtl()
                 );
             }
             
             // Clear cache settings for next call
-            $exchangeClient->getTaler()->getCacheWrapper()?->clearCacheSettings();
+            $cacheWrapper?->clearCacheSettings();
             
             return $result;
         } catch (\Throwable $e) {
-            $exchangeClient->getTaler()->getCacheWrapper()?->clearCacheSettings();
+            $cacheWrapper?->clearCacheSettings();
             throw $e;
         }
         
