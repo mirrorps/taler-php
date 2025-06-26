@@ -49,39 +49,68 @@ class ManagementKeys
         
         $keys = new self($exchangeClient);
 
-        $keys->exchangeClient->setResponse(
-            $keys->exchangeClient->getClient()->request('GET', 'management/keys', $headers)
-        );
+        try {
+            $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? "exchange_management_keys_{$exchangeClient->getTaler()->getConfig()->toHash()}";
+            
+            // If caching is enabled, try to get from cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cachedResult = $cacheWrapper->getCache()->get($cacheKey);
+                if ($cachedResult !== null) {
+                    $cacheWrapper->clearCacheSettings();
+                    return $cachedResult;
+                }
+            }
 
-        /** @var FutureKeysResponse|array{
-         *     future_denoms: array<int, array{
-         *         section_name: string,
-         *         value: string,
-         *         stamp_start: string,
-         *         stamp_expire_withdraw: string,
-         *         stamp_expire_deposit: string,
-         *         stamp_expire_legal: string,
-         *         denom_pub: string,
-         *         fee_withdraw: string,
-         *         fee_deposit: string,
-         *         fee_refresh: string,
-         *         fee_refund: string,
-         *         denom_secmod_sig: string
-         *     }>,
-         *     future_signkeys: array<int, array{
-         *         key: string,
-         *         stamp_start: string,
-         *         stamp_expire: string,
-         *         stamp_expire_legal: string,
-         *         key_secmod_sig: string
-         *     }>,
-         *     master_pub: string,
-         *     denom_secmod_public_key: string,
-         *     signkey_secmod_public_key: string
-         * } $result */
-        $result = $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
+            $keys->exchangeClient->setResponse(
+                $keys->exchangeClient->getClient()->request('GET', 'management/keys', $headers)
+            );
 
-        return $result;
+            /** @var FutureKeysResponse|array{
+             *     future_denoms: array<int, array{
+             *         section_name: string,
+             *         value: string,
+             *         stamp_start: string,
+             *         stamp_expire_withdraw: string,
+             *         stamp_expire_deposit: string,
+             *         stamp_expire_legal: string,
+             *         denom_pub: string,
+             *         fee_withdraw: string,
+             *         fee_deposit: string,
+             *         fee_refresh: string,
+             *         fee_refund: string,
+             *         denom_secmod_sig: string
+             *     }>,
+             *     future_signkeys: array<int, array{
+             *         key: string,
+             *         stamp_start: string,
+             *         stamp_expire: string,
+             *         stamp_expire_legal: string,
+             *         key_secmod_sig: string
+             *     }>,
+             *     master_pub: string,
+             *     denom_secmod_public_key: string,
+             *     signkey_secmod_public_key: string
+             * } $result */
+            $result = $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
+
+            // If caching was enabled, store in cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cacheWrapper->getCache()->set(
+                    $cacheKey,
+                    $result,
+                    $cacheWrapper->getTtl()
+                );
+            }
+            
+            // Clear cache settings for next call
+            $cacheWrapper?->clearCacheSettings();
+            
+            return $result;
+        } catch (\Throwable $e) {
+            $cacheWrapper?->clearCacheSettings();
+            throw $e;
+        }
     }
 
     /**
