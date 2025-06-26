@@ -48,7 +48,6 @@ class Config
             if ($cacheWrapper?->getTtl() !== null) {
                 $cachedResult = $cacheWrapper->getCache()->get($cacheKey);
                 if ($cachedResult !== null) {
-                    dump('cache hit');
                     $cacheWrapper->clearCacheSettings();
                     return $cachedResult;
                 }
@@ -90,8 +89,14 @@ class Config
             $cacheWrapper?->clearCacheSettings();
             
             return $result;
-        } catch (\Throwable $e) {
+        } catch (TalerException $e) {
+            //--- NOTE: no need to log here, TalerException is already logged in HttpClientWrapper::run
             $cacheWrapper?->clearCacheSettings();
+            throw $e;
+        }
+        catch (\Throwable $e) {
+            $cacheWrapper?->clearCacheSettings();
+            $exchangeClient->getTaler()->getLogger()->error("Taler config request failed: {$e->getCode()}, {$e->getMessage()}");
             throw $e;
         }
         
