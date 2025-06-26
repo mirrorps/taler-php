@@ -14,6 +14,7 @@ class Keys
     ) {}
 
     /**
+     * @param array<string, string> $params HTTP params
      * @param array<string, string> $headers HTTP headers
      * @return ExchangeKeysResponse|array{
      *     master_public_key: string,
@@ -260,6 +261,7 @@ class Keys
     }
 
     /**
+     * @param array<string, string> $params HTTP params
      * @param array<string, string> $headers HTTP headers
      * @return mixed
      */
@@ -273,7 +275,7 @@ class Keys
 
         return $keys->exchangeClient
             ->getClient()
-            ->requestAsync('GET', 'keys', $headers)
+            ->requestAsync('GET', 'keys?' . http_build_query($params), $headers)
             ->then(function (ResponseInterface $response) use ($keys) {
                 $keys->exchangeClient->setResponse($response);
                 return $keys->exchangeClient->handleWrappedResponse($keys->handleResponse(...));
