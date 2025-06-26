@@ -23,7 +23,8 @@
     "psr-discovery/http-client-implementations": "^1.0",
     "psr-discovery/http-factory-implementations":  "^1.0",
     "league/uri": "^7.5",
-    "psr/simple-cache": "^3.0"
+    "psr/simple-cache": "^3.0",
+    "psr/log": "^3.0"
   },
   "require-dev": {
     "guzzlehttp/guzzle": "^7.0",
@@ -32,10 +33,12 @@
     "symfony/var-dumper": "^6.4",
     "php-http/httplug": "^2.4",
     "php-http/mock-client": "^1.6",
-    "nyholm/psr7": "^1.8"
+    "nyholm/psr7": "^1.8",
+    "monolog/monolog": "^3.0"
   },
   "suggest": {
-    "php-http/async-client-implementation": "For async HTTP requests (e.g., symfony/http-client, php-http/guzzle7-adapter)"
+    "php-http/async-client-implementation": "For async HTTP requests (e.g., symfony/http-client, php-http/guzzle7-adapter)",
+    "psr/log-implementation": "For logging support (e.g., monolog/monolog)"
   },
   "minimum-stability": "stable",
   "license": "MIT",
