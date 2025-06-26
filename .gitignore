@@ -44,4 +44,5 @@ Icon?
 Desktop.ini
 
 # PHPStan config
-phpstan.neoncomposer.lock
+phpstan.neon
+composer.lock
