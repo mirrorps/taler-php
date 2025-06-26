@@ -44,29 +44,58 @@ class Transfer
         
         $transfer = new self($exchangeClient);
 
-        $transfer->exchangeClient->setResponse(
-            $transfer->exchangeClient->getClient()->request('GET', "transfers/{$wtid}", $headers)
-        );
+        try {
+            $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? "exchange_transfer_{$wtid}_{$exchangeClient->getTaler()->getConfig()->toHash()}";
+            
+            // If caching is enabled, try to get from cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cachedResult = $cacheWrapper->getCache()->get($cacheKey);
+                if ($cachedResult !== null) {
+                    $cacheWrapper->clearCacheSettings();
+                    return $cachedResult;
+                }
+            }
 
-        /** @var TrackTransferResponse|array{
-         *     total: string,
-         *     wire_fee: string,
-         *     merchant_pub: string,
-         *     h_payto: string,
-         *     execution_time: array{t_s: int|string},
-         *     deposits: array<int, array{
-         *         h_contract_terms: string,
-         *         coin_pub: string,
-         *         deposit_value: string,
-         *         deposit_fee: string,
-         *         refund_total?: string|null
-         *     }>,
-         *     exchange_sig: string,
-         *     exchange_pub: string
-         * } $result */
-        $result = $transfer->exchangeClient->handleWrappedResponse($transfer->handleResponse(...));
+            $transfer->exchangeClient->setResponse(
+                $transfer->exchangeClient->getClient()->request('GET', "transfers/{$wtid}", $headers)
+            );
 
-        return $result;
+            /** @var TrackTransferResponse|array{
+             *     total: string,
+             *     wire_fee: string,
+             *     merchant_pub: string,
+             *     h_payto: string,
+             *     execution_time: array{t_s: int|string},
+             *     deposits: array<int, array{
+             *         h_contract_terms: string,
+             *         coin_pub: string,
+             *         deposit_value: string,
+             *         deposit_fee: string,
+             *         refund_total?: string|null
+             *     }>,
+             *     exchange_sig: string,
+             *     exchange_pub: string
+             * } $result */
+            $result = $transfer->exchangeClient->handleWrappedResponse($transfer->handleResponse(...));
+
+            // If caching was enabled, store in cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cacheWrapper->getCache()->set(
+                    $cacheKey,
+                    $result,
+                    $cacheWrapper->getTtl()
+                );
+            }
+            
+            // Clear cache settings for next call
+            $cacheWrapper?->clearCacheSettings();
+            
+            return $result;
+        } catch (\Throwable $e) {
+            $cacheWrapper?->clearCacheSettings();
+            throw $e;
+        }
     }
 
     /**
