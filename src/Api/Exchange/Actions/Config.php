@@ -42,7 +42,7 @@ class Config
 
         try {
             $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
-            $cacheKey = $cacheWrapper?->getCacheKey() ?? 'exchange_config';
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? "exchange_config_{$exchangeClient->getTaler()->getConfig()->toHash()}";
             
             // If caching is enabled, try to get from cache
             if ($cacheWrapper?->getTtl() !== null) {

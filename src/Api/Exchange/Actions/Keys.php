@@ -71,7 +71,7 @@ class Keys
 
         try {
             $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
-            $cacheKey = $cacheWrapper?->getCacheKey() ?? 'exchange_keys';
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? "exchange_keys_{$exchangeClient->getTaler()->getConfig()->toHash()}";
             
             // If caching is enabled, try to get from cache
             if ($cacheWrapper?->getTtl() !== null) {
