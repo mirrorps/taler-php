@@ -49,14 +49,15 @@ class ExchangeClient extends AbstractApiClient
     }
 
     /**
+     * @param array<string, string> $params Optional request params
      * @param array<string, string> $headers Optional request headers
      * @return mixed
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getKeysAsync(array $headers = []): mixed
+    public function getKeysAsync(array $params = [], array $headers = []): mixed
     {
-        return Actions\Keys::runAsync($this, $headers);
+        return Actions\Keys::runAsync($this, $params, $headers);
     }
 
     /**
