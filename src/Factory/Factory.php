@@ -17,6 +17,7 @@ class Factory
      *     base_url: string,
      *     token?: string,
      *     client?: ClientInterface|null,
+     *     logger?: LoggerInterface|null,
      *     cache?: CacheInterface|null,
      *     wrapResponse?: bool
      * } $options Configuration options for creating Taler instance
@@ -26,9 +27,9 @@ class Factory
     {
         $token = $options['token'] ?? '';
         $client = $options['client'] ?? null;
+        $logger = $options['logger'] ?? null;
         $cache = $options['cache'] ?? null;
         $wrapResponse = $options['wrapResponse'] ?? true;
-        $logger = $options['logger'] ?? null;
 
         $config = new TalerConfig(
             baseUrl: $options['base_url'],
