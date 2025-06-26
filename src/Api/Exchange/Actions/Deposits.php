@@ -104,8 +104,14 @@ class Deposits
             $cacheWrapper?->clearCacheSettings();
             
             return $result;
-        } catch (\Throwable $e) {
+        } catch (TalerException $e) {
+            //--- NOTE: no need to log here, TalerException is already logged in HttpClientWrapper::run
             $cacheWrapper?->clearCacheSettings();
+            throw $e;
+        }
+        catch (\Throwable $e) {
+            $cacheWrapper?->clearCacheSettings();
+            $exchangeClient->getTaler()->getLogger()->error("Taler deposits request failed: {$e->getCode()}, {$e->getMessage()}");
             throw $e;
         }
     }
