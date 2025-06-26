@@ -55,30 +55,59 @@ class Deposits
         
         $deposits = new self($exchangeClient);
 
-        $deposits->exchangeClient->setResponse(
-            $deposits->exchangeClient->getClient()->request(
-                'GET',
-                "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}",
-                $headers
-            )
-        );
+        try {
+            $cacheWrapper = $exchangeClient->getTaler()->getCacheWrapper();
+            $cacheKey = $cacheWrapper?->getCacheKey() ?? 'exchange_deposits';
+            
+            // If caching is enabled, try to get from cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cachedResult = $cacheWrapper->getCache()->get($cacheKey);
+                if ($cachedResult !== null) {
+                    $cacheWrapper->clearCacheSettings();
+                    return $cachedResult;
+                }
+            }
 
-        /** @var TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail|array{
-         *     wtid?: string,
-         *     execution_time: array{t_s: int|string},
-         *     coin_contribution?: string,
-         *     exchange_sig?: string,
-         *     exchange_pub?: string,
-         *     requirement_row?: int|null,
-         *     kyc_ok?: bool,
-         *     account_pub?: string|null,
-         *     code?: int,
-         *     hint?: string|null,
-         *     detail?: string|null
-         * } $result */
-        $result = $deposits->exchangeClient->handleWrappedResponse($deposits->handleResponse(...));
+            $deposits->exchangeClient->setResponse(
+                $deposits->exchangeClient->getClient()->request(
+                    'GET',
+                    "deposits/{$H_WIRE}/{$MERCHANT_PUB}/{$H_CONTRACT_TERMS}/{$COIN_PUB}?merchant_sig={$merchant_sig}&timeout_ms={$timeout_ms}&lpt={$lpt}",
+                    $headers
+                )
+            );
 
-        return $result;
+            /** @var TrackTransactionResponse|TrackTransactionAcceptedResponse|ErrorDetail|array{
+             *     wtid?: string,
+             *     execution_time: array{t_s: int|string},
+             *     coin_contribution?: string,
+             *     exchange_sig?: string,
+             *     exchange_pub?: string,
+             *     requirement_row?: int|null,
+             *     kyc_ok?: bool,
+             *     account_pub?: string|null,
+             *     code?: int,
+             *     hint?: string|null,
+             *     detail?: string|null
+             * } $result */
+            $result = $deposits->exchangeClient->handleWrappedResponse($deposits->handleResponse(...));
+
+            // If caching was enabled, store in cache
+            if ($cacheWrapper?->getTtl() !== null) {
+                $cacheWrapper->getCache()->set(
+                    $cacheKey,
+                    $result,
+                    $cacheWrapper->getTtl()
+                );
+            }
+            
+            // Clear cache settings for next call
+            $cacheWrapper?->clearCacheSettings();
+            
+            return $result;
+        } catch (\Throwable $e) {
+            $cacheWrapper?->clearCacheSettings();
+            throw $e;
+        }
     }
 
     /**
