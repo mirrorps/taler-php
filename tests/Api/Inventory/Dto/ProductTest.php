@@ -1,9 +1,9 @@
 <?php
 
-namespace Taler\Tests\Api\Dto;
+namespace Taler\Tests\Api\Inventory\Dto;
 
 use PHPUnit\Framework\TestCase;
-use Taler\Api\Dto\Product;
+use Taler\Api\Inventory\Dto\Product;
 use Taler\Api\Dto\Tax;
 use Taler\Api\Dto\Timestamp;
 
