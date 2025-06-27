@@ -60,13 +60,31 @@ $taler = Factory::create([
 - `base_url`: The URL of your Taler backend instance.
 - `token`: Your authentication token ( ⚠️ do **not** hardcode; use environment variables or secure storage in your application).
 - `wrapResponse`: (Optional) Boolean flag to control DTO wrapping of responses. Defaults to `true`. When set to `false`, methods return raw array responses from Taler.
+- `httpClient`: (Optional) A PSR-18 compatible HTTP client instance.
 
-Example:
+### Basic Example
 ```php
 $taler = Factory::create([
     'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
     'token'    => 'Bearer token',
     'wrapResponse' => true // Optional, defaults to true
+]);
+```
+
+### Using Custom HTTP Client
+
+If the SDK's auto-discovery doesn't find a PSR-18 compatible HTTP client, or if you want to use a specific client implementation, you can provide your own. Here's an example using Guzzle:
+
+```php
+use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
+
+// Create PSR-18 client using Guzzle
+$httpClient = GuzzleAdapter::createWithConfig(['timeout' => 30]);
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token',
+    'client' => $httpClient
 ]);
 ```
 
