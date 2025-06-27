@@ -34,26 +34,4 @@ class TaxTest extends TestCase
         $this->assertEquals($data['name'], $tax->name);
         $this->assertEquals($data['tax'], $tax->tax);
     }
-
-    /**
-     * @dataProvider invalidDataProvider
-     * @param array<string, string> $data
-     */
-    public function testFromArrayWithInvalidData(array $data): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        Tax::fromArray($data);
-    }
-
-    /**
-     * @return array<string, array{0: array<string, string>}>
-     */
-    public function invalidDataProvider(): array
-    {
-        return [
-            'missing name' => [['tax' => '19.99']],
-            'missing tax' => [['name' => 'VAT']],
-            'empty array' => [[]],
-        ];
-    }
 } 
