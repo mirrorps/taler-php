@@ -21,22 +21,14 @@ class Tax
      * Creates a new instance from an array of data
      *
      * @param array{
-     *     name?: string,
-     *     tax?: string
+     *     name: string,
+     *     tax: string
      * } $data
      * @return self
      * @throws \InvalidArgumentException When required data is missing or invalid
      */
     public static function fromArray(array $data): self
     {
-        if (!isset($data['name'])) {
-            throw new \InvalidArgumentException('Missing required field: name');
-        }
-
-        if (!isset($data['tax'])) {
-            throw new \InvalidArgumentException('Missing required field: tax');
-        }
-
         return new self(
             name: $data['name'],
             tax: $data['tax']
