@@ -1,6 +1,9 @@
 <?php
 
-namespace Taler\Api\Dto;
+namespace Taler\Api\Inventory\Dto;
+
+use Taler\Api\Dto\Tax;
+use Taler\Api\Dto\Timestamp;
 
 /**
  * DTO for Product data
