@@ -10,12 +10,14 @@ use Taler\Api\Exchange\ExchangeClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
 use Taler\Api\Cache\CacheWrapper;
+use Taler\Api\Order\OrderClient;
 
 class Taler
 {
     protected HttpClientWrapper $httpClientWrapper;
     protected ?CacheWrapper $cacheWrapper;
     protected ExchangeClient $exchange;
+    protected OrderClient $order;
 
     /**
      * Taler constructor.
@@ -65,6 +67,22 @@ class Taler
     }
 
     /**
+     * Update configuration with new values
+     * 
+     * Allows fluent configuration updates by returning $this.
+     * 
+     * @param array<string, mixed> $config Array of configuration values to update
+     * @return self Returns $this for method chaining
+     * @throws \InvalidArgumentException When any of the configuration attributes do not exist
+     */
+    public function config(array $config): self
+    {
+        $this->getConfig()->setAttributes($config);
+        return $this;
+    }
+
+
+    /**
      * Get the logger instance
      */
     public function getLogger(): LoggerInterface
@@ -90,18 +108,20 @@ class Taler
     }
 
     /**
-     * Update configuration with new values
+     * Get the Order API client instance
      * 
-     * Allows fluent configuration updates by returning $this.
+     * Creates a new instance if one doesn't exist yet, otherwise returns the existing instance.
      * 
-     * @param array<string, mixed> $config Array of configuration values to update
-     * @return self Returns $this for method chaining
-     * @throws \InvalidArgumentException When any of the configuration attributes do not exist
+     * @return OrderClient The Order API client
      */
-    public function config(array $config): self
+    public function order(): OrderClient
     {
-        $this->getConfig()->setAttributes($config);
-        return $this;
+        $this->order ??= new OrderClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->order;
     }
 
     /**

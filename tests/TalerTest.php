@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Client\ClientInterface;
 use Taler\Api\Exchange\ExchangeClient;
+use Taler\Api\Order\OrderClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
@@ -93,5 +94,14 @@ class TalerTest extends TestCase
 
         $this->assertSame($this->taler, $result);
         $this->assertSame('https://another.api.taler.net', $this->taler->getConfig()->getBaseUrl());
+    }
+
+    public function testOrderClientCreation(): void
+    {
+        $order = $this->taler->order();
+        $this->assertInstanceOf(OrderClient::class, $order);
+        
+        // Test that the same instance is returned on subsequent calls
+        $this->assertSame($order, $this->taler->order());
     }
 } 
