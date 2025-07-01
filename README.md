@@ -90,6 +90,114 @@ $taler = Factory::create([
 
 ---
 
+## Order API (Payment processing)
+https://docs.taler.net/core/api-merchant.html#payment-processing
+
+The Order API provides functionality to interact with Taler order services. Here's how to use it:
+
+### Basic Setup
+
+```php
+use TalerPHP\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$orderClient = $taler->order();
+```
+
+### Available Methods
+
+#### Get Orders History
+
+Retrieve the order history with optional filtering:
+
+```php
+// Get orders (default limit: 20 asc)
+$orders = $orderClient->getOrders();
+
+// Get orders with filters
+$orders = $orderClient->getOrders([
+    'limit' => '-20',  // last 20 orders
+]);
+
+// Access order history details
+foreach ($orders->orders as $order) {
+    echo $order->order_id;    // Order ID of the transaction related to this entry
+    echo $order->row_id;      // Row ID of the order in the database
+    echo $order->amount;      // The amount of money the order is for
+    echo $order->summary;     // The summary of the order
+    echo $order->refundable;  // Whether the order can be refunded
+    echo $order->paid;        // Whether the order has been paid or not
+    
+    // Access timestamp (Unix timestamp)
+    echo $order->timestamp->t_s; // When the order was created
+}
+```
+
+### Asynchronous Operations
+
+All methods support asynchronous operations with the Async suffix:
+
+```php
+// Get orders asynchronously
+$ordersPromise = $orderClient->getOrdersAsync();
+
+// Handle the promise
+$ordersPromise->then(function ($orders) {
+    // Handle orders response
+});
+```
+
+### Error Handling
+
+The Order API methods may throw exceptions that you should handle:
+
+```php
+use Taler\Exception\TalerException;
+
+try {
+    $orders = $orderClient->getOrders();
+} catch (TalerException $e) {
+    // Handle Taler-specific errors
+    echo $e->getMessage();
+} catch (\Throwable $e) {
+    // Handle other errors
+    echo $e->getMessage();
+}
+```
+
+### Response Types
+
+By default, responses are wrapped in DTOs (`OrderHistory` and its nested objects). You can configure this behavior:
+
+```php
+// Disable DTO wrapping to get raw array responses
+$orders = $taler->config(['wrapResponse' => false])->order()->getOrders();
+
+/*
+Array response example:
+[
+    'orders' => [
+        [
+            'order_id' => 'order_123',
+            'row_id' => 1,
+            'timestamp' => ['t_s' => 1234567890],
+            'amount' => '10.00',
+            'summary' => 'Order description',
+            'refundable' => true,
+            'paid' => true
+        ],
+        // ... more orders
+    ]
+]
+*/
+```
+
+---
+
 ## Exchange API
 
 The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
