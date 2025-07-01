@@ -17,13 +17,17 @@ class MinimalInventoryProduct
     /**
      * @param string $product_id Which product is requested (here mandatory!)
      * @param int $quantity How many units of the product are requested
+     * @param bool $validate Whether to validate the properties
      * @throws InvalidArgumentException When validation fails
      */
     public function __construct(
         private string $product_id,
         private int $quantity,
+        private bool $validate = true,
     ) {
-        $this->validate();
+        if($this->validate) {
+            $this->validate();
+        }
     }
 
     /**
