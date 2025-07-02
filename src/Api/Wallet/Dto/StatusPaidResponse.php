@@ -1,6 +1,6 @@
 <?php
 
-namespace Taler\Api\Order\Dto;
+namespace Taler\Api\Wallet\Dto;
 
 class StatusPaidResponse
 {

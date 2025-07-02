@@ -1,9 +1,9 @@
 <?php
 
-namespace Taler\Tests\Api\Order\Dto;
+namespace Taler\Tests\Api\Wallet\Dto;
 
 use PHPUnit\Framework\TestCase;
-use Taler\Api\Order\Dto\StatusPaidResponse;
+use Taler\Api\Wallet\Dto\StatusPaidResponse;
 
 class StatusPaidResponseTest extends TestCase
 {
