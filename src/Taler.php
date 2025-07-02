@@ -11,6 +11,7 @@ use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
 use Taler\Api\Cache\CacheWrapper;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Wallet\WalletClient;
 
 class Taler
 {
@@ -18,6 +19,7 @@ class Taler
     protected ?CacheWrapper $cacheWrapper;
     protected ExchangeClient $exchange;
     protected OrderClient $order;
+    protected WalletClient $wallet;
 
     /**
      * Taler constructor.
@@ -122,6 +124,23 @@ class Taler
         );
 
         return $this->order;
+    }
+
+    /**
+     * Get the Wallet API client instance
+     * 
+     * Creates a new instance if one doesn't exist yet, otherwise returns the existing instance.
+     * 
+     * @return WalletClient The Wallet API client
+     */
+    public function wallet(): WalletClient
+    {
+        $this->wallet ??= new WalletClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->wallet;
     }
 
     /**
