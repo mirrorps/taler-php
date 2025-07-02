@@ -33,27 +33,27 @@ class ContractInputTokenTest extends TestCase
         $this->assertSame('token', $contractInput->getType());
     }
 
-    public function testFromArrayWithRequiredParameters(): void
+    public function testCreateFromArrayWithRequiredParameters(): void
     {
         $data = [
             'token_family_slug' => self::SAMPLE_TOKEN_FAMILY_SLUG
         ];
 
-        $contractInput = ContractInputToken::fromArray($data);
+        $contractInput = ContractInputToken::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_TOKEN_FAMILY_SLUG, $contractInput->token_family_slug);
         $this->assertSame(1, $contractInput->count);
         $this->assertSame('token', $contractInput->getType());
     }
 
-    public function testFromArrayWithAllParameters(): void
+    public function testCreateFromArrayWithAllParameters(): void
     {
         $data = [
             'token_family_slug' => self::SAMPLE_TOKEN_FAMILY_SLUG,
             'count' => self::SAMPLE_COUNT
         ];
 
-        $contractInput = ContractInputToken::fromArray($data);
+        $contractInput = ContractInputToken::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_TOKEN_FAMILY_SLUG, $contractInput->token_family_slug);
         $this->assertSame(self::SAMPLE_COUNT, $contractInput->count);
