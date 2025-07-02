@@ -12,8 +12,8 @@ class ContractInputToken
     private const TYPE = 'token';
 
     /**
-     * @param string $token_family_slug Slug of the token family in the token_families map on the order
-     * @param int|null $count Number of tokens of this type required. Defaults to one if the field is not provided.
+     * @param string $token_family_slug Slug of the token family in the token_families map on the top-level
+     * @param int|null $count Number of tokens to be issued. Defaults to one if the field is not provided.
      */
     public function __construct(
         public readonly string $token_family_slug,
@@ -29,7 +29,7 @@ class ContractInputToken
      *     count?: int|null
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             token_family_slug: $data['token_family_slug'],
