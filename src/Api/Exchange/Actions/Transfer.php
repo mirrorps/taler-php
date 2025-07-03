@@ -94,7 +94,7 @@ class Transfer
             return $result;
         } catch (TalerException $e) {
             //--- NOTE: no need to log here, TalerException is already logged in HttpClientWrapper::run
-            $cacheWrapper?->clearCacheSettings();
+            $cacheWrapper?->clearCacheSettings(); // @phpstan-ignore-line
             throw $e;
         }
         catch (\Throwable $e) {

@@ -18,6 +18,7 @@ use Taler\Api\Exchange\ExchangeClient;
 use Taler\Http\HttpClientWrapper;
 use Taler\Config\TalerConfig;
 use Taler\Taler;
+use Taler\Cache\CacheWrapper;
 
 class DepositsTest extends TestCase
 {
@@ -107,7 +108,7 @@ class DepositsTest extends TestCase
         $taler->method('getLogger')->willReturn($this->createMock(LoggerInterface::class));
 
         // Create cache wrapper
-        $cacheWrapper = $this->createMock(\Taler\Api\Cache\CacheWrapper::class);
+        $cacheWrapper = $this->createMock(CacheWrapper::class);
         $cacheWrapper->method('getCache')->willReturn($cache);
         $cacheWrapper->method('getTtl')->willReturn(3600);
         $cacheWrapper->method('getCacheKey')->willReturn('test_cache_key');

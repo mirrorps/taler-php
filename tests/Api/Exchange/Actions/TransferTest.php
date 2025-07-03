@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\SimpleCache\CacheInterface;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
-use Taler\Api\Cache\CacheWrapper;
+use Taler\Cache\CacheWrapper;
 use Taler\Config\TalerConfig;
 use Taler\Taler;
 use Taler\Http\HttpClientWrapper;

@@ -101,13 +101,14 @@ class TalerConfig
      * Get a string representation of the configuration
      * 
      * @return string The string representation of the configuration
+     * @throws \JsonException When the JSON encoding fails
      */
     public function __toString(): string
     {
         return json_encode([
-            'baseUrl' => $this->baseUrl,
+            'baseUrl'      => $this->baseUrl,
             'wrapResponse' => $this->wrapResponse
-        ]);
+        ], JSON_THROW_ON_ERROR);
     }
 
     public function toHash(): string

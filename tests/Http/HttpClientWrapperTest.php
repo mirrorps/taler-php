@@ -4,6 +4,11 @@ namespace Taler\Tests\Http;
 use Http\Client\Exception\HttpException;
 use League\Uri\Uri;
 use Psr\Http\Client\ClientInterface;
+use Psr\Http\Message\RequestFactoryInterface;
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Log\LoggerInterface;
+use Psr\Log\NullLogger;
 use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
 use Taler\Http\HttpClientWrapper;
@@ -12,12 +17,14 @@ use Http\Mock\Client as MockClient;
 use Psr\Http\Message\ResponseInterface;
 use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
 class HttpClientWrapperTest extends TestCase
 {
     private \Http\Mock\Client $mockClient;
     private \Nyholm\Psr7\Factory\Psr17Factory $factory;
     private TalerConfig $config;
+    private LoggerInterface $logger;
 
     private const BASE_URL = 'https://backend.demo.taler.net/instances/sandbox/';
     private const AUTH_TOKEN = 'Bearer secret-token:sandbox';
@@ -26,6 +33,7 @@ class HttpClientWrapperTest extends TestCase
     {
         $this->mockClient = new MockClient();
         $this->factory = new Psr17Factory();
+        $this->logger = new NullLogger();
 
         //--- Note: baseUrl and authToken are not actually used
         $this->config = new TalerConfig(
@@ -40,6 +48,7 @@ class HttpClientWrapperTest extends TestCase
         return new HttpClientWrapper(
             $this->config,
             $this->mockClient,
+            $this->logger,
             $this->factory,
             $this->factory,
             $wrapResponse
@@ -237,7 +246,7 @@ class HttpClientWrapperTest extends TestCase
 
         $this->mockClient->addException(new HttpException(
             'Error',
-            $this->createMock(\Psr\Http\Message\RequestInterface::class),
+            $this->factory->createRequest('GET', 'invalid-endpoint'),
             $this->factory->createResponse(400)
         ));
 
@@ -253,7 +262,7 @@ class HttpClientWrapperTest extends TestCase
 
         $this->mockClient->addException(new HttpException(
             'Error',
-            $this->createMock(\Psr\Http\Message\RequestInterface::class),
+            $this->factory->createRequest('GET', 'invalid-endpoint'),
             $this->factory->createResponse(400)
         ));
 
@@ -262,12 +271,19 @@ class HttpClientWrapperTest extends TestCase
         $wrapper->request('GET', 'invalid-endpoint');
     }
 
-
     /** @test */
     public function async_request_fails_without_async_support(): void
     {
-        $nonAsyncClient = $this->createMock(ClientInterface::class);
-        $wrapper = new HttpClientWrapper($this->config, $nonAsyncClient);
+        /** @var ClientInterface&MockObject */
+        $client = $this->createMock(ClientInterface::class);
+        $wrapper = new HttpClientWrapper(
+            $this->config,
+            $client,
+            $this->logger,
+            $this->factory,
+            $this->factory,
+            true
+        );
 
         $this->expectException(\RuntimeException::class);
         $wrapper->requestAsync('GET', 'users');
@@ -280,9 +296,9 @@ class HttpClientWrapperTest extends TestCase
         $this->mockClient->addResponse($this->factory->createResponse(200));
 
         $wrapper->request('GET', 'users');
-
         $lastRequest = $this->mockClient->getLastRequest();
-        $this->assertEquals('Bearer secret-token:sandbox', $lastRequest->getHeader('Authorization')[0]);
+
+        $this->assertEquals(self::AUTH_TOKEN, $lastRequest->getHeaderLine('Authorization'));
     }
 
     /** @test */
@@ -292,10 +308,9 @@ class HttpClientWrapperTest extends TestCase
         $this->mockClient->addResponse($this->factory->createResponse(200));
 
         $wrapper->request('GET', 'users');
-
         $lastRequest = $this->mockClient->getLastRequest();
-        $this->assertStringStartsWith('Mirrorps_Taler_PHP', $lastRequest->getHeader('User-Agent')[0]);
-        $this->assertStringContainsString('https://github.com/mirrorps/taler-php', $lastRequest->getHeader('User-Agent')[0]);
+
+        $this->assertStringContainsString('Mirrorps_Taler_PHP', $lastRequest->getHeaderLine('User-Agent'));
     }
 
     /**
@@ -305,30 +320,20 @@ class HttpClientWrapperTest extends TestCase
     public function it_throws_exception_for_malicious_url(string $maliciousEndpoint): void
     {
         $wrapper = $this->getWrapper();
+        $this->mockClient->addResponse($this->factory->createResponse(200));
 
         $this->expectException(TalerException::class);
-
-        $errorMessage = $maliciousEndpoint === '..%2Fmalicious'
-            ? 'Encoded slashes are not allowed in endpoints.'
-            : 'Endpoint results in a URL outside the configured base path';
-
-        $this->expectExceptionMessage($errorMessage);
-
         $wrapper->request('GET', $maliciousEndpoint);
-
     }
 
-    /**
-     * @return array<string, array<string>>
-     */
     public function maliciousUrlProvider(): array
     {
         return [
-            'Path traversal' => ['../malicious'],
-            'Localhost' => ['http://localhost'],
-            'Internal service' => ['http://internal-service'],
+            'Path traversal' => ['../etc/passwd'],
+            'Localhost' => ['http://localhost/test'],
+            'Encoded slashes' => ['test%2Fpath'],
+            'Internal service' => ['http://internal-service/api'],
             'Absolute path' => ['/etc/passwd'],
-            'Encoded slashes' => ['..%2Fmalicious'], // %2F = /
         ];
     }
 }

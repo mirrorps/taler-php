@@ -4,12 +4,11 @@ namespace Taler\Tests\Api\Exchange;
 
 use Http\Client\HttpAsyncClient;
 use Http\Promise\Promise;
-use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\SimpleCache\CacheInterface;
-use Taler\Api\Cache\CacheWrapper;
 use Taler\Api\Dto\ErrorDetail;
 use Taler\Api\Dto\FutureKeysResponse;
 use Taler\Api\Exchange\Dto\ExchangeKeysResponse;
@@ -18,6 +17,7 @@ use Taler\Api\Exchange\Dto\TrackTransactionAcceptedResponse;
 use Taler\Api\Exchange\Dto\TrackTransactionResponse;
 use Taler\Api\Exchange\Dto\TrackTransferResponse;
 use Taler\Api\Exchange\ExchangeClient;
+use Taler\Cache\CacheWrapper;
 use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
 use Taler\Http\HttpClientWrapper;
@@ -148,7 +148,7 @@ class ExchangeClientTest extends TestCase
 
         $this->httpClient->expects($this->once())
             ->method('request')
-            ->with('GET', 'keys', [])
+            ->with('GET', 'keys?', [])
             ->willReturn($this->response);
 
         $result = $this->client->getKeys();
@@ -164,7 +164,7 @@ class ExchangeClientTest extends TestCase
 
         $this->httpClient->expects($this->once())
             ->method('requestAsync')
-            ->with('GET', 'keys', [])
+            ->with('GET', 'keys?', [])
             ->willReturn($this->promise);
 
         $promise = $this->client->getKeysAsync();

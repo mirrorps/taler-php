@@ -9,7 +9,7 @@ use Psr\SimpleCache\CacheInterface;
 use Taler\Api\Exchange\ExchangeClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
-use Taler\Api\Cache\CacheWrapper;
+use Taler\Cache\CacheWrapper;
 use Taler\Api\Order\OrderClient;
 use Taler\Api\Wallet\WalletClient;
 
