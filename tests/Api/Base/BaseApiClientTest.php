@@ -9,6 +9,11 @@ use Taler\Api\Base\BaseApiClient;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
 
+/**
+ * Concrete implementation of BaseApiClient for testing
+ */
+class TestApiClient extends BaseApiClient {}
+
 class BaseApiClientTest extends TestCase
 {
     /** @var Taler&MockObject */
@@ -20,7 +25,7 @@ class BaseApiClientTest extends TestCase
     /** @var ResponseInterface&MockObject */
     private $responseMock;
 
-    private BaseApiClient $baseApiClient;
+    private TestApiClient $baseApiClient;
 
     protected function setUp(): void
     {
@@ -28,7 +33,7 @@ class BaseApiClientTest extends TestCase
         $this->clientMock = $this->createMock(HttpClientWrapper::class);
         $this->responseMock = $this->createMock(ResponseInterface::class);
 
-        $this->baseApiClient = new BaseApiClient($this->talerMock, $this->clientMock);
+        $this->baseApiClient = new TestApiClient($this->talerMock, $this->clientMock);
     }
 
     public function testConstructorAndGetters(): void

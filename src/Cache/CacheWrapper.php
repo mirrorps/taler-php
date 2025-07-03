@@ -1,6 +1,6 @@
 <?php
 
-namespace Taler\Api\Cache;
+namespace Taler\Cache;
 
 use Psr\SimpleCache\CacheInterface;
 
