@@ -138,7 +138,7 @@ class ContractTermsCommonTest extends TestCase
             'minimum_age' => 18
         ];
 
-        $contractTerms = ContractTermsCommon::fromArray($data);
+        $contractTerms = ContractTermsCommon::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_SUMMARY, $contractTerms->summary);
         $this->assertSame(self::SAMPLE_ORDER_ID, $contractTerms->order_id);
