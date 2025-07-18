@@ -143,7 +143,7 @@ class ContractTermsCommon
      *     minimum_age?: int
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             summary: $data['summary'],

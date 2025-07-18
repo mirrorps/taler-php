@@ -30,7 +30,7 @@ class ContractTermsV0
      *     version?: int|null
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             amount: $data['amount'],

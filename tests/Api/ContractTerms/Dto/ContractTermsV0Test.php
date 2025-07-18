@@ -42,7 +42,7 @@ class ContractTermsV0Test extends TestCase
             'max_fee' => self::SAMPLE_MAX_FEE
         ];
 
-        $contractTerms = ContractTermsV0::fromArray($data);
+        $contractTerms = ContractTermsV0::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_AMOUNT, $contractTerms->amount);
         $this->assertSame(self::SAMPLE_MAX_FEE, $contractTerms->max_fee);
@@ -57,7 +57,7 @@ class ContractTermsV0Test extends TestCase
             'version' => 0
         ];
 
-        $contractTerms = ContractTermsV0::fromArray($data);
+        $contractTerms = ContractTermsV0::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_AMOUNT, $contractTerms->amount);
         $this->assertSame(self::SAMPLE_MAX_FEE, $contractTerms->max_fee);
