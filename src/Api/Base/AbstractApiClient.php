@@ -10,9 +10,8 @@ abstract class AbstractApiClient extends BaseApiClient
     /**
      * Handle response wrapping based on configuration
      *
-     * @template T
-     * @param callable(ResponseInterface): T $handler The response handler function
-     * @return T|array<string, mixed>
+     * @param callable(ResponseInterface): mixed $handler The response handler function
+     * @return mixed
      */
     public function handleWrappedResponse(callable $handler): mixed
     {
@@ -33,13 +32,11 @@ abstract class AbstractApiClient extends BaseApiClient
     /**
      * Parse response body and check status code
      *
-     * @template T of array
      * @param ResponseInterface $response
      * @param int $expectedStatusCode
-     * @return T
      * @throws TalerException
      */
-    public function parseResponseBody(ResponseInterface $response, int $expectedStatusCode = 200): array
+    public function parseResponseBody(ResponseInterface $response, int $expectedStatusCode = 200): mixed
     {
         $data = json_decode((string)$response->getBody(), true);
 

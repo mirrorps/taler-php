@@ -326,6 +326,9 @@ class HttpClientWrapperTest extends TestCase
         $wrapper->request('GET', $maliciousEndpoint);
     }
 
+    /**
+     * @return array<string, array<int, string>>
+     */
     public function maliciousUrlProvider(): array
     {
         return [
