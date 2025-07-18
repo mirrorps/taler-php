@@ -23,10 +23,19 @@ class ContractTermsV0Test extends TestCase
     private const SAMPLE_WIRE_METHOD = 'wire_method';
     private const SAMPLE_NONCE = 'nonce123';
 
+    /** @var array{t_s: int} */
     private array $sampleTimestamp;
+
+    /** @var array{description: string, product_id: string, quantity: int, unit: string, price: string} */
     private array $sampleProduct;
+
+    /** @var array{name: string, email: string, website: string} */
     private array $sampleMerchant;
+
+    /** @var array{url: string, priority: int, master_pub: string} */
     private array $sampleExchange;
+
+    /** @var array{country: string, town: string} */
     private array $sampleLocation;
 
     protected function setUp(): void
@@ -144,6 +153,60 @@ class ContractTermsV0Test extends TestCase
 
     public function testCreateFromArrayWithRequiredParameters(): void
     {
+        /** @var array{
+         *   amount: string,
+         *   max_fee: string,
+         *   summary: string,
+         *   order_id: string,
+         *   products: array<int, array{
+         *     description: string,
+         *     product_id?: string|null,
+         *     description_i18n?: array<string, string>|null,
+         *     quantity?: int|null,
+         *     unit?: string|null,
+         *     price?: string|null,
+         *     image?: string|null,
+         *     taxes?: array<int, array{name: string, tax: string}>|null,
+         *     delivery_date?: array{t_s: int|string}|null
+         *   }>,
+         *   timestamp: array{t_s: int|string},
+         *   refund_deadline: array{t_s: int|string},
+         *   pay_deadline: array{t_s: int|string},
+         *   wire_transfer_deadline: array{t_s: int|string},
+         *   merchant_pub: string,
+         *   merchant_base_url: string,
+         *   merchant: array{
+         *     name: string,
+         *     email?: string|null,
+         *     website?: string|null,
+         *     logo?: string|null,
+         *     address?: array{
+         *       country?: string|null,
+         *       town?: string|null,
+         *       state?: string|null,
+         *       region?: string|null,
+         *       province?: string|null,
+         *       street?: string|null
+         *     }|null,
+         *     jurisdiction?: array{
+         *       country?: string|null,
+         *       town?: string|null,
+         *       state?: string|null,
+         *       region?: string|null,
+         *       province?: string|null,
+         *       street?: string|null
+         *     }|null
+         *   },
+         *   h_wire: string,
+         *   wire_method: string,
+         *   exchanges: array<int, array{
+         *     url: string,
+         *     priority: int,
+         *     master_pub: string,
+         *     max_contribution?: string|null
+         *   }>,
+         *   nonce: string
+         * } */
         $data = [
             'amount' => self::SAMPLE_AMOUNT,
             'max_fee' => self::SAMPLE_MAX_FEE,
@@ -188,6 +251,78 @@ class ContractTermsV0Test extends TestCase
 
     public function testCreateFromArrayWithAllParameters(): void
     {
+        /** @var array{
+         *   amount: string,
+         *   max_fee: string,
+         *   summary: string,
+         *   order_id: string,
+         *   products: array<int, array{
+         *     description: string,
+         *     product_id?: string|null,
+         *     description_i18n?: array<string, string>|null,
+         *     quantity?: int|null,
+         *     unit?: string|null,
+         *     price?: string|null,
+         *     image?: string|null,
+         *     taxes?: array<int, array{name: string, tax: string}>|null,
+         *     delivery_date?: array{t_s: int|string}|null
+         *   }>,
+         *   timestamp: array{t_s: int|string},
+         *   refund_deadline: array{t_s: int|string},
+         *   pay_deadline: array{t_s: int|string},
+         *   wire_transfer_deadline: array{t_s: int|string},
+         *   merchant_pub: string,
+         *   merchant_base_url: string,
+         *   merchant: array{
+         *     name: string,
+         *     email?: string|null,
+         *     website?: string|null,
+         *     logo?: string|null,
+         *     address?: array{
+         *       country?: string|null,
+         *       town?: string|null,
+         *       state?: string|null,
+         *       region?: string|null,
+         *       province?: string|null,
+         *       street?: string|null
+         *     }|null,
+         *     jurisdiction?: array{
+         *       country?: string|null,
+         *       town?: string|null,
+         *       state?: string|null,
+         *       region?: string|null,
+         *       province?: string|null,
+         *       street?: string|null
+         *     }|null
+         *   },
+         *   h_wire: string,
+         *   wire_method: string,
+         *   exchanges: array<int, array{
+         *     url: string,
+         *     priority: int,
+         *     master_pub: string,
+         *     max_contribution?: string|null
+         *   }>,
+         *   nonce: string,
+         *   summary_i18n?: array<string, string>|null,
+         *   public_reorder_url?: string|null,
+         *   fulfillment_url?: string|null,
+         *   fulfillment_message?: string|null,
+         *   fulfillment_message_i18n?: array<string, string>|null,
+         *   delivery_location?: array{
+         *     country?: string|null,
+         *     town?: string|null,
+         *     state?: string|null,
+         *     region?: string|null,
+         *     province?: string|null,
+         *     street?: string|null
+         *   }|null,
+         *   delivery_date?: array{t_s: int|string}|null,
+         *   auto_refund?: array{d_us: int|string}|null,
+         *   extra?: object|null,
+         *   minimum_age?: int|null,
+         *   version?: int|null
+         * } */
         $data = [
             'amount' => self::SAMPLE_AMOUNT,
             'max_fee' => self::SAMPLE_MAX_FEE,
