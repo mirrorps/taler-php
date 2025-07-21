@@ -3,6 +3,7 @@
 namespace Taler\Api\Order;
 
 use Taler\Api\Base\AbstractApiClient;
+use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Exception\TalerException;
 
@@ -31,4 +32,21 @@ class OrderClient extends AbstractApiClient
     {
         return Actions\GetOrders::runAsync($this, $params, $headers);
     }
+
+    /**
+     * @param array<string, string> $params HTTP params
+     * @param array<string, string> $headers Optional request headers
+     * @return CheckPaymentPaidResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getOrder(string $orderId, array $params = [], array $headers = []): CheckPaymentPaidResponse|array
+    {
+        return Actions\GetOrder::run($this, $orderId, $params, $headers);
+    }
+
+    // public function getOrderAsync(string $orderId, array $params = [], array $headers = []): mixed
+    // {
+    //     return Actions\GetOrder::runAsync($this, $orderId, $params, $headers);
+    // }
 }
