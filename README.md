@@ -110,6 +110,70 @@ $orderClient = $taler->order();
 
 ### Available Methods
 
+#### Get Order Status
+
+Retrieve the status and details of a specific order:
+
+```php
+// Get order by ID
+$order = $orderClient->getOrder('order_123');
+
+// The response type depends on the order status:
+if ($order instanceof CheckPaymentPaidResponse) {
+    // Order is paid
+    echo $order->order_status;        // "paid"
+    echo $order->deposit_total;       // Total amount deposited
+    echo $order->refunded;            // Whether order was refunded
+    echo $order->refund_pending;      // Whether refund is pending
+    echo $order->wired;               // Whether funds were wired
+    echo $order->refund_amount;       // Total refunded amount
+    
+    // Access contract terms
+    $terms = $order->contract_terms;
+    echo $terms->summary;             // Order summary
+    echo $terms->order_id;            // Order ID
+    
+    // Access last payment timestamp
+    echo $order->last_payment->t_s;   // Unix timestamp
+} 
+
+if ($order instanceof CheckPaymentClaimedResponse) {
+    // Order is claimed but not paid
+    echo $order->order_status;        // "claimed"
+    echo $order->order_status_url;    // Status URL for browser/wallet
+    
+    // Contract terms
+    $terms = $order->contract_terms;
+    echo $terms->summary;             // Order summary
+    echo $terms->order_id;            // Order ID
+}
+
+if ($order instanceof CheckPaymentUnpaidResponse) {
+    // Order is neither claimed nor paid
+    echo $order->order_status;        // "unpaid"
+    echo $order->taler_pay_uri;       // URI for wallet to process payment
+    echo $order->summary;             // Order summary
+    echo $order->total_amount;        // Total amount to pay (may be null for v1)
+    echo $order->order_status_url;    // Status URL for browser/wallet
+    
+    // Access creation timestamp
+    echo $order->creation_time->t_s;  // Unix timestamp
+}
+
+// Get order with additional parameters
+$order = $orderClient->getOrder('order_123', [
+    'session_id' => 'session_xyz'     // Optional session ID
+]);
+
+// Get order with custom headers
+$order = $orderClient->getOrder(
+    orderId: 'order_123', 
+    headers:[
+        'X-Custom-Header' => 'value'
+    ]
+);
+```
+
 #### Get Orders History
 
 Retrieve the order history with optional filtering:
