@@ -44,7 +44,7 @@ Requirements
 ## Usage
 ```
 require "vendor/autoload.php";
-use TalerPHP\Factory;
+use Taler\Factory\Factory;
 
 $taler = Factory::create([
     'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
@@ -98,7 +98,7 @@ The Order API provides functionality to interact with Taler order services. Here
 ### Basic Setup
 
 ```php
-use TalerPHP\Factory;
+use Taler\Factory\Factory;
 
 $taler = Factory::create([
     'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
@@ -269,7 +269,7 @@ The Exchange API provides functionality to interact with Taler exchange services
 ### Basic Setup
 
 ```php
-use TalerPHP\Factory;
+use Taler\Factory\Factory;
 
 $taler = Factory::create([
     'base_url' => 'https://exchange.demo.taler.net',
