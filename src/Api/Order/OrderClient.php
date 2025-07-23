@@ -36,6 +36,7 @@ class OrderClient extends AbstractApiClient
     }
 
     /**
+     * @param string $orderId
      * @param array<string, string> $params HTTP params
      * @param array<string, string> $headers Optional request headers
      * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|array<string, mixed>
@@ -47,8 +48,16 @@ class OrderClient extends AbstractApiClient
         return Actions\GetOrder::run($this, $orderId, $params, $headers);
     }
 
-    // public function getOrderAsync(string $orderId, array $params = [], array $headers = []): mixed
-    // {
-    //     return Actions\GetOrder::runAsync($this, $orderId, $params, $headers);
-    // }
+    /**
+     * @param string $orderId
+     * @param array<string, string> $params HTTP params
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getOrderAsync(string $orderId, array $params = [], array $headers = []): mixed
+    {
+        return Actions\GetOrder::runAsync($this, $orderId, $params, $headers);
+    }
 }

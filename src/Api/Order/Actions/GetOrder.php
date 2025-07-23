@@ -60,6 +60,32 @@ class GetOrder
         }
     }
 
+    /**
+     * @param OrderClient $orderClient
+     * @param string $orderId
+     * @param array<string, string> $params HTTP params
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public static function runAsync(
+        OrderClient $orderClient,
+        string $orderId,
+        array $params = [],
+        array $headers = []
+    ): mixed {
+        $getOrder = new self($orderClient);
+
+        return $orderClient
+            ->getClient()
+            ->requestAsync('GET', "private/orders/{$orderId}?" . http_build_query($params), $headers)
+            ->then(function (ResponseInterface $response) use ($getOrder) {
+                $getOrder->orderClient->setResponse($response);
+                return $getOrder->orderClient->handleWrappedResponse($getOrder->handleResponse(...));
+            });
+    }
+
     private function handleResponse(ResponseInterface $response): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse
     {
         $data = $this->orderClient->parseResponseBody($response, 200);
