@@ -234,18 +234,6 @@ $ordersPromise = $orderClient->getOrdersAsync();
 $ordersPromise->then(function ($orders) {
     // Handle orders response
 });
-
-// Refund order asynchronously
-$refundPromise = $orderClient->refundOrderAsync(
-    orderId: 'order_123',
-    refundRequest: $refundRequest
-);
-
-// Handle the refund promise
-$refundPromise->then(function ($refund) {
-    // Handle refund response
-    echo $refund->taler_refund_uri;
-});
 ```
 
 ### Error Handling
