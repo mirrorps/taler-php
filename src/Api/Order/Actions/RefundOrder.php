@@ -8,7 +8,7 @@ use Taler\Api\Order\OrderClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 
-class Refunds
+class RefundOrder
 {
     public function __construct(
         private OrderClient $orderClient
