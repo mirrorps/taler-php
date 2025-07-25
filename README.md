@@ -220,15 +220,6 @@ $refund = $orderClient->refundOrder('order_123', $refundRequest);
 // Access refund response details
 echo $refund->taler_refund_uri;  // URL for wallet to process refund
 echo $refund->h_contract;        // Contract hash for request authentication
-
-// Refund with custom headers
-$refund = $orderClient->refundOrder(
-    orderId: 'order_123',
-    refundRequest: $refundRequest,
-    headers: [
-        'X-Custom-Header' => 'value'
-    ]
-);
 ```
 
 ### Asynchronous Operations
