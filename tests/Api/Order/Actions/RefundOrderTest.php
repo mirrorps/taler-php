@@ -4,7 +4,7 @@ namespace Taler\Tests\Api\Order\Actions;
 
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
-use Taler\Api\Order\Actions\Refunds;
+use Taler\Api\Order\Actions\RefundOrder;
 use Taler\Api\Order\OrderClient;
 use Taler\Api\Order\Dto\MerchantRefundResponse;
 use Taler\Api\Order\Dto\RefundRequest;
@@ -17,7 +17,7 @@ use Taler\Taler;
 use Taler\Http\HttpClientWrapper;
 use GuzzleHttp\Promise\Promise;
 
-class RefundsTest extends TestCase
+class RefundOrderTest extends TestCase
 {
     private OrderClient $orderClient;
     private ResponseInterface&MockObject $response;
@@ -74,7 +74,7 @@ class RefundsTest extends TestCase
             ->with('POST', "sandbox/private/orders/{$orderId}/refund", $headers, $requestData)
             ->willReturn($this->response);
 
-        $result = Refunds::run($this->orderClient, $orderId, $refundRequest);
+        $result = RefundOrder::run($this->orderClient, $orderId, $refundRequest);
 
         $this->assertInstanceOf(MerchantRefundResponse::class, $result);
         $this->assertEquals('taler://refund/example', $result->taler_refund_uri);
@@ -95,7 +95,7 @@ class RefundsTest extends TestCase
         $this->expectException(TalerException::class);
         $this->expectExceptionMessage('Test exception');
 
-        Refunds::run($this->orderClient, $orderId, $refundRequest);
+        RefundOrder::run($this->orderClient, $orderId, $refundRequest);
     }
 
     public function testRunWithGenericException(): void
@@ -116,7 +116,7 @@ class RefundsTest extends TestCase
         $this->expectException(\RuntimeException::class);
         $this->expectExceptionMessage('Test generic exception');
 
-        Refunds::run($this->orderClient, $orderId, $refundRequest);
+        RefundOrder::run($this->orderClient, $orderId, $refundRequest);
     }
 
     public function testRunAsync(): void
@@ -151,7 +151,7 @@ class RefundsTest extends TestCase
             ->with('POST', "sandbox/private/orders/{$orderId}/refund", $headers, $requestData)
             ->willReturn($promise);
 
-        $result = Refunds::runAsync($this->orderClient, $orderId, $refundRequest);
+        $result = RefundOrder::runAsync($this->orderClient, $orderId, $refundRequest);
         $promise->resolve($this->response);
 
         $this->assertInstanceOf(MerchantRefundResponse::class, $result->wait());
