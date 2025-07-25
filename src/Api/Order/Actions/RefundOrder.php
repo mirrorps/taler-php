@@ -42,7 +42,7 @@ class RefundOrder
             $refunds->orderClient->setResponse(
                 $refunds->orderClient->getClient()->request(
                     "POST",
-                    "sandbox/private/orders/{$orderId}/refund",
+                    "private/orders/{$orderId}/refund",
                     $headers,
                     $requestBody
                 )
@@ -93,7 +93,7 @@ class RefundOrder
             ->getClient()
             ->requestAsync(
                 "POST",
-                "sandbox/private/orders/{$orderId}/refund",
+                "private/orders/{$orderId}/refund",
                 $headers,
                 $requestBody
             )

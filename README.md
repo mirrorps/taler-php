@@ -201,6 +201,36 @@ foreach ($orders->orders as $order) {
 }
 ```
 
+#### Refund Order
+
+Initiate a refund for a specific order:
+
+```php
+use Taler\Api\Order\Dto\RefundRequest;
+
+// Create refund request
+$refundRequest = new RefundRequest(
+    refund: 'EUR:10.00',  // Amount to be refunded
+    reason: 'Customer request'  // Human-readable refund justification
+);
+
+// Initiate refund
+$refund = $orderClient->refundOrder('order_123', $refundRequest);
+
+// Access refund response details
+echo $refund->taler_refund_uri;  // URL for wallet to process refund
+echo $refund->h_contract;        // Contract hash for request authentication
+
+// Refund with custom headers
+$refund = $orderClient->refundOrder(
+    orderId: 'order_123',
+    refundRequest: $refundRequest,
+    headers: [
+        'X-Custom-Header' => 'value'
+    ]
+);
+```
+
 ### Asynchronous Operations
 
 All methods support asynchronous operations with the Async suffix:
@@ -212,6 +242,18 @@ $ordersPromise = $orderClient->getOrdersAsync();
 // Handle the promise
 $ordersPromise->then(function ($orders) {
     // Handle orders response
+});
+
+// Refund order asynchronously
+$refundPromise = $orderClient->refundOrderAsync(
+    orderId: 'order_123',
+    refundRequest: $refundRequest
+);
+
+// Handle the refund promise
+$refundPromise->then(function ($refund) {
+    // Handle refund response
+    echo $refund->taler_refund_uri;
 });
 ```
 
@@ -229,6 +271,22 @@ try {
     echo $e->getMessage();
 } catch (\Throwable $e) {
     // Handle other errors
+    echo $e->getMessage();
+}
+
+// Error handling for refunds
+try {
+    $refundRequest = new RefundRequest(
+        refund: '10.00',
+        reason: 'Customer request'
+    );
+    $refund = $orderClient->refundOrder('order_123', $refundRequest);
+} catch (TalerException $e) {
+    // Handle validation errors (e.g., missing refund amount or reason)
+    // or other Taler-specific errors
+    echo $e->getMessage();
+} catch (\Throwable $e) {
+    // Handle other errors (e.g., network issues)
     echo $e->getMessage();
 }
 ```
@@ -256,6 +314,20 @@ Array response example:
         ],
         // ... more orders
     ]
+]
+*/
+
+// Raw array response for refunds
+$refund = $taler->config(['wrapResponse' => false])->order()->refundOrder(
+    'order_123',
+    new RefundRequest('10.00', 'Customer request')
+);
+
+/*
+Array response example:
+[
+    'taler_refund_uri' => 'taler://refund/...',
+    'h_contract' => 'hash_value'
 ]
 */
 ```
