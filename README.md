@@ -90,7 +90,7 @@ $taler = Factory::create([
 
 ---
 
-## Order API (Payment processing)
+##  Payment processing (Order API)
 https://docs.taler.net/core/api-merchant.html#payment-processing
 
 The Order API provides functionality to interact with Taler order services. Here's how to use it:
