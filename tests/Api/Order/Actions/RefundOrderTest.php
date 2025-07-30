@@ -71,7 +71,7 @@ class RefundOrderTest extends TestCase
 
         $this->httpClientWrapper->expects($this->once())
             ->method('request')
-            ->with('POST', "sandbox/private/orders/{$orderId}/refund", $headers, $requestData)
+            ->with('POST', "private/orders/{$orderId}/refund", $headers, $requestData)
             ->willReturn($this->response);
 
         $result = RefundOrder::run($this->orderClient, $orderId, $refundRequest);
@@ -148,7 +148,7 @@ class RefundOrderTest extends TestCase
 
         $this->httpClientWrapper->expects($this->once())
             ->method('requestAsync')
-            ->with('POST', "sandbox/private/orders/{$orderId}/refund", $headers, $requestData)
+            ->with('POST', "private/orders/{$orderId}/refund", $headers, $requestData)
             ->willReturn($promise);
 
         $result = RefundOrder::runAsync($this->orderClient, $orderId, $refundRequest);
