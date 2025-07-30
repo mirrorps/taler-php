@@ -56,7 +56,7 @@ class OrderV0Test extends TestCase
             'extra' => (object) ['custom_field' => 'value']
         ];
 
-        $OrderV0 = OrderV0::fromArray($data);
+        $OrderV0 = OrderV0::createFromArray($data);
 
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
@@ -94,7 +94,7 @@ class OrderV0Test extends TestCase
             'amount' => '10.00'
         ];
 
-        $OrderV0 = OrderV0::fromArray($data);
+        $OrderV0 = OrderV0::createFromArray($data);
 
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
@@ -130,7 +130,7 @@ class OrderV0Test extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage($expectedMessage);
 
-        OrderV0::fromArray($data);
+        OrderV0::createFromArray($data);
     }
 
     /**

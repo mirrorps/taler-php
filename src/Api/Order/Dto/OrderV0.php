@@ -90,7 +90,7 @@ class OrderV0
      * @param array<string, mixed> $data
      * @throws InvalidArgumentException
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         if (!isset($data['summary']) || !is_string($data['summary']) || empty(trim($data['summary']))) {
             throw new InvalidArgumentException('Summary is required and must be a non-empty string');
