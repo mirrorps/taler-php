@@ -10,10 +10,13 @@ use Taler\Api\Dto\Timestamp;
 
 
 /**
- * OrderCommon DTO
+ * OrderV0 DTO
  *
- * @phpstan-type OrderCommonArray array{
+ * @phpstan-type OrderV0Array array{
  *   summary: string,
+ *   amount: string,
+ *   version?: string,
+ *   max_fee?: string,
  *   summary_i18n?: array<string, string>,
  *   order_id?: string,
  *   public_reorder_url?: string,
@@ -33,13 +36,16 @@ use Taler\Api\Dto\Timestamp;
  *   extra?: object
  * }
  */
-class OrderCommon
+class OrderV0
 {
     /**
      * @param string $summary Human-readable description of the whole purchase
+     * @param string $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
+     * @param string|null $version Optional, defaults to 0 if not set.
+     * @param string|null $max_fee Maximum total deposit fee accepted by the merchant for this contract. Overrides defaults of the merchant instance.
      * @param array<string, string>|null $summary_i18n Map from IETF BCP 47 language tags to localized summaries
      * @param string|null $order_id Unique identifier for the order
-     * @param string|null $public_reorder_url URL where the same contract could be ordered again
+     * @param string|null $public_reorder_url URL where the same contract could be ordered again,
      * @param string|null $fulfillment_url URL for fulfillment
      * @param string|null $fulfillment_message Fulfillment message
      * @param array<string, string>|null $fulfillment_message_i18n Map from IETF BCP 47 language tags to localized fulfillment messages
@@ -57,6 +63,9 @@ class OrderCommon
      */
     public function __construct(
         public string $summary,
+        public string $amount,
+        public ?string $version = null,
+        public ?string $max_fee = null,
         public ?array $summary_i18n = null,
         public ?string $order_id = null,
         public ?string $public_reorder_url = null,
@@ -85,6 +94,14 @@ class OrderCommon
     {
         if (!isset($data['summary']) || !is_string($data['summary']) || empty(trim($data['summary']))) {
             throw new InvalidArgumentException('Summary is required and must be a non-empty string');
+        }
+
+        if (!isset($data['amount']) || !is_string($data['amount']) || empty(trim($data['amount']))) {
+            throw new InvalidArgumentException('Amount is required and must be a non-empty string');
+        }
+
+        if (isset($data['version']) && $data['version'] !== '0' && $data['version'] !== 0) {
+            throw new InvalidArgumentException('Version must be 0 or null');
         }
 
         if (isset($data['summary_i18n']) && !is_array($data['summary_i18n'])) {
@@ -128,6 +145,9 @@ class OrderCommon
 
         return new self(
             summary: $data['summary'],
+            amount: $data['amount'],
+            version: $data['version'] ?? '0',
+            max_fee: $data['max_fee'] ?? null,
             summary_i18n: $data['summary_i18n'] ?? null,
             order_id: $data['order_id'] ?? null,
             public_reorder_url: $data['public_reorder_url'] ?? null,
