@@ -41,7 +41,11 @@ abstract class AbstractApiClient extends BaseApiClient
         $data = json_decode((string)$response->getBody(), true);
 
         if ($response->getStatusCode() !== $expectedStatusCode) {
-            throw new TalerException('Unexpected response status code: ' . $response->getStatusCode());
+            throw new TalerException(
+                message: 'Unexpected response status code: ' . $response->getStatusCode(),
+                code: $response->getStatusCode(),
+                response: $response
+            );
         }
 
         return $data;

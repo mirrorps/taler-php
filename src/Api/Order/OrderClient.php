@@ -92,4 +92,31 @@ class OrderClient extends AbstractApiClient
     {
         return Actions\RefundOrder::runAsync($this, $orderId, $refundRequest, $headers);
     }
+
+    /**
+     * Deletes an order.
+     *
+     * @param string $orderId The order ID to delete
+     * @param array<string, string> $headers Optional request headers
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteOrder(string $orderId, array $headers = []): void
+    {
+        Actions\DeleteOrder::run($this, $orderId, $headers);
+    }
+
+    /**
+     * Deletes an order asynchronously.
+     *
+     * @param string $orderId The order ID to delete
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteOrderAsync(string $orderId, array $headers = []): mixed
+    {
+        return Actions\DeleteOrder::runAsync($this, $orderId, $headers);
+    }
 }
