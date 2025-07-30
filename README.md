@@ -222,6 +222,17 @@ echo $refund->taler_refund_uri;  // URL for wallet to process refund
 echo $refund->h_contract;        // Contract hash for request authentication
 ```
 
+#### Delete Order
+
+Delete a specific order:
+
+```php
+// Delete an order by ID
+$orderClient->deleteOrder('order_123');
+```
+
+Note: The delete operation returns no content on success (HTTP 204). If the order doesn't exist or can't be deleted, a `TalerException` will be thrown.
+
 ### Asynchronous Operations
 
 All methods support asynchronous operations with the Async suffix:
@@ -250,22 +261,6 @@ try {
     echo $e->getMessage();
 } catch (\Throwable $e) {
     // Handle other errors
-    echo $e->getMessage();
-}
-
-// Error handling for refunds
-try {
-    $refundRequest = new RefundRequest(
-        refund: '10.00',
-        reason: 'Customer request'
-    );
-    $refund = $orderClient->refundOrder('order_123', $refundRequest);
-} catch (TalerException $e) {
-    // Handle validation errors (e.g., missing refund amount or reason)
-    // or other Taler-specific errors
-    echo $e->getMessage();
-} catch (\Throwable $e) {
-    // Handle other errors (e.g., network issues)
     echo $e->getMessage();
 }
 ```
