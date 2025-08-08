@@ -8,6 +8,8 @@ use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
 use Taler\Api\Order\Dto\MerchantRefundResponse;
 use Taler\Api\Order\Dto\OrderHistory;
+use Taler\Api\Order\Dto\PostOrderRequest;
+use Taler\Api\Order\Dto\PostOrderResponse;
 use Taler\Api\Order\Dto\RefundRequest;
 use Taler\Exception\TalerException;
 
@@ -61,6 +63,30 @@ class OrderClient extends AbstractApiClient
     public function getOrderAsync(string $orderId, array $params = [], array $headers = []): mixed
     {
         return Actions\GetOrder::runAsync($this, $orderId, $params, $headers);
+    }
+
+    /**
+     * @param PostOrderRequest $postOrderRequest
+     * @param array<string, string> $headers Optional request headers
+     * @return PostOrderResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function createOrder(PostOrderRequest $postOrderRequest, array $headers = []): PostOrderResponse|array
+    {
+        return Actions\CreateOrder::run($this, $postOrderRequest, $headers);
+    }
+
+    /**
+     * @param PostOrderRequest $postOrderRequest
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function createOrderAsync(PostOrderRequest $postOrderRequest, array $headers = []): mixed
+    {
+        return Actions\CreateOrder::runAsync($this, $postOrderRequest, $headers);
     }
 
     /**

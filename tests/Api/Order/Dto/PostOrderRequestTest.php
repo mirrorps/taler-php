@@ -27,9 +27,9 @@ class PostOrderRequestTest extends TestCase
             amount: '10.00'
         );
 
-        $choice = new OrderChoice(amount: '10.00');
         $this->order_v1 = OrderV1::createFromArray([
             'version' => 1,
+            'summary' => 'Test Order V1',
             'choices' => [
                 [
                     'amount' => '10.00'
@@ -202,6 +202,7 @@ class PostOrderRequestTest extends TestCase
         $data = [
             'order' => [
                 'version' => 1,
+                'summary' => 'Test Order V1',
                 'choices' => [
                     [
                         'amount' => '10.00'
@@ -258,6 +259,7 @@ class PostOrderRequestTest extends TestCase
         $data = [
             'order' => [
                 'version' => 1,
+                'summary' => 'Test Order V1',
                 'choices' => [
                     [
                         'amount' => '10.00'

@@ -6,110 +6,128 @@ use PHPUnit\Framework\TestCase;
 use Taler\Api\Order\Dto\OrderV1;
 use Taler\Api\Order\Dto\OrderChoice;
 use Taler\Api\Order\Dto\OrderInputToken;
-use Taler\Api\Order\Dto\OrderOutputToken;
 use Taler\Api\Order\Dto\OrderOutputTaxReceipt;
+use Taler\Api\Order\Dto\OrderOutputToken;
+use Taler\Api\Dto\Timestamp;
+use Taler\Api\Dto\RelativeTime;
+use Taler\Api\Dto\Location;
+use Taler\Api\Inventory\Dto\Product;
 
 class OrderV1Test extends TestCase
 {
-    private const SAMPLE_AMOUNT = '10.00';
-    private const SAMPLE_MAX_FEE = '1.00';
-    private const SAMPLE_TOKEN_FAMILY_SLUG = 'test-token-family';
-
-    public function testConstruct(): void
+    public function testConstructMinimal(): void
     {
-        $orderV1 = new OrderV1();
+        $dto = new OrderV1(version: 1, summary: 'Test order');
 
-        $this->assertNull($orderV1->choices);
-        $this->assertSame(1, $orderV1->getVersion());
-    }
-
-    public function testConstructWithChoices(): void
-    {
-        $choice = new OrderChoice(amount: self::SAMPLE_AMOUNT);
-        $orderV1 = new OrderV1(choices: [$choice]);
-
-        $this->assertCount(1, $orderV1->choices);
-        $this->assertInstanceOf(OrderChoice::class, $orderV1->choices[0]);
-        $this->assertSame(self::SAMPLE_AMOUNT, $orderV1->choices[0]->amount);
-        $this->assertSame(1, $orderV1->getVersion());
+        $this->assertSame(1, $dto->version);
+        $this->assertSame('Test order', $dto->summary);
+        $this->assertNull($dto->choices);
     }
 
     public function testConstructWithoutValidation(): void
     {
-        $choice = new OrderChoice(amount: self::SAMPLE_AMOUNT);
-        $orderV1 = new OrderV1(
-            choices: [$choice],
-            validate: false
-        );
+        $dto = new OrderV1(version: 1, summary: '', validate: false);
 
-        $this->assertCount(1, $orderV1->choices);
-        $this->assertInstanceOf(OrderChoice::class, $orderV1->choices[0]);
+        $this->assertSame(1, $dto->version);
+        $this->assertSame('', $dto->summary);
     }
 
-    public function testCreateFromArrayWithoutChoices(): void
-    {
-        $data = [
-            'version' => 1
-        ];
-
-        $orderV1 = OrderV1::createFromArray($data);
-
-        $this->assertNull($orderV1->choices);
-        $this->assertSame(1, $orderV1->getVersion());
-    }
-
-    public function testCreateFromArrayWithChoices(): void
+    public function testCreateFromArrayMinimal(): void
     {
         $data = [
             'version' => 1,
-            'choices' => [
-                [
-                    'amount' => self::SAMPLE_AMOUNT,
-                    'inputs' => [
-                        [
-                            'token_family_slug' => self::SAMPLE_TOKEN_FAMILY_SLUG
-                        ]
-                    ],
-                    'outputs' => [
-                        [
-                            'type' => 'token',
-                            'token_family_slug' => self::SAMPLE_TOKEN_FAMILY_SLUG
-                        ],
-                        [
-                            'type' => 'tax-receipt'
-                        ]
-                    ],
-                    'max_fee' => self::SAMPLE_MAX_FEE
-                ]
-            ]
+            'summary' => 'Test order'
         ];
 
-        $orderV1 = OrderV1::createFromArray($data);
+        $dto = OrderV1::createFromArray($data);
 
-        $this->assertCount(1, $orderV1->choices);
-        $this->assertInstanceOf(OrderChoice::class, $orderV1->choices[0]);
-        $this->assertSame(self::SAMPLE_AMOUNT, $orderV1->choices[0]->amount);
-        $this->assertCount(1, $orderV1->choices[0]->inputs);
-        $this->assertCount(2, $orderV1->choices[0]->outputs);
-        $this->assertSame(self::SAMPLE_MAX_FEE, $orderV1->choices[0]->max_fee);
-        $this->assertInstanceOf(OrderInputToken::class, $orderV1->choices[0]->inputs[0]);
-        $this->assertInstanceOf(OrderOutputToken::class, $orderV1->choices[0]->outputs[0]);
-        $this->assertInstanceOf(OrderOutputTaxReceipt::class, $orderV1->choices[0]->outputs[1]);
+        $this->assertInstanceOf(OrderV1::class, $dto);
+        $this->assertSame(1, $dto->version);
+        $this->assertSame('Test order', $dto->summary);
+        $this->assertNull($dto->choices);
     }
 
-    public function testValidationFailsWithInvalidChoice(): void
+    public function testCreateFromArrayFull(): void
     {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Each choice must be an instance of OrderChoice');
+        $data = [
+            'version' => 1,
+            'summary' => 'Full order',
+            'choices' => [
+                [
+                    'amount' => '10.00',
+                    'inputs' => [
+                        ['n' => 0, 'token_family_slug' => 'family-1']
+                    ],
+                    'outputs' => [
+                        ['type' => 'token', 'token_family_slug' => 'family-1'],
+                        ['type' => 'tax-receipt']
+                    ],
+                    'max_fee' => '0.10'
+                ]
+            ],
+            'summary_i18n' => ['en' => 'Full order'],
+            'order_id' => 'ORDER_1',
+            'public_reorder_url' => 'https://merchant.example/again',
+            'fulfillment_url' => 'https://merchant.example/ok',
+            'fulfillment_message' => 'done',
+            'fulfillment_message_i18n' => ['en' => 'done'],
+            'minimum_age' => 18,
+            'products' => [
+                ['description' => 'Item A']
+            ],
+            'timestamp' => ['t_s' => 123],
+            'refund_deadline' => ['t_s' => 124],
+            'pay_deadline' => ['t_s' => 125],
+            'wire_transfer_deadline' => ['t_s' => 126],
+            'merchant_base_url' => 'https://merchant.example/',
+            'delivery_location' => ['country' => 'CH'],
+            'delivery_date' => ['t_s' => 127],
+            'auto_refund' => ['d_us' => 1000],
+            'extra' => (object) ['k' => 'v']
+        ];
 
-        new OrderV1(choices: [new \stdClass()]); /** @phpstan-ignore-line */
+        $dto = OrderV1::createFromArray($data);
+
+        $this->assertSame('Full order', $dto->summary);
+        $this->assertCount(1, $dto->choices);
+        $this->assertInstanceOf(OrderChoice::class, $dto->choices[0]);
+        $this->assertCount(1, $dto->choices[0]->inputs);
+        $this->assertInstanceOf(OrderInputToken::class, $dto->choices[0]->inputs[0]);
+        $this->assertCount(2, $dto->choices[0]->outputs);
+        $this->assertInstanceOf(OrderOutputToken::class, $dto->choices[0]->outputs[0]);
+        $this->assertInstanceOf(OrderOutputTaxReceipt::class, $dto->choices[0]->outputs[1]);
+
+        $this->assertSame(['en' => 'Full order'], $dto->summary_i18n);
+        $this->assertSame('ORDER_1', $dto->order_id);
+        $this->assertSame('https://merchant.example/again', $dto->public_reorder_url);
+        $this->assertSame('https://merchant.example/ok', $dto->fulfillment_url);
+        $this->assertSame('done', $dto->fulfillment_message);
+        $this->assertSame(['en' => 'done'], $dto->fulfillment_message_i18n);
+        $this->assertSame(18, $dto->minimum_age);
+        $this->assertCount(1, $dto->products);
+        $this->assertInstanceOf(Product::class, $dto->products[0]);
+        $this->assertInstanceOf(Timestamp::class, $dto->timestamp);
+        $this->assertInstanceOf(Timestamp::class, $dto->refund_deadline);
+        $this->assertInstanceOf(Timestamp::class, $dto->pay_deadline);
+        $this->assertInstanceOf(Timestamp::class, $dto->wire_transfer_deadline);
+        $this->assertSame('https://merchant.example/', $dto->merchant_base_url);
+        $this->assertInstanceOf(Location::class, $dto->delivery_location);
+        $this->assertInstanceOf(Timestamp::class, $dto->delivery_date);
+        $this->assertInstanceOf(RelativeTime::class, $dto->auto_refund);
+        $this->assertIsObject($dto->extra);
     }
 
-    public function testCreateFromArrayFailsWithInvalidVersion(): void
+    public function testValidationFailsOnWrongVersion(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Version must be 1');
+        OrderV1::createFromArray(['version' => 0, 'summary' => 'x']);
+    }
 
-        OrderV1::createFromArray(['version' => 0]);
+    public function testValidationFailsOnEmptySummary(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new OrderV1(version: 1, summary: '');
     }
 }
+
+
