@@ -127,14 +127,14 @@ $order = new OrderV0(
 
 $request = new PostOrderRequest(order: $order);
 
-// Create the order (synchronous)
+// Create the order 
 $result = $orderClient->createOrder($request);
 
 // Access response
 echo $result->order_id; // e.g., "order_123"
 ```
 
-Example with `OrderV1` (choices, subscriptions/discounts capable):
+Example with `OrderV1` (choices):
 
 ```php
 use Taler\Api\Order\Dto\OrderV1;
@@ -155,7 +155,6 @@ $request = new PostOrderRequest(
 $result = $orderClient->createOrder($request);
 
 echo $result->order_id;
-// echo $result->token; // present only if create_token was true
 ```
 
 With custom headers or raw array response:
