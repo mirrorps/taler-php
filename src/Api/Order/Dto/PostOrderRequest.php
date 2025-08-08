@@ -41,39 +41,106 @@ class PostOrderRequest
      * Creates a new instance from an array.
      *
      * @param array{
-     *     order: array{
-     *         version?: int,
-     *         summary?: string,
-     *         amount?: string,
-     *         summary_i18n?: array<string, string>,
-     *         order_id?: string,
-     *         public_reorder_url?: string,
-     *         fulfillment_url?: string,
-     *         fulfillment_message?: string,
-     *         fulfillment_message_i18n?: array<string, string>,
-     *         minimum_age?: int,
-     *         products?: array<mixed>,
-     *         timestamp?: array<mixed>,
-     *         refund_deadline?: array<mixed>,
-     *         pay_deadline?: array<mixed>,
-     *         wire_transfer_deadline?: array<mixed>,
-     *         merchant_base_url?: string,
-     *         delivery_location?: array<mixed>,
-     *         delivery_date?: array<mixed>,
-     *         auto_refund?: array<mixed>,
-     *         extra?: object,
-     *         choices?: array<array{
+     *     order: (
+     *         array{
+     *             version: 1,
+     *             summary: string,
+     *             summary_i18n?: array<string, string>,
+     *             order_id?: string,
+     *             public_reorder_url?: string,
+     *             fulfillment_url?: string,
+     *             fulfillment_message?: string,
+     *             fulfillment_message_i18n?: array<string, string>,
+     *             minimum_age?: int,
+     *             products?: array<int, array{
+     *                 product_id?: string,
+     *                 description?: string,
+     *                 description_i18n?: array<string, string>,
+     *                 quantity?: int,
+     *                 unit?: string,
+     *                 price?: string,
+     *                 image?: string,
+     *                 taxes?: array<int, array{name: string, tax: string}>,
+     *                 delivery_date?: array{t_s: int|string}
+     *             }>,
+     *             timestamp?: array{t_s: int|string},
+     *             refund_deadline?: array{t_s: int|string},
+     *             pay_deadline?: array{t_s: int|string},
+     *             wire_transfer_deadline?: array{t_s: int|string},
+     *             merchant_base_url?: string,
+     *             delivery_location?: array{
+     *                 country?: string,
+     *                 country_subdivision?: string,
+     *                 district?: string,
+     *                 town?: string,
+     *                 town_location?: string,
+     *                 post_code?: string,
+     *                 street?: string,
+     *                 building_name?: string,
+     *                 building_number?: string,
+     *                 address_lines?: array<int, string>
+     *             },
+     *             delivery_date?: array{t_s: int|string},
+     *             auto_refund?: array{d_us: int|string},
+     *             extra?: object,
+     *             choices?: array<int, array{
+     *                 amount: string,
+     *                 inputs?: array<int, array{token_family_slug: string, count?: int|null}>,
+     *                 outputs?: array<int, (array{type: 'token', token_family_slug: string, count?: int|null, valid_at?: array{t_s: int|string}}|array{type: 'tax-receipt'})>,
+     *                 max_fee?: string
+     *             }>
+     *         }
+     *         |
+     *         array{
+     *             summary: string,
      *             amount: string,
-     *             inputs?: array<array{token_family_slug: string, count?: int|null}>,
-     *             outputs?: array<array{type: string, token_family_slug?: string, count?: int|null, valid_at?: array{t_s: int|string}}>,
-     *             max_fee?: string
-     *         }>
-     *     },
+     *             version?: 0|'0',
+     *             max_fee?: string,
+     *             summary_i18n?: array<string, string>,
+     *             order_id?: string,
+     *             public_reorder_url?: string,
+     *             fulfillment_url?: string,
+     *             fulfillment_message?: string,
+     *             fulfillment_message_i18n?: array<string, string>,
+     *             minimum_age?: int,
+     *             products?: array<int, array{
+     *                 product_id?: string,
+     *                 description?: string,
+     *                 description_i18n?: array<string, string>,
+     *                 quantity?: int,
+     *                 unit?: string,
+     *                 price?: string,
+     *                 image?: string,
+     *                 taxes?: array<int, array{name: string, tax: string}>,
+     *                 delivery_date?: array{t_s: int|string}
+     *             }>,
+     *             timestamp?: array{t_s: int|string},
+     *             refund_deadline?: array{t_s: int|string},
+     *             pay_deadline?: array{t_s: int|string},
+     *             wire_transfer_deadline?: array{t_s: int|string},
+     *             merchant_base_url?: string,
+     *             delivery_location?: array{
+     *                 country?: string,
+     *                 country_subdivision?: string,
+     *                 district?: string,
+     *                 town?: string,
+     *                 town_location?: string,
+     *                 post_code?: string,
+     *                 street?: string,
+     *                 building_name?: string,
+     *                 building_number?: string,
+     *                 address_lines?: array<int, string>
+     *             },
+     *             delivery_date?: array{t_s: int|string},
+     *             auto_refund?: array{d_us: int|string},
+     *             extra?: object
+     *         }
+     *     ),
      *     refund_delay?: array{d_us: int|string},
      *     payment_target?: string,
      *     session_id?: string,
-     *     inventory_products?: array<array{product_id: string, quantity: int}>,
-     *     lock_uuids?: array<string>,
+     *     inventory_products?: array<int, array{product_id: string, quantity: int}>,
+     *     lock_uuids?: array<int, string>,
      *     create_token?: bool,
      *     otp_id?: string
      * } $data The data array
