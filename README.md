@@ -110,6 +110,68 @@ $orderClient = $taler->order();
 
 ### Available Methods
 
+#### Create Order
+
+Create a new order using either a fixed-amount contract (`OrderV0`) or a choice-based contract (`OrderV1`). The call returns a `PostOrderResponse` with the generated `order_id` (and an optional `token` if you request one).
+
+Minimal example with `OrderV0` (fixed amount):
+
+```php
+use Taler\Api\Order\Dto\OrderV0;
+use Taler\Api\Order\Dto\PostOrderRequest;
+
+$order = new OrderV0(
+    summary: 'Coffee Beans 1kg',
+    amount: 'EUR:12.50'
+);
+
+$request = new PostOrderRequest(order: $order);
+
+// Create the order (synchronous)
+$result = $orderClient->createOrder($request);
+
+// Access response
+echo $result->order_id; // e.g., "order_123"
+```
+
+Example with `OrderV1` (choices, subscriptions/discounts capable):
+
+```php
+use Taler\Api\Order\Dto\OrderV1;
+use Taler\Api\Order\Dto\OrderChoice;
+use Taler\Api\Order\Dto\PostOrderRequest;
+
+$order = new OrderV1(
+    summary: 'Monthly Subscription',
+    choices: [
+        new OrderChoice(amount: 'EUR:9.99')
+    ]
+);
+
+$request = new PostOrderRequest(
+    order: $order,
+);
+
+$result = $orderClient->createOrder($request);
+
+echo $result->order_id;
+// echo $result->token; // present only if create_token was true
+```
+
+With custom headers or raw array response:
+
+```php
+// Custom headers
+$result = $orderClient->createOrder($request, [
+    'X-Custom-Header' => 'value'
+]);
+
+// Disable DTO wrapping to get raw array
+$result = $taler->config(['wrapResponse' => false])
+    ->order()
+    ->createOrder($request);
+```
+
 #### Get Order Status
 
 Retrieve the status and details of a specific order:
