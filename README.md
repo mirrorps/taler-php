@@ -112,7 +112,7 @@ $orderClient = $taler->order();
 
 #### Create Order
 
-Create a new order using either a fixed-amount contract (`OrderV0`) or a choice-based contract (`OrderV1`). The call returns a `PostOrderResponse` with the generated `order_id` (and an optional `token` if you request one).
+Create a new order using either a fixed-amount contract (`OrderV0`) or a choice-based contract (`OrderV1`). The call returns a `PostOrderResponse` with the generated `order_id`.
 
 Minimal example with `OrderV0` (fixed amount):
 
