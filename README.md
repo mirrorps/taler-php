@@ -292,6 +292,40 @@ Delete a specific order:
 $orderClient->deleteOrder('order_123');
 ```
 
+#### Forget Order
+
+Request the backend to forget specific fields of an order's contract terms.
+
+Notes:
+- The request uses HTTP PUT and returns no content on success (HTTP 200).
+- A valid JSON path must begin with `$.` and end with a field identifier. Array indices and wildcards `*` are allowed inside the path, but the path cannot end with an index or wildcard.
+
+```php
+use Taler\Api\Order\Dto\ForgetRequest;
+
+// Create forget request
+$forgetRequest = new ForgetRequest([
+    '$.wire_fee',
+    '$.products[0].description',
+    // Wildcards allowed as long as the path ends with a field
+    '$.products[*].description'
+]);
+
+// Send forget request (void on success)
+$orderClient->forgetOrder('order_123', $forgetRequest);
+
+// With custom headers
+$orderClient->forgetOrder(
+    orderId: 'order_123',
+    forgetRequest: $forgetRequest,
+    headers: [
+        'X-Custom-Header' => 'value'
+    ]
+);
+```
+
+If the order or paths are invalid, a `TalerException` will be thrown.
+
 Note: The delete operation returns no content on success (HTTP 204). If the order doesn't exist or can't be deleted, a `TalerException` will be thrown.
 
 ### Asynchronous Operations
