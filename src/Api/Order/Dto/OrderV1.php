@@ -37,6 +37,7 @@ class OrderV1
      * @param Timestamp|null $delivery_date Time indicating when the order should be delivered
      * @param RelativeTime|null $auto_refund Specifies how long the wallet should try to get an automatic refund
      * @param object|null $extra Extra data only interpreted by the merchant frontend
+     * @param array<string, mixed>|null $special_fields Data like $forgettable
      * @param bool $validate Whether to validate the data upon construction
      */
     public function __construct(
@@ -60,8 +61,15 @@ class OrderV1
         public readonly ?Timestamp $delivery_date = null,
         public readonly ?RelativeTime $auto_refund = null,
         public readonly ?object $extra = null,
+        public ?array $special_fields = null,
         bool $validate = true
     ) {
+        if (isset($special_fields)) {
+            foreach ($special_fields as $key => $value) {
+                $this->$key = $value;
+            }
+            $this->special_fields = null;
+        }
         if ($validate) {
             $this->validate();
         }
@@ -130,7 +138,8 @@ class OrderV1
      *   },
      *   delivery_date?: array{t_s: int|string},
      *   auto_refund?: array{d_us: int|string},
-     *   extra?: object
+     *   extra?: object,
+     *   special_fields?: array<string, mixed>
      * } $data
      */
     public static function createFromArray(array $data): self
@@ -172,7 +181,8 @@ class OrderV1
             delivery_location: isset($data['delivery_location']) ? Location::fromArray($data['delivery_location']) : null,
             delivery_date: isset($data['delivery_date']) ? Timestamp::fromArray($data['delivery_date']) : null,
             auto_refund: isset($data['auto_refund']) ? RelativeTime::fromArray($data['auto_refund']) : null,
-            extra: $data['extra'] ?? null
+            extra: $data['extra'] ?? null,
+            special_fields: $data['special_fields'] ?? null
         );
     }
 }

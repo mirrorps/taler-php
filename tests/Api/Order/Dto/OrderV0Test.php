@@ -84,7 +84,8 @@ class OrderV0Test extends TestCase
         $this->assertInstanceOf(Timestamp::class, $OrderV0->delivery_date);
         $this->assertInstanceOf(RelativeTime::class, $OrderV0->auto_refund);
         $this->assertIsObject($OrderV0->extra);
-        $this->assertSame('value', $OrderV0->extra->custom_field); // @phpstan-ignore-line it's an object set for the test
+        $this->assertObjectHasProperty('custom_field', $OrderV0->extra);
+        $this->assertSame('value', ((array) $OrderV0->extra)['custom_field']);
     }
 
     public function testFromArrayWithMinimalData(): void
@@ -118,6 +119,44 @@ class OrderV0Test extends TestCase
         $this->assertNull($OrderV0->delivery_date);
         $this->assertNull($OrderV0->auto_refund);
         $this->assertNull($OrderV0->extra);
+    }
+
+    public function testCreateFromArrayWithSpecialFields(): void
+    {
+        $data = [
+            'summary' => 'Test order',
+            'amount' => '10.00',
+            'special_fields' => [
+                'forgettable' => ['$.wire_fee', '$.products[0].description'],
+                'custom_flag' => true,
+            ],
+        ];
+
+        $order = OrderV0::createFromArray($data);
+
+        // dynamic properties assigned from special_fields
+        $this->assertTrue(property_exists($order, 'forgettable'));
+        $this->assertTrue(property_exists($order, 'custom_flag'));
+        $this->assertSame(['$.wire_fee', '$.products[0].description'], $order->forgettable); // @phpstan-ignore-line accessing dynamic property for test
+        $this->assertTrue($order->custom_flag); // @phpstan-ignore-line accessing dynamic property for test
+
+        // special_fields should be cleared after assignment
+        $this->assertNull($order->special_fields);
+    }
+
+    public function testConstructorWithSpecialFields(): void
+    {
+        $order = new OrderV0(
+            summary: 'S',
+            amount: '1',
+            special_fields: [
+                'x' => 123,
+            ]
+        );
+
+        $this->assertTrue(property_exists($order, 'x'));
+        $this->assertSame(123, $order->x); // @phpstan-ignore-line accessing dynamic property for test
+        $this->assertNull($order->special_fields);
     }
 
     /**
