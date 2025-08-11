@@ -60,6 +60,7 @@ class OrderV0
      * @param Timestamp|null $delivery_date Time indicating when the order should be delivered
      * @param RelativeTime|null $auto_refund Specifies for how long the wallet should try to get an automatic refund
      * @param object|null $extra Extra data that is only interpreted by the merchant frontend
+     * @param array<string, mixed>|null $special_fields data like $forgettable
      */
     public function __construct(
         public string $summary,
@@ -83,7 +84,14 @@ class OrderV0
         public ?Timestamp $delivery_date = null,
         public ?RelativeTime $auto_refund = null,
         public ?object $extra = null,
+        public ?array $special_fields = null,
     ) {
+        if (isset($special_fields)) {
+            foreach ($special_fields as $key => $value) {
+                $this->$key = $value;
+            }
+            $this->special_fields = null;
+        }
     }
 
     /**
@@ -168,6 +176,7 @@ class OrderV0
             delivery_date: isset($data['delivery_date']) ? Timestamp::fromArray($data['delivery_date']) : null,
             auto_refund: isset($data['auto_refund']) ? RelativeTime::fromArray($data['auto_refund']) : null,
             extra: isset($data['extra']) ? $data['extra'] : null,
+            special_fields: isset($data['special_fields']) ? $data['special_fields'] : null,
         );
     }
 } 

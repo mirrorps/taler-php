@@ -11,6 +11,7 @@ use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Api\Order\Dto\PostOrderRequest;
 use Taler\Api\Order\Dto\PostOrderResponse;
 use Taler\Api\Order\Dto\RefundRequest;
+use Taler\Api\Order\Dto\ForgetRequest;
 use Taler\Exception\TalerException;
 
 class OrderClient extends AbstractApiClient
@@ -144,5 +145,35 @@ class OrderClient extends AbstractApiClient
     public function deleteOrderAsync(string $orderId, array $headers = []): mixed
     {
         return Actions\DeleteOrder::runAsync($this, $orderId, $headers);
+    }
+
+    /**
+     * Sends a forget request for a specific order.
+     *
+     * @param string $orderId The order ID to forget fields for
+     * @param ForgetRequest $forgetRequest The forget request data
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function forgetOrder(string $orderId, ForgetRequest $forgetRequest, array $headers = []): void
+    {
+        Actions\ForgetOrder::run($this, $orderId, $forgetRequest, $headers);
+    }
+
+    /**
+     * Sends a forget request for a specific order asynchronously.
+     *
+     * @param string $orderId The order ID to forget fields for
+     * @param ForgetRequest $forgetRequest The forget request data
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function forgetOrderAsync(string $orderId, ForgetRequest $forgetRequest, array $headers = []): mixed
+    {
+        return Actions\ForgetOrder::runAsync($this, $orderId, $forgetRequest, $headers);
     }
 }
