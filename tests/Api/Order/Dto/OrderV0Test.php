@@ -135,10 +135,11 @@ class OrderV0Test extends TestCase
         $order = OrderV0::createFromArray($data);
 
         // dynamic properties assigned from special_fields
-        $this->assertTrue(property_exists($order, 'forgettable'));
-        $this->assertTrue(property_exists($order, 'custom_flag'));
-        $this->assertSame(['$.wire_fee', '$.products[0].description'], $order->forgettable); // @phpstan-ignore-line accessing dynamic property for test
-        $this->assertTrue($order->custom_flag); // @phpstan-ignore-line accessing dynamic property for test
+        $vars = get_object_vars($order);
+        $this->assertArrayHasKey('forgettable', $vars);
+        $this->assertArrayHasKey('custom_flag', $vars);
+        $this->assertSame(['$.wire_fee', '$.products[0].description'], $vars['forgettable']);
+        $this->assertTrue($vars['custom_flag']);
 
         // special_fields should be cleared after assignment
         $this->assertNull($order->special_fields);
@@ -154,9 +155,11 @@ class OrderV0Test extends TestCase
             ]
         );
 
-        $this->assertTrue(property_exists($order, 'x'));
-        $this->assertSame(123, $order->x); // @phpstan-ignore-line accessing dynamic property for test
-        $this->assertNull($order->special_fields);
+        $vars = get_object_vars($order);
+        $this->assertArrayHasKey('x', $vars);
+        $this->assertSame(123, $vars['x']);
+        $this->assertArrayHasKey('special_fields', $vars);
+        $this->assertNull($vars['special_fields']);
     }
 
     /**

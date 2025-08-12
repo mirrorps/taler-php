@@ -130,11 +130,13 @@ class OrderV1Test extends TestCase
 
         $dto = OrderV1::createFromArray($data);
 
-        $this->assertTrue(property_exists($dto, 'forgettable'));
-        $this->assertTrue(property_exists($dto, 'flag'));
-        $this->assertSame(['$.wire_fee'], $dto->forgettable); // @phpstan-ignore-line accessing dynamic property for test
-        $this->assertTrue($dto->flag); // @phpstan-ignore-line accessing dynamic property for test
-        $this->assertNull($dto->special_fields);
+        $vars = get_object_vars($dto);
+        $this->assertArrayHasKey('forgettable', $vars);
+        $this->assertArrayHasKey('flag', $vars);
+        $this->assertSame(['$.wire_fee'], $vars['forgettable']);
+        $this->assertTrue($vars['flag']);
+        $this->assertArrayHasKey('special_fields', $vars);
+        $this->assertNull($vars['special_fields']);
     }
 
     public function testConstructorWithSpecialFields(): void
@@ -145,9 +147,11 @@ class OrderV1Test extends TestCase
             special_fields: ['x' => 1]
         );
 
-        $this->assertTrue(property_exists($dto, 'x'));
-        $this->assertSame(1, $dto->x); // @phpstan-ignore-line accessing dynamic property for test
-        $this->assertNull($dto->special_fields);
+        $vars = get_object_vars($dto);
+        $this->assertArrayHasKey('x', $vars);
+        $this->assertSame(1, $vars['x']);
+        $this->assertArrayHasKey('special_fields', $vars);
+        $this->assertNull($vars['special_fields']);
     }
 
     public function testValidationFailsOnWrongVersion(): void
