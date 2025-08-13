@@ -458,7 +458,7 @@ try {
 }
 ```
 
-Error handling follows the same pattern as other APIs and may throw `Taler\\Exception\\TalerException`.
+Error handling follows the same pattern as other APIs and may throw `Taler\Exception\TalerException`.
 
 ---
 
