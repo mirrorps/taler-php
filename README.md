@@ -728,6 +728,86 @@ $accountsPromise->then(function ($summary) {
     }
 });
 ```
+
+---
+## OTP Devices
+
+Reference: [Merchant Backend: POST /instances/$INSTANCE/private/otp-devices](https://docs.taler.net/core/api-merchant.html#post-[-instances-$INSTANCE]-private-otp-devices)
+
+Create and register an OTP device to generate POS confirmations for orders.
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$otpDevices = $taler->otpDevices();
+```
+
+### Create OTP Device
+
+The API accepts the algorithm as integer or string per the docs:
+- 0 or "NONE": no algorithm
+- 1 or "TOTP_WITHOUT_PRICE": without amounts (typical OTP device)
+- 2 or "TOTP_WITH_PRICE": with amounts (special-purpose OTP device)
+
+On success, the endpoint returns HTTP 204 No Content.
+
+```php
+use Taler\Api\OtpDevices\Dto\OtpDeviceAddDetails;
+
+$details = new OtpDeviceAddDetails(
+    otp_device_id: 'pos-device-1',
+    otp_device_description: 'Main counter POS',
+    otp_key: 'JBSWY3DPEHPK3PXP', // Base32-encoded secret
+    otp_algorithm: 'TOTP_WITHOUT_PRICE' // or 0|1|2 or "NONE"|"TOTP_WITH_PRICE"
+);
+
+try {
+    // 204 No Content on success
+    $otpDevices->createOtpDevice($details);
+    echo "OTP device created\n";
+} catch (\Taler\Exception\TalerException $e) {
+    // Handle Taler-specific API errors
+    echo $e->getMessage();
+} catch (\Throwable $e) {
+    // Handle other errors
+    echo $e->getMessage();
+}
+```
+
+### Asynchronous
+All OTP Device methods support asynchronous operations using the Async suffix:
+```php
+use Taler\Api\OtpDevices\Dto\OtpDeviceAddDetails;
+
+$details = new OtpDeviceAddDetails(
+    otp_device_id: 'pos-device-2',
+    otp_device_description: 'Side counter POS',
+    otp_key: 'JBSWY3DPEHPK3PXP',
+    otp_algorithm: 1 // TOTP_WITHOUT_PRICE
+);
+
+try {
+    $promise = $otpDevices->createOtpDeviceAsync($details);
+    // Promise resolves to null on 204
+    $promise->wait();
+    echo "OTP device created (async)\n";
+} catch (\Taler\Exception\TalerException $e) {
+    echo $e->getMessage();
+} catch (\Throwable $e) {
+    echo $e->getMessage();
+}
+```
+
+Notes:
+- Ensure `base_url` points to your instance path (for example, `https://.../instances/<instance>`), and include the `token` header if your backend requires authentication.
+- When `wrapResponse` is enabled (default), this call returns void and throws on errors; when disabled, you still get no content for 204 responses.
 ---
 ## Exchange API
 
