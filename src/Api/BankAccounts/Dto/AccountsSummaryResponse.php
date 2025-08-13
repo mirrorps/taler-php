@@ -9,15 +9,10 @@ class AccountsSummaryResponse
 {
     /**
      * @param array<BankAccountEntry> $accounts
-     * @param bool $validate
      */
     public function __construct(
         public readonly array $accounts,
-        bool $validate = true
     ) {
-        if ($validate) {
-            $this->validate();
-        }
     }
 
     /**
@@ -31,11 +26,6 @@ class AccountsSummaryResponse
         );
 
         return new self($accounts);
-    }
-
-    public function validate(): void
-    {
-        // Intentionally left blank. Constructor PHPDoc ensures type safety for $accounts.
     }
 }
 
