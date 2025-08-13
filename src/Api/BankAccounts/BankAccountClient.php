@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Taler\Api\BankAccounts\Dto\AccountAddDetails;
 use Taler\Api\BankAccounts\Dto\AccountAddResponse;
 use Taler\Api\BankAccounts\Dto\AccountsSummaryResponse;
+use Taler\Api\BankAccounts\Dto\BankAccountDetail;
 use Taler\Api\Base\AbstractApiClient;
 use Taler\Exception\TalerException;
 
@@ -63,6 +64,33 @@ class BankAccountClient extends AbstractApiClient
     public function getAccountsAsync(array $headers = []): mixed
     {
         return Actions\GetAccounts::runAsync($this, $headers);
+    }
+
+    /**
+     * Get a specific bank account by its h_wire value.
+     *
+     * @param string $hWire
+     * @param array<string, string> $headers
+     * @return BankAccountDetail|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     * @see https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-accounts-$H_WIRE
+     */
+    public function getAccount(string $hWire, array $headers = []): BankAccountDetail|array
+    {
+        return Actions\GetAccount::run($this, $hWire, $headers);
+    }
+
+    /**
+     * Async variant of getAccount.
+     *
+     * @param string $hWire
+     * @param array<string, string> $headers
+     * @return mixed
+     */
+    public function getAccountAsync(string $hWire, array $headers = []): mixed
+    {
+        return Actions\GetAccount::runAsync($this, $hWire, $headers);
     }
 }
 
