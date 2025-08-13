@@ -810,6 +810,59 @@ $otpDevices->updateOtpDevice('pos-device-1', $patch);
 // $otpDevices->updateOtpDevice('pos-device-1', $patch);
 ```
 
+### Get OTP Device
+
+Reference: [Merchant Backend: GET /instances/$INSTANCE/private/otp-devices/$DEVICE_ID](https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-otp-devices-$DEVICE_ID)
+
+Retrieve details of a specific OTP device. 
+
+```php
+use Taler\Api\OtpDevices\Dto\GetOtpDeviceRequest;
+
+$otpDevices = $taler->otpDevices();
+
+// Without query parameters
+$device = $otpDevices->getOtpDevice('pos-device-1'); // OtpDeviceDetails
+
+echo $device->device_description; // e.g., "Main counter POS"
+echo $device->otp_algorithm;      // e.g., 1 or "TOTP_WITHOUT_PRICE"
+echo $device->otp_timestamp;      // Unix timestamp (int)
+
+// Optional fields (may be null)
+echo $device->otp_ctr ?? '';
+echo $device->otp_code ?? '';
+
+// With query parameters and custom headers
+$request = new GetOtpDeviceRequest(
+    faketime: 1700000000,
+    price: 'EUR:1.23'
+);
+
+$device = $otpDevices->getOtpDevice(
+    deviceId: 'pos-device-1',
+    request: $request,
+    headers: [ 'X-Custom-Header' => 'value' ]
+);
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$array = $taler
+    ->config(['wrapResponse' => false])
+    ->otpDevices()
+    ->getOtpDevice('pos-device-1');
+
+// Example shape:
+// [
+//   'device_description' => 'Main counter POS',
+//   'otp_algorithm' => 'TOTP_WITHOUT_PRICE', // or 0|1|2
+//   'otp_timestamp' => 1700000000,           // int
+//   'otp_ctr' => 0,                          // optional
+//   'otp_code' => '123456'                   // optional
+// ]
+```
+
 ### Get OTP Devices
 
 Reference: [Merchant Backend: GET /instances/$INSTANCE/private/otp-devices](https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-otp-devices)
