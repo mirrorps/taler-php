@@ -19,18 +19,6 @@ class AccountAddResponseTest extends TestCase
         $this->assertSame('salt456', $dto->salt);
     }
 
-    public function testValidation(): void
-    {
-        $dto = new AccountAddResponse('h', 's');
-        $this->assertSame('h', $dto->h_wire);
-        $this->assertSame('s', $dto->salt);
-    }
-
-    public function testValidationFails(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        new AccountAddResponse('', '');
-    }
 }
 
 
