@@ -10,14 +10,14 @@ namespace Taler\Api\OtpDevices\Dto;
 class OtpDevicePatchDetails
 {
     /**
-     * @param string|null $otp_device_description Human-readable description
+     * @param string $otp_device_description Human-readable description
      * @param string|null $otp_key Base32-encoded shared secret (RFC 3548)
      * @param int|string|null $otp_algorithm Algorithm for computing POS confirmation
      * @param int|null $otp_ctr Optional counter value
      * @param bool $validate Whether to validate inputs
      */
     public function __construct(
-        public readonly ?string $otp_device_description = null,
+        public readonly string $otp_device_description,
         public readonly ?string $otp_key = null,
         public readonly int|string|null $otp_algorithm = null,
         public readonly ?int $otp_ctr = null,
@@ -30,7 +30,7 @@ class OtpDevicePatchDetails
 
     /**
      * @param array{
-     *   otp_device_description?: string|null,
+     *   otp_device_description: string,
      *   otp_key?: string|null,
      *   otp_algorithm?: string|int|null,
      *   otp_ctr?: int|null
@@ -38,8 +38,13 @@ class OtpDevicePatchDetails
      */
     public static function createFromArray(array $data): self
     {
+        $desc = (string) $data['otp_device_description'];
+        if ($desc === '') {
+            throw new \InvalidArgumentException('otp_device_description is required');
+        }
+
         return new self(
-            otp_device_description: $data['otp_device_description'] ?? null,
+            otp_device_description: $desc,
             otp_key: $data['otp_key'] ?? null,
             otp_algorithm: $data['otp_algorithm'] ?? null,
             otp_ctr: $data['otp_ctr'] ?? null
@@ -48,6 +53,10 @@ class OtpDevicePatchDetails
 
     public function validate(): void
     {
+        if (!$this->otp_device_description) {
+            throw new \InvalidArgumentException('otp_device_description must not be empty');
+        }
+
         if ($this->otp_algorithm !== null) {
             $validStringAlgorithms = ['NONE', 'TOTP_WITHOUT_PRICE', 'TOTP_WITH_PRICE'];
             $validIntAlgorithms = [0, 1, 2];

@@ -65,7 +65,7 @@ class UpdateOtpDeviceTest extends TestCase
             ->willReturn($this->response);
 
         UpdateOtpDevice::run($this->client, $deviceId, $details, $headers);
-        $this->assertTrue(true);
+        $this->addToAssertionCount(1);
     }
 
     public function testRunWithTalerException(): void

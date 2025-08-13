@@ -64,7 +64,7 @@ class CreateOtpDeviceTest extends TestCase
             ->willReturn($this->response);
 
         CreateOtpDevice::run($this->client, $details, $headers);
-        $this->assertTrue(true);
+        $this->addToAssertionCount(1);
     }
 
     public function testRunWithTalerException(): void
