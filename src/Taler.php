@@ -6,6 +6,7 @@ use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
+use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\Exchange\ExchangeClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
@@ -20,6 +21,7 @@ class Taler
     protected ExchangeClient $exchange;
     protected OrderClient $order;
     protected WalletClient $wallet;
+    protected BankAccountClient $bankAccount;
 
     /**
      * Taler constructor.
@@ -141,6 +143,23 @@ class Taler
         );
 
         return $this->wallet;
+    }
+
+    /**
+     * Get the Bank Account API client instance
+     * 
+     * Creates a new instance if one doesn't exist yet, otherwise returns the existing instance.
+     * 
+     * @return BankAccountClient The Bank Account API client
+     */
+    public function bankAccount(): BankAccountClient
+    {
+        $this->bankAccount ??= new BankAccountClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->bankAccount;
     }
 
     /**
