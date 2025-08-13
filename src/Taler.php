@@ -8,6 +8,7 @@ use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\Exchange\ExchangeClient;
+use Taler\Api\OtpDevices\OtpDevicesClient;
 use Taler\Api\WireTransfers\WireTransfersClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
@@ -24,7 +25,7 @@ class Taler
     protected WalletClient $wallet;
     protected BankAccountClient $bankAccount;
     protected WireTransfersClient $wireTransfers;
-
+    protected OtpDevicesClient $otpDevices;
     /**
      * Taler constructor.
      * 
@@ -177,6 +178,21 @@ class Taler
         );
 
         return $this->wireTransfers;
+    }
+
+    /**
+     * Get the OTP Devices API client instance
+     *
+     * @return OtpDevicesClient
+     */
+    public function otpDevices(): OtpDevicesClient
+    {
+        $this->otpDevices ??= new OtpDevicesClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->otpDevices;
     }
 
     /**
