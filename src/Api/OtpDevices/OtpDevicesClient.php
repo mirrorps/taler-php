@@ -5,6 +5,7 @@ namespace Taler\Api\OtpDevices;
 use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\OtpDevices\Dto\OtpDeviceAddDetails;
 use Taler\Api\OtpDevices\Dto\OtpDevicePatchDetails;
+use Taler\Api\OtpDevices\Dto\OtpDevicesSummaryResponse;
 use Taler\Exception\TalerException;
 
 class OtpDevicesClient extends AbstractApiClient
@@ -57,6 +58,26 @@ class OtpDevicesClient extends AbstractApiClient
     public function updateOtpDeviceAsync(string $deviceId, OtpDevicePatchDetails $details, array $headers = []): mixed
     {
         return Actions\UpdateOtpDevice::runAsync($this, $deviceId, $details, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return OtpDevicesSummaryResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getOtpDevices(array $headers = []): OtpDevicesSummaryResponse|array
+    {
+        return Actions\GetOtpDevices::run($this, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     */
+    public function getOtpDevicesAsync(array $headers = []): mixed
+    {
+        return Actions\GetOtpDevices::runAsync($this, $headers);
     }
 }
 
