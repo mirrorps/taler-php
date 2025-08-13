@@ -780,6 +780,34 @@ try {
     echo $e->getMessage();
 }
 ```
+### Update OTP Device
+
+Reference: [Merchant Backend: PATCH /instances/$INSTANCE/private/otp-devices/$DEVICE_ID](https://docs.taler.net/core/api-merchant.html#patch-[-instances-$INSTANCE]-private-otp-devices-$DEVICE_ID)
+
+Update a registered OTP device. Returns HTTP 204 No Content on success.
+
+```php
+use Taler\Api\OtpDevices\Dto\OtpDevicePatchDetails;
+
+$otpDevices = $taler->otpDevices();
+
+// Minimal: update the description only (required)
+$patch = new OtpDevicePatchDetails(
+    otp_device_description: 'Front desk POS'
+);
+
+// Apply update (204 No Content on success)
+$otpDevices->updateOtpDevice('pos-device-1', $patch);
+
+// Optional: update key/algorithm/counter as well
+// $patch = new OtpDevicePatchDetails(
+//     otp_device_description: 'Front desk POS',
+//     otp_key: 'JBSWY3DPEHPK3PXP',           // Base32-encoded secret
+//     otp_algorithm: 'TOTP_WITH_PRICE',      // or 0|1|2 or "NONE"|"TOTP_WITHOUT_PRICE"
+//     otp_ctr: 0
+// );
+// $otpDevices->updateOtpDevice('pos-device-1', $patch);
+```
 
 ### Asynchronous
 All OTP Device methods support asynchronous operations using the Async suffix:
