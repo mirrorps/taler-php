@@ -403,6 +403,65 @@ Array response example:
 
 ---
 
+## Bank Accounts
+https://docs.taler.net/core/api-merchant.html#bank-accounts
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+use Taler\Api\BankAccounts\Dto\AccountAddDetails;
+use Taler\Api\BankAccounts\Dto\BasicAuthFacadeCredentials;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$bankAccountClient = $taler->bankAccount();
+```
+
+### Create Bank Account
+
+Minimal example with only a payto URI:
+
+```php
+$details = new AccountAddDetails(
+    payto_uri: 'payto://iban/DE89370400440532013000?receiver-name=Example%20Merchant'
+);
+
+try {
+    $response = $bankAccountClient->createAccount($details);
+    echo "h_wire: {$response->h_wire}\n";
+    echo "salt:   {$response->salt}\n";
+} catch (\Taler\Exception\TalerException $exception) {
+    // Handle API error
+}
+```
+
+With facade URL and Basic credentials with error handling and debug:
+
+```php
+$details = new AccountAddDetails(
+    payto_uri: 'payto://iban/DE89370400440532013000?receiver-name=Example%20Merchant',
+    credit_facade_url: 'https://bank-facade.example.com/api',
+    credit_facade_credentials: new BasicAuthFacadeCredentials('facade-user', 'facade-pass')
+);
+
+try {
+    $response = $bankAccountClient->createAccount($details);
+    echo "h_wire: {$response->h_wire}\n";
+    echo "salt:   {$response->salt}\n";
+    // dd($response); // if using Symfony VarDumper or similar
+} catch (\Taler\Exception\TalerException $exception) {
+    // dd($exception->getMessage(), $exception->getCode(), $exception->getRawResponseBody());
+}
+```
+
+Error handling follows the same pattern as other APIs and may throw `Taler\\Exception\\TalerException`.
+
+---
+
 ## Exchange API
 
 The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
