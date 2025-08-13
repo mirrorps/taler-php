@@ -568,6 +568,32 @@ $patch = new AccountPatchDetails(
 
 $bankAccountClient->updateAccount($hWire, $patch);
 ```
+### Delete Bank Account
+
+Delete a specific bank account by its `h_wire`. Returns no content on success (HTTP 204). See docs: [DELETE /instances/$INSTANCE/private/accounts/$H_WIRE](https://docs.taler.net/core/api-merchant.html#delete-[-instances-$INSTANCE]-private-accounts-$H_WIRE)
+
+```php
+$hWire = 'your-h-wire-hash';
+
+try {
+    // 204 No Content on success
+    $bankAccountClient->deleteAccount($hWire);
+} catch (\Taler\Exception\TalerException $exception) {
+    // Handle API error
+}
+```
+
+With custom headers:
+
+```php
+$bankAccountClient->deleteAccount(
+    hWire: 'your-h-wire-hash',
+    headers: [
+        'X-Custom-Header' => 'value'
+    ]
+);
+```
+
 ---
 ### Asynchronous Operations
 
