@@ -492,6 +492,31 @@ $arrayResponse = $taler
 // ]
 ```
 
+### Delete Transfer
+
+Reference: [Merchant Backend: DELETE /instances/$INSTANCE/private/transfers/$TID](https://docs.taler.net/core/api-merchant.html#delete-[-instances-$INSTANCE]-private-transfers-$TID)
+
+```php
+// Delete by transfer serial ID (TID). 204 No Content on success.
+$taler->wireTransfers()->deleteTransfer('123');
+
+// With custom headers
+$taler->wireTransfers()->deleteTransfer('123', [
+    'X-Custom-Header' => 'value'
+]);
+```
+
+Async variant:
+
+```php
+$promise = $taler->wireTransfers()->deleteTransferAsync('123');
+$promise->then(function () {
+    // Deleted
+});
+```
+
+Errors raise `Taler\Exception\TalerException` (e.g., not found).
+
 ---
 
 ## Bank Accounts

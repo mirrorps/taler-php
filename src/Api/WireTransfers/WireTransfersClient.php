@@ -32,6 +32,34 @@ class WireTransfersClient extends AbstractApiClient
     {
         return Actions\GetTransfers::runAsync($this, $request, $headers);
     }
+
+    /**
+     * Delete a wire transfer by its transfer serial ID.
+     *
+     * @param string $tid
+     * @param array<string, string> $headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteTransfer(string $tid, array $headers = []): void
+    {
+        Actions\DeleteTransfer::run($this, $tid, $headers);
+    }
+
+    /**
+     * Async delete transfer.
+     *
+     * @param string $tid
+     * @param array<string, string> $headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteTransferAsync(string $tid, array $headers = []): mixed
+    {
+        return Actions\DeleteTransfer::runAsync($this, $tid, $headers);
+    }
 }
 
 
