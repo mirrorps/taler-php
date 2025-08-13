@@ -780,6 +780,7 @@ try {
     echo $e->getMessage();
 }
 ```
+
 ### Update OTP Device
 
 Reference: [Merchant Backend: PATCH /instances/$INSTANCE/private/otp-devices/$DEVICE_ID](https://docs.taler.net/core/api-merchant.html#patch-[-instances-$INSTANCE]-private-otp-devices-$DEVICE_ID)
@@ -807,6 +808,44 @@ $otpDevices->updateOtpDevice('pos-device-1', $patch);
 //     otp_ctr: 0
 // );
 // $otpDevices->updateOtpDevice('pos-device-1', $patch);
+```
+
+### Get OTP Devices
+
+Reference: [Merchant Backend: GET /instances/$INSTANCE/private/otp-devices](https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-otp-devices)
+
+Retrieve all registered OTP devices for the instance.
+
+```php
+// Returns OtpDevicesSummaryResponse by default
+$summary = $otpDevices->getOtpDevices();
+
+foreach ($summary->otp_devices as $device) {
+    echo $device->otp_device_id . "\n";      // e.g., "pos-device-1"
+    echo $device->device_description . "\n";  // e.g., "Main counter POS"
+}
+
+// With custom headers
+$summary = $otpDevices->getOtpDevices([
+    'X-Custom-Header' => 'value'
+]);
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$summary = $taler
+    ->config(['wrapResponse' => false])
+    ->otpDevices()
+    ->getOtpDevices();
+
+// Example shape:
+// [
+//   'otp_devices' => [
+//     [ 'otp_device_id' => 'device1', 'device_description' => 'Front desk POS' ],
+//     [ 'otp_device_id' => 'device2', 'device_description' => 'Side counter POS' ],
+//   ]
+// ]
 ```
 
 ### Asynchronous
