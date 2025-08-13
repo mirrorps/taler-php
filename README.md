@@ -91,7 +91,7 @@ $taler = Factory::create([
 ---
 
 ##  Payment processing (Order API)
-https://docs.taler.net/core/api-merchant.html#payment-processing
+<a href="https://docs.taler.net/core/api-merchant.html#payment-processing" target="_blank" rel="noopener noreferrer">Merchant Backend — Payment processing</a>
 
 The Order API provides functionality to interact with Taler order services. Here's how to use it:
 
@@ -404,7 +404,7 @@ Array response example:
 ---
 
 ## Bank Accounts
-https://docs.taler.net/core/api-merchant.html#bank-accounts
+<a href="https://docs.taler.net/core/api-merchant.html#bank-accounts" target="_blank" rel="noopener noreferrer">Merchant Backend — Bank Accounts</a>
 
 ### Basic Setup
 
@@ -464,7 +464,7 @@ Error handling follows the same pattern as other APIs and may throw `Taler\Excep
 
 ### Get Bank Accounts
 
-Retrieve all bank accounts configured for the merchant instance. See docs: https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-accounts
+Retrieve all bank accounts configured for the merchant instance. See docs: <a href="https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-accounts" target="_blank" rel="noopener noreferrer">GET private/accounts</a>
 
 ```php
 try {
@@ -781,7 +781,7 @@ php vendor/bin/phpunit
 
 ## Contributing
 
-Contributions are welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+Contributions are welcome! Please see <a href="CONTRIBUTING.md" target="_blank" rel="noopener noreferrer">CONTRIBUTING.md</a> for guidelines.
 
 ---
 
@@ -793,7 +793,7 @@ The TalerPHP SDK allows developers to make HTTP requests to arbitrary endpoints 
 
 ## License
 
-This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
+This project is licensed under the MIT License. See <a href="LICENSE" target="_blank" rel="noopener noreferrer">LICENSE</a> for details.
 
 ---
 
@@ -805,7 +805,7 @@ If you have questions or need help, open an issue or start a discussion on the r
 
 ## Acknowledgments
 
-- [GNU Taler](https://taler.net/)
+- <a href="https://taler.net/" target="_blank" rel="noopener noreferrer">GNU Taler</a>
 - All contributors and the open source community
 
 ---
