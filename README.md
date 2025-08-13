@@ -462,6 +462,60 @@ Error handling follows the same pattern as other APIs and may throw `Taler\Excep
 
 ---
 
+### Get Bank Accounts
+
+Retrieve all bank accounts configured for the merchant instance. See docs: https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-accounts
+
+```php
+try {
+    $summary = $bankAccountClient->getAccounts(); // AccountsSummaryResponse
+
+    foreach ($summary->accounts as $account) {
+        echo $account->payto_uri . "\n"; // payto URI
+        echo $account->h_wire . "\n";    // hash of wire details
+        echo ($account->active ? 'active' : 'inactive') . "\n";
+    }
+} catch (\Taler\Exception\TalerException $exception) {
+    // Handle API error
+}
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$summary = $taler
+    ->config(['wrapResponse' => false])
+    ->bankAccount()
+    ->getAccounts();
+
+// Example shape:
+// [
+//   'accounts' => [
+//       ['payto_uri' => 'payto://iban/..', 'h_wire' => '...', 'active' => true],
+//       // ...
+//   ]
+// ]
+```
+
+---
+### Asynchronous Operations
+
+All Bank Accounts methods support asynchronous operations using the Async suffix:
+
+```php
+// Get bank accounts asynchronously
+$accountsPromise = $bankAccountClient->getAccountsAsync();
+
+// Handle the promise
+$accountsPromise->then(function ($summary) {
+    // $summary is an AccountsSummaryResponse when wrapResponse is true
+    foreach ($summary->accounts as $account) {
+        // Handle each bank account entry
+        // $account->payto_uri, $account->h_wire, $account->active
+    }
+});
+```
+
 ## Exchange API
 
 The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
