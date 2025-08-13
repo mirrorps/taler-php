@@ -403,6 +403,97 @@ Array response example:
 
 ---
 
+## Tracking Wire Transfers
+Reference: [Merchant Backend: GET /instances/$INSTANCE/private/transfers](https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-transfers)
+
+The Wire Transfers API lets you list wire transfers credited to the merchant, optionally filtered via query parameters.
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$wireTransfers = $taler->wireTransfers();
+```
+
+### Get Transfers
+
+```php
+use Taler\Api\WireTransfers\Dto\GetTransfersRequest;
+
+// Without filters (default server-side paging)
+$list = $wireTransfers->getTransfers(); // TransfersList
+
+foreach ($list->transfers as $transfer) {
+    echo $transfer->credit_amount;      // e.g. "EUR:100.00"
+    echo $transfer->wtid;               // Wire transfer identifier
+    echo $transfer->payto_uri;          // Merchant payto URI
+    echo $transfer->exchange_url;       // Exchange base URL
+    echo $transfer->transfer_serial_id; // Serial ID
+    echo $transfer->execution_time->t_s;// Unix timestamp
+    echo $transfer->verified ? 'yes' : 'no';     // optional
+    echo $transfer->confirmed ? 'yes' : 'no';    // optional
+    echo $transfer->expected ? 'yes' : 'no';     // optional
+}
+
+// With filters
+$request = new GetTransfersRequest(
+    payto_uri: 'payto://iban/DE89370400440532013000?receiver-name=Example%20Merchant',
+    after: '1700000000', // returns transfers after this timestamp (string per API)
+    limit: 20,
+);
+
+$filtered = $wireTransfers->getTransfers($request, [
+    'X-Custom-Header' => 'value'
+]);
+```
+
+### Asynchronous
+
+```php
+$promise = $wireTransfers->getTransfersAsync();
+$promise->then(function ($list) {
+    // $list is TransfersList when wrapResponse is true
+});
+```
+
+### Raw Array Response
+
+```php
+use Taler\Api\WireTransfers\Dto\GetTransfersRequest;
+
+$req = new GetTransfersRequest(limit: 10);
+
+$arrayResponse = $taler
+    ->config(['wrapResponse' => false])
+    ->wireTransfers()
+    ->getTransfers($req);
+
+// Example shape:
+// [
+//   'transfers' => [
+//     [
+//       'credit_amount' => 'EUR:10.00',
+//       'wtid' => 'WTID...',
+//       'payto_uri' => 'payto://...',
+//       'exchange_url' => 'https://exchange.example.com',
+//       'transfer_serial_id' => 123,
+//       'execution_time' => ['t_s' => 1700000000],
+//       'verified' => true,
+//       'confirmed' => false,
+//       'expected' => true
+//     ]
+//   ]
+// ]
+```
+
+---
+
 ## Bank Accounts
 https://docs.taler.net/core/api-merchant.html#bank-accounts
 
@@ -756,7 +847,6 @@ Array response example:
 */
 
 ```
-
 
 ---
 ## Logging

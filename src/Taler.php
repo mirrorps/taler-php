@@ -8,6 +8,7 @@ use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\Exchange\ExchangeClient;
+use Taler\Api\WireTransfers\WireTransfersClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
 use Taler\Cache\CacheWrapper;
@@ -22,6 +23,7 @@ class Taler
     protected OrderClient $order;
     protected WalletClient $wallet;
     protected BankAccountClient $bankAccount;
+    protected WireTransfersClient $wireTransfers;
 
     /**
      * Taler constructor.
@@ -160,6 +162,21 @@ class Taler
         );
 
         return $this->bankAccount;
+    }
+
+    /**
+     * Get the Wire Transfers API client instance
+     *
+     * @return WireTransfersClient
+     */
+    public function wireTransfers(): WireTransfersClient
+    {
+        $this->wireTransfers ??= new WireTransfersClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->wireTransfers;
     }
 
     /**
