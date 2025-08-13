@@ -122,6 +122,33 @@ class BankAccountClient extends AbstractApiClient
     {
         return Actions\UpdateAccount::runAsync($this, $hWire, $details, $headers);
     }
+
+    /**
+     * Delete a bank account by its h_wire.
+     *
+     * @param string $hWire
+     * @param array<string, string> $headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     * @see https://docs.taler.net/core/api-merchant.html#delete-[-instances-$INSTANCE]-private-accounts-$H_WIRE
+     */
+    public function deleteAccount(string $hWire, array $headers = []): void
+    {
+        Actions\DeleteAccount::run($this, $hWire, $headers);
+    }
+
+    /**
+     * Async variant of deleteAccount.
+     *
+     * @param string $hWire
+     * @param array<string, string> $headers
+     * @return mixed
+     */
+    public function deleteAccountAsync(string $hWire, array $headers = []): mixed
+    {
+        return Actions\DeleteAccount::runAsync($this, $hWire, $headers);
+    }
 }
 
 
