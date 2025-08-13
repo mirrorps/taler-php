@@ -498,6 +498,27 @@ $summary = $taler
 ```
 
 ---
+### Get Bank Account
+
+Retrieve a specific bank account by its `h_wire`. See docs: https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-accounts-$H_WIRE
+
+```php
+$hWire = 'your-h-wire-hash';
+
+try {
+    $account = $bankAccountClient->getAccount($hWire); // BankAccountDetail
+
+    echo $account->payto_uri . "\n";           // full payto URI
+    echo $account->h_wire . "\n";              // hash over wire details
+    echo $account->salt . "\n";                // salt used to compute h_wire
+    echo ($account->active ? 'active' : 'inactive') . "\n";
+    echo ($account->credit_facade_url ?? '');    // optional
+} catch (\Taler\Exception\TalerException $exception) {
+    // Handle API error
+}
+```
+
+---
 ### Asynchronous Operations
 
 All Bank Accounts methods support asynchronous operations using the Async suffix:
