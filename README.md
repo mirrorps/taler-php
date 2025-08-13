@@ -518,6 +518,56 @@ try {
 }
 ```
 
+### Update Bank Account
+
+Update a specific bank account by its `h_wire`. Returns no content on success (HTTP 204). See docs: [PATCH /instances/$INSTANCE/private/accounts/$H_WIRE](https://docs.taler.net/core/api-merchant.html#patch-[-instances-$INSTANCE]-private-accounts-$H_WIRE)
+
+Set or update the credit facade URL and credentials:
+
+```php
+use Taler\Api\BankAccounts\Dto\AccountPatchDetails;
+use Taler\Api\BankAccounts\Dto\BasicAuthFacadeCredentials;
+
+$hWire = 'your-h-wire-hash';
+
+// Provide facade URL and Basic credentials
+$patch = new AccountPatchDetails(
+    credit_facade_url: 'https://bank-facade.example.com/api',
+    credit_facade_credentials: new BasicAuthFacadeCredentials('facade-user', 'facade-pass')
+);
+
+// Apply update (204 No Content on success)
+$bankAccountClient->updateAccount($hWire, $patch);
+```
+
+Remove stored facade credentials (preserving other fields):
+
+```php
+use Taler\Api\BankAccounts\Dto\AccountPatchDetails;
+use Taler\Api\BankAccounts\Dto\NoFacadeCredentials;
+
+$hWire = 'your-h-wire-hash';
+
+$patch = new AccountPatchDetails(
+    credit_facade_credentials: new NoFacadeCredentials()
+);
+
+$bankAccountClient->updateAccount($hWire, $patch);
+```
+
+Update only the facade URL (keep existing credentials):
+
+```php
+use Taler\Api\BankAccounts\Dto\AccountPatchDetails;
+
+$hWire = 'your-h-wire-hash';
+
+$patch = new AccountPatchDetails(
+    credit_facade_url: 'https://bank-facade.example.com/v2'
+);
+
+$bankAccountClient->updateAccount($hWire, $patch);
+```
 ---
 ### Asynchronous Operations
 

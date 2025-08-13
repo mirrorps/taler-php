@@ -7,6 +7,7 @@ use Taler\Api\BankAccounts\Dto\AccountAddDetails;
 use Taler\Api\BankAccounts\Dto\AccountAddResponse;
 use Taler\Api\BankAccounts\Dto\AccountsSummaryResponse;
 use Taler\Api\BankAccounts\Dto\BankAccountDetail;
+use Taler\Api\BankAccounts\Dto\AccountPatchDetails;
 use Taler\Api\Base\AbstractApiClient;
 use Taler\Exception\TalerException;
 
@@ -91,6 +92,35 @@ class BankAccountClient extends AbstractApiClient
     public function getAccountAsync(string $hWire, array $headers = []): mixed
     {
         return Actions\GetAccount::runAsync($this, $hWire, $headers);
+    }
+
+    /**
+     * Update a bank account by its h_wire.
+     *
+     * @param string $hWire
+     * @param AccountPatchDetails $details
+     * @param array<string, string> $headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     * @see https://docs.taler.net/core/api-merchant.html#patch-[-instances-$INSTANCE]-private-accounts-$H_WIRE
+     */
+    public function updateAccount(string $hWire, AccountPatchDetails $details, array $headers = []): void
+    {
+        Actions\UpdateAccount::run($this, $hWire, $details, $headers);
+    }
+
+    /**
+     * Async variant of updateAccount.
+     *
+     * @param string $hWire
+     * @param AccountPatchDetails $details
+     * @param array<string, string> $headers
+     * @return mixed
+     */
+    public function updateAccountAsync(string $hWire, AccountPatchDetails $details, array $headers = []): mixed
+    {
+        return Actions\UpdateAccount::runAsync($this, $hWire, $details, $headers);
     }
 }
 
