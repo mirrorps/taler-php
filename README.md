@@ -594,7 +594,7 @@ $bankAccountClient->deleteAccount(
 );
 ```
 
----
+
 ### Asynchronous Operations
 
 All Bank Accounts methods support asynchronous operations using the Async suffix:
@@ -612,7 +612,7 @@ $accountsPromise->then(function ($summary) {
     }
 });
 ```
-
+---
 ## Exchange API
 
 The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
