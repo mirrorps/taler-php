@@ -4,6 +4,7 @@ namespace Taler\Api\Templates;
 use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\Templates\Dto\TemplateAddDetails;
 use Taler\Api\Templates\Dto\TemplatePatchDetails;
+use Taler\Api\Templates\Dto\TemplatesSummaryResponse;
 use Taler\Exception\TalerException;
 
 class TemplatesClient extends AbstractApiClient
@@ -56,5 +57,27 @@ class TemplatesClient extends AbstractApiClient
     public function updateTemplateAsync(string $templateId, TemplatePatchDetails $details, array $headers = []): mixed
     {
         return Actions\UpdateTemplate::runAsync($this, $templateId, $details, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return TemplatesSummaryResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getTemplates(array $headers = []): TemplatesSummaryResponse|array
+    {
+        return Actions\GetTemplates::run($this, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getTemplatesAsync(array $headers = []): mixed
+    {
+        return Actions\GetTemplates::runAsync($this, $headers);
     }
 }
