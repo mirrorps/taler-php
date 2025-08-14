@@ -105,4 +105,28 @@ class TemplatesClient extends AbstractApiClient
     {
         return Actions\GetTemplate::runAsync($this, $templateId, $headers);
     }
+
+    /**
+     * @param string $templateId
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteTemplate(string $templateId, array $headers = []): void
+    {
+        Actions\DeleteTemplate::run($this, $templateId, $headers);
+    }
+
+    /**
+     * @param string $templateId
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteTemplateAsync(string $templateId, array $headers = []): mixed
+    {
+        return Actions\DeleteTemplate::runAsync($this, $templateId, $headers);
+    }
 }
