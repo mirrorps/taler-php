@@ -938,10 +938,162 @@ try {
     echo $e->getMessage();
 }
 ```
+## Templates
 
-Notes:
-- Ensure `base_url` points to your instance path (for example, `https://.../instances/<instance>`), and include the `token` header if your backend requires authentication.
-- When `wrapResponse` is enabled (default), this call returns void and throws on errors; when disabled, you still get no content for 204 responses.
+https://docs.taler.net/core/api-merchant.html#templates
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$templates = $taler->templates();
+```
+
+### Create Template
+
+Returns no content on success (HTTP 204).
+
+```php
+use Taler\Api\Templates\Dto\TemplateAddDetails;
+use Taler\Api\Templates\Dto\TemplateContractDetails;
+use Taler\Api\Dto\RelativeTime;
+
+$details = new TemplateAddDetails(
+    template_id: 'invoice-2025',
+    template_description: 'Default invoice template',
+    template_contract: new TemplateContractDetails(
+        minimum_age: 18,
+        pay_duration: new RelativeTime(3600),
+        summary: 'Service fee',
+        currency: 'EUR',
+        amount: 'EUR:10.00',
+    ),
+    otp_id: 'pos-device-1',
+    editable_defaults: ['summary' => 'Editable']
+);
+
+// 204 No Content on success
+$templates->createTemplate($details);
+```
+
+### Update Template
+
+Returns no content on success (HTTP 204).
+
+```php
+use Taler\Api\Templates\Dto\TemplatePatchDetails;
+use Taler\Api\Templates\Dto\TemplateContractDetails;
+use Taler\Api\Dto\RelativeTime;
+
+$patch = new TemplatePatchDetails(
+    template_description: 'Updated description',
+    template_contract: new TemplateContractDetails(
+        minimum_age: 21,
+        pay_duration: new RelativeTime(5400),
+        summary: 'Updated service fee',
+        currency: 'EUR',
+        amount: 'EUR:12.00',
+    ),
+    otp_id: 'pos-device-2',
+    editable_defaults: ['summary' => 'Editable']
+);
+
+// Apply update (204 No Content on success)
+$templates->updateTemplate('invoice-2025', $patch);
+```
+
+### Get Templates
+
+```php
+$summary = $templates->getTemplates(); // TemplatesSummaryResponse by default
+
+foreach ($summary->templates as $entry) {
+    echo $entry->template_id . "\n";          // e.g., "invoice-2025"
+    echo $entry->template_description . "\n"; // e.g., "Default invoice template"
+}
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$summaryArray = $taler
+    ->config(['wrapResponse' => false])
+    ->templates()
+    ->getTemplates();
+
+// Example shape:
+// [ 'templates' => [ ['template_id' => 'invoice-2025', 'template_description' => '...'], ... ] ]
+```
+
+### Get Template
+
+```php
+$details = $templates->getTemplate('invoice-2025'); // TemplateDetails
+
+echo $details->template_id;           // "invoice-2025"
+echo $details->template_description;  // description
+
+// Contract defaults
+$contract = $details->template_contract;
+echo $contract->summary;      // e.g., "Service fee"
+echo $contract->currency;     // e.g., "EUR"
+echo $contract->amount;       // e.g., "EUR:10.00"
+echo $contract->minimum_age;  // e.g., 18
+echo $contract->pay_duration->d_us; // microseconds or string representation
+
+// Optional fields
+echo $details->otp_id ?? '';
+var_dump($details->editable_defaults ?? null);
+```
+
+Raw array response:
+
+```php
+$detailsArray = $taler
+    ->config(['wrapResponse' => false])
+    ->templates()
+    ->getTemplate('invoice-2025');
+
+// Example shape:
+// [
+//   'template_id' => 'invoice-2025',
+//   'template_description' => '...',
+//   'template_contract' => [ 'summary' => '...', 'currency' => 'EUR', 'amount' => 'EUR:10.00', 'minimum_age' => 18, 'pay_duration' => ['d_us' => 3600000000] ],
+//   'otp_id' => 'pos-device-1',
+//   'editable_defaults' => ['summary' => 'Editable']
+// ]
+```
+
+### Delete Template
+
+Returns no content on success (HTTP 204).
+
+```php
+$templates->deleteTemplate('invoice-2025');
+
+// With custom headers
+$templates->deleteTemplate('invoice-2025', [
+    'X-Custom-Header' => 'value'
+]);
+```
+
+### Asynchronous Operations
+
+All Templates methods support asynchronous operations with the `Async` suffix:
+
+```php
+$promise = $templates->getTemplatesAsync();
+$promise->then(function ($result) {
+    // $result is TemplatesSummaryResponse when wrapResponse is true
+});
+```
+
 ---
 ## Exchange API
 
