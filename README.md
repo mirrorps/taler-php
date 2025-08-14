@@ -901,6 +901,20 @@ $summary = $taler
 // ]
 ```
 
+### Delete OTP Device
+
+Reference: [Merchant Backend: DELETE /instances/$INSTANCE/private/otp-devices/$DEVICE_ID](https://docs.taler.net/core/api-merchant.html#delete-[-instances-$INSTANCE]-private-otp-devices-$DEVICE_ID)
+
+```php
+// Delete a specific OTP device by ID. 204 No Content on success.
+$otpDevices->deleteOtpDevice('pos-device-1');
+
+// With custom headers
+$otpDevices->deleteOtpDevice('pos-device-1', [
+    'X-Custom-Header' => 'value'
+]);
+```
+
 ### Asynchronous
 All OTP Device methods support asynchronous operations using the Async suffix:
 ```php
