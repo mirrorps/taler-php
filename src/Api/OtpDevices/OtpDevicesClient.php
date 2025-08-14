@@ -103,6 +103,28 @@ class OtpDevicesClient extends AbstractApiClient
     {
         return Actions\GetOtpDevice::runAsync($this, $deviceId, $request, $headers);
     }
+
+    /**
+     * @param string $deviceId
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteOtpDevice(string $deviceId, array $headers = []): void
+    {
+        Actions\DeleteOtpDevice::run($this, $deviceId, $headers);
+    }
+
+    /**
+     * @param string $deviceId
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     */
+    public function deleteOtpDeviceAsync(string $deviceId, array $headers = []): mixed
+    {
+        return Actions\DeleteOtpDevice::runAsync($this, $deviceId, $headers);
+    }
 }
 
 
