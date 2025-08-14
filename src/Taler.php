@@ -14,6 +14,7 @@ use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
 use Taler\Cache\CacheWrapper;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Templates\TemplatesClient;
 use Taler\Api\Wallet\WalletClient;
 
 class Taler
@@ -26,6 +27,7 @@ class Taler
     protected BankAccountClient $bankAccount;
     protected WireTransfersClient $wireTransfers;
     protected OtpDevicesClient $otpDevices;
+    protected TemplatesClient $templates;
     /**
      * Taler constructor.
      * 
@@ -193,6 +195,21 @@ class Taler
         );
 
         return $this->otpDevices;
+    }
+
+    /**
+     * Get the Templates API client instance
+     *
+     * @return TemplatesClient
+     */
+    public function templates(): TemplatesClient
+    {
+        $this->templates ??= new TemplatesClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->templates;
     }
 
     /**
