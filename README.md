@@ -1095,6 +1095,125 @@ $promise->then(function ($result) {
 ```
 
 ---
+## Webhooks
+
+https://docs.taler.net/core/api-merchant.html#webhooks
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$webhooks = $taler->webhooks();
+```
+
+### Create Webhook
+
+Returns no content on success (HTTP 204).
+
+```php
+use Taler\Api\Webhooks\Dto\WebhookAddDetails;
+
+$details = new WebhookAddDetails(
+    webhook_id: 'checkout-completed',
+    event_type: 'ORDER_PAID',
+    url: 'https://example.com/webhooks/order-paid',
+    http_method: 'POST',
+    header_template: '{"X-Webhook":"paid"}',  // optional
+    body_template: '{"order_id":"$order_id"}' // optional
+);
+
+// 204 No Content on success
+$webhooks->createWebhook($details);
+```
+
+### Update Webhook
+
+Returns no content on success (HTTP 204).
+
+```php
+use Taler\Api\Webhooks\Dto\WebhookPatchDetails;
+
+$patch = new WebhookPatchDetails(
+    event_type: 'ORDER_PAID',
+    url: 'https://example.com/webhooks/order-paid-v2',
+    http_method: 'POST',
+    header_template: '{"X-Webhook":"paid"}',   // optional
+    body_template: '{"order_id":"$order_id"}'  // optional
+);
+
+$webhooks->updateWebhook('checkout-completed', $patch);
+```
+
+### Get Webhooks
+
+```php
+$summary = $webhooks->getWebhooks(); // WebhookSummaryResponse
+
+foreach ($summary->webhooks as $entry) {
+    echo $entry->webhook_id . "\n"; // e.g., "checkout-completed"
+    echo $entry->event_type . "\n"; // e.g., "ORDER_PAID"
+}
+
+// With custom headers
+$summary = $webhooks->getWebhooks([
+    'X-Custom-Header' => 'value'
+]);
+```
+
+### Get Webhook
+
+```php
+$details = $webhooks->getWebhook('checkout-completed'); // WebhookDetails
+
+echo $details->event_type;     // e.g., "ORDER_PAID"
+echo $details->url;            // e.g., "https://example.com/webhooks/order-paid"
+echo $details->http_method;    // e.g., "POST"
+echo $details->header_template ?? ''; // optional
+echo $details->body_template ?? '';   // optional
+```
+
+### Delete Webhook
+
+Returns no content on success (HTTP 204).
+
+```php
+$webhooks->deleteWebhook('checkout-completed');
+
+// With custom headers
+$webhooks->deleteWebhook('checkout-completed', [
+    'X-Custom-Header' => 'value'
+]);
+```
+
+### Asynchronous Operations
+
+Every Webhooks method also supports an async variant using the `Async` suffix (e.g., `createWebhookAsync`, `updateWebhookAsync`, `getWebhooksAsync`, `getWebhookAsync`, `deleteWebhookAsync`).
+
+```php
+use Taler\Api\Webhooks\Dto\WebhookAddDetails;
+
+$details = new WebhookAddDetails(
+    webhook_id: 'checkout-completed',
+    event_type: 'ORDER_PAID',
+    url: 'https://example.com/webhooks/order-paid',
+    http_method: 'POST'
+);
+
+$promise = $taler->webhooks()->createWebhookAsync($details);
+
+// Promise resolves to null on 204 No Content
+$promise->then(function () {
+    echo "Webhook created (async)\n";
+});
+```
+
+---
 ## Exchange API
 
 The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
