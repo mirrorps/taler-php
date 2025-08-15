@@ -16,6 +16,7 @@ use Taler\Cache\CacheWrapper;
 use Taler\Api\Order\OrderClient;
 use Taler\Api\Templates\TemplatesClient;
 use Taler\Api\Wallet\WalletClient;
+use Taler\Api\Webhooks\WebhooksClient;
 
 class Taler
 {
@@ -28,6 +29,7 @@ class Taler
     protected WireTransfersClient $wireTransfers;
     protected OtpDevicesClient $otpDevices;
     protected TemplatesClient $templates;
+    protected WebhooksClient $webhooks;
     /**
      * Taler constructor.
      * 
@@ -210,6 +212,21 @@ class Taler
         );
 
         return $this->templates;
+    }
+
+    /**
+     * Get the Webhooks API client instance
+     *
+     * @return WebhooksClient
+     */
+    public function webhooks(): WebhooksClient
+    {
+        $this->webhooks ??= new WebhooksClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->webhooks;
     }
 
     /**
