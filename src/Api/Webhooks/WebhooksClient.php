@@ -102,6 +102,28 @@ class WebhooksClient extends AbstractApiClient
     {
         return Actions\GetWebhook::runAsync($this, $webhookId, $headers);
     }
+
+    /**
+     * @param string $webhookId
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteWebhook(string $webhookId, array $headers = []): void
+    {
+        Actions\DeleteWebhook::run($this, $webhookId, $headers);
+    }
+
+    /**
+     * @param string $webhookId
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     */
+    public function deleteWebhookAsync(string $webhookId, array $headers = []): mixed
+    {
+        return Actions\DeleteWebhook::runAsync($this, $webhookId, $headers);
+    }
 }
 
 
