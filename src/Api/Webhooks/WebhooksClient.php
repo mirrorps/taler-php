@@ -5,6 +5,7 @@ namespace Taler\Api\Webhooks;
 use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\Webhooks\Dto\WebhookAddDetails;
 use Taler\Api\Webhooks\Dto\WebhookPatchDetails;
+use Taler\Api\Webhooks\Dto\WebhookSummaryResponse;
 use Taler\Exception\TalerException;
 
 class WebhooksClient extends AbstractApiClient
@@ -57,6 +58,26 @@ class WebhooksClient extends AbstractApiClient
     public function updateWebhookAsync(string $webhookId, WebhookPatchDetails $details, array $headers = []): mixed
     {
         return Actions\UpdateWebhook::runAsync($this, $webhookId, $details, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return WebhookSummaryResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getWebhooks(array $headers = []): WebhookSummaryResponse|array
+    {
+        return Actions\GetWebhooks::run($this, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     */
+    public function getWebhooksAsync(array $headers = []): mixed
+    {
+        return Actions\GetWebhooks::runAsync($this, $headers);
     }
 }
 
