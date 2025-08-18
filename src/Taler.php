@@ -29,6 +29,7 @@ class Taler
     protected WireTransfersClient $wireTransfers;
     protected OtpDevicesClient $otpDevices;
     protected TemplatesClient $templates;
+    protected \Taler\Api\TokenFamilies\TokenFamiliesClient $tokenFamilies;
     protected WebhooksClient $webhooks;
     /**
      * Taler constructor.
@@ -227,6 +228,21 @@ class Taler
         );
 
         return $this->webhooks;
+    }
+
+    /**
+     * Get the Token Families API client instance
+     *
+     * @return \Taler\Api\TokenFamilies\TokenFamiliesClient
+     */
+    public function tokenFamilies(): \Taler\Api\TokenFamilies\TokenFamiliesClient
+    {
+        $this->tokenFamilies ??= new \Taler\Api\TokenFamilies\TokenFamiliesClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->tokenFamilies;
     }
 
     /**
