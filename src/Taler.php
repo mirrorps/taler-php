@@ -9,6 +9,7 @@ use Psr\SimpleCache\CacheInterface;
 use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\Exchange\ExchangeClient;
 use Taler\Api\OtpDevices\OtpDevicesClient;
+use Taler\Api\Inventory\InventoryClient;
 use Taler\Api\WireTransfers\WireTransfersClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
@@ -31,6 +32,7 @@ class Taler
     protected TemplatesClient $templates;
     protected \Taler\Api\TokenFamilies\TokenFamiliesClient $tokenFamilies;
     protected WebhooksClient $webhooks;
+    protected InventoryClient $inventory;
     /**
      * Taler constructor.
      * 
@@ -243,6 +245,21 @@ class Taler
         );
 
         return $this->tokenFamilies;
+    }
+
+    /**
+     * Get the Inventory API client instance
+     *
+     * @return InventoryClient
+     */
+    public function inventory(): InventoryClient
+    {
+        $this->inventory ??= new InventoryClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->inventory;
     }
 
     /**
