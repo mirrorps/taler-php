@@ -1095,6 +1095,141 @@ $promise->then(function ($result) {
 ```
 
 ---
+## Token Families
+
+The Token Families API lets you manage token families (discounts or subscriptions) for a merchant instance.
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$tokenFamilies = $taler->tokenFamilies();
+```
+
+### Create Token Family
+
+Create a new token family. Returns no content on success (HTTP 204).
+
+```php
+use Taler\Api\TokenFamilies\Dto\TokenFamilyCreateRequest;
+use Taler\Api\Dto\Timestamp;
+use Taler\Api\Dto\RelativeTime;
+
+$request = new TokenFamilyCreateRequest(
+    slug: 'family-01',
+    name: 'My Family',
+    description: 'Human-readable description',
+    description_i18n: ['en' => 'Human-readable description'],
+    // For a discount family, use expected_domains; for a subscription family, use trusted_domains
+    extra_data: ['expected_domains' => ['example.com']],
+    valid_after: new Timestamp(1700000000),
+    valid_before: new Timestamp(1800000000),
+    // Ensure duration >= validity_granularity + start_offset
+    duration: new RelativeTime(60_000_000),            // 1 minute
+    validity_granularity: new RelativeTime(60_000_000),// 1 minute
+    start_offset: new RelativeTime(0),
+    kind: 'discount'                                   // or 'subscription'
+);
+
+// 204 No Content on success
+$tokenFamilies->createTokenFamily($request);
+```
+
+### Update Token Family
+
+Update an existing token family. Returns detailed information (HTTP 200) as `TokenFamilyDetails`.
+
+```php
+use Taler\Api\TokenFamilies\Dto\TokenFamilyUpdateRequest;
+use Taler\Api\Dto\Timestamp;
+
+$patch = new TokenFamilyUpdateRequest(
+    name: 'Updated Name',
+    description: 'Updated Description',
+    description_i18n: ['en' => 'Updated Description'],
+    // Depends on the token family kind; adjust accordingly
+    extra_data: ['trusted_domains' => ['example.com']],
+    valid_after: new Timestamp(1700000100),
+    valid_before: new Timestamp(1800000100)
+);
+
+// Returns TokenFamilyDetails on HTTP 200
+$details = $tokenFamilies->updateTokenFamily('family-01', $patch);
+```
+
+### Get Token Families
+
+List all configured token families for the instance. Returns `TokenFamiliesList` (HTTP 200).
+
+```php
+$list = $tokenFamilies->getTokenFamilies(); // TokenFamiliesList
+
+foreach ($list->token_families as $family) {
+    echo $family->slug . "\n";           // e.g., "family-01"
+    echo $family->name . "\n";           // human-readable name
+    echo $family->kind . "\n";           // "discount" or "subscription"
+    echo $family->valid_after->t_s . "\n";// Unix timestamp
+    echo $family->valid_before->t_s . "\n";// Unix timestamp
+}
+```
+
+### Get Token Family
+
+Get detailed information about a specific token family. Returns `TokenFamilyDetails` (HTTP 200).
+
+```php
+$details = $tokenFamilies->getTokenFamily('family-01'); // TokenFamilyDetails
+
+echo $details->slug;                      // e.g., "family-01"
+echo $details->name;                      // human-readable name
+echo $details->description;               // description
+echo $details->kind;                      // "discount" or "subscription"
+echo $details->issued;                    // number of tokens issued
+echo $details->used;                      // number of tokens used
+echo $details->valid_after->t_s;          // Unix timestamp
+echo $details->valid_before->t_s;         // Unix timestamp
+echo $details->duration->d_us;            // microseconds
+echo $details->validity_granularity->d_us;// microseconds
+echo $details->start_offset->d_us;        // microseconds
+
+// Optional
+var_dump($details->description_i18n ?? null);
+var_dump($details->extra_data ?? null);
+```
+
+### Delete Token Family
+
+Delete a specific token family. Returns no content on success (HTTP 204).
+
+```php
+$tokenFamilies->deleteTokenFamily('family-01');
+
+// With custom headers
+$tokenFamilies->deleteTokenFamily('family-01', [
+    'X-Custom-Header' => 'value'
+]);
+```
+
+### Asynchronous Operations
+
+Every Token Families method also supports an async variant using the `Async` suffix (e.g., `getTokenFamiliesAsync`, `getTokenFamilyAsync`, `createTokenFamilyAsync`, `updateTokenFamilyAsync`, `deleteTokenFamilyAsync`).
+
+```php
+// Example: Get token families asynchronously
+$promise = $taler->tokenFamilies()->getTokenFamiliesAsync();
+
+$promise->then(function ($result) {
+    // $result is TokenFamiliesList when wrapResponse is true
+});
+```
+
+---
 ## Webhooks
 
 https://docs.taler.net/core/api-merchant.html#webhooks
