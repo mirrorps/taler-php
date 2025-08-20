@@ -8,10 +8,12 @@ use Taler\Api\Inventory\Actions\GetCategory;
 use Taler\Api\Inventory\Actions\CreateCategory;
 use Taler\Api\Inventory\Actions\UpdateCategory;
 use Taler\Api\Inventory\Actions\DeleteCategory;
+use Taler\Api\Inventory\Actions\CreateProduct;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
 use Taler\Api\Inventory\Dto\CategoryCreatedResponse;
+use Taler\Api\Inventory\Dto\ProductAddDetail;
 use Taler\Exception\TalerException;
 
 class InventoryClient extends AbstractApiClient
@@ -134,6 +136,30 @@ class InventoryClient extends AbstractApiClient
     public function deleteCategoryAsync(int $categoryId, array $headers = []): mixed
     {
         return DeleteCategory::runAsync($this, $categoryId, $headers);
+    }
+
+    /**
+     * @param ProductAddDetail $details
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function createProduct(ProductAddDetail $details, array $headers = []): void
+    {
+        CreateProduct::run($this, $details, $headers);
+    }
+
+    /**
+     * @param ProductAddDetail $details
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function createProductAsync(ProductAddDetail $details, array $headers = []): mixed
+    {
+        return CreateProduct::runAsync($this, $details, $headers);
     }
 }
 
