@@ -6,6 +6,7 @@ use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\Inventory\Actions\GetCategories;
 use Taler\Api\Inventory\Actions\GetCategory;
 use Taler\Api\Inventory\Actions\CreateCategory;
+use Taler\Api\Inventory\Actions\UpdateCategory;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
@@ -82,6 +83,32 @@ class InventoryClient extends AbstractApiClient
     public function createCategoryAsync(CategoryCreateRequest $request, array $headers = []): mixed
     {
         return CreateCategory::runAsync($this, $request, $headers);
+    }
+
+    /**
+     * @param int $categoryId
+     * @param CategoryCreateRequest $request
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function updateCategory(int $categoryId, CategoryCreateRequest $request, array $headers = []): void
+    {
+        UpdateCategory::run($this, $categoryId, $request, $headers);
+    }
+
+    /**
+     * @param int $categoryId
+     * @param CategoryCreateRequest $request
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function updateCategoryAsync(int $categoryId, CategoryCreateRequest $request, array $headers = []): mixed
+    {
+        return UpdateCategory::runAsync($this, $categoryId, $request, $headers);
     }
 }
 
