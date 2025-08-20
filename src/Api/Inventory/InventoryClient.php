@@ -7,6 +7,7 @@ use Taler\Api\Inventory\Actions\GetCategories;
 use Taler\Api\Inventory\Actions\GetCategory;
 use Taler\Api\Inventory\Actions\CreateCategory;
 use Taler\Api\Inventory\Actions\UpdateCategory;
+use Taler\Api\Inventory\Actions\DeleteCategory;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
@@ -109,6 +110,30 @@ class InventoryClient extends AbstractApiClient
     public function updateCategoryAsync(int $categoryId, CategoryCreateRequest $request, array $headers = []): mixed
     {
         return UpdateCategory::runAsync($this, $categoryId, $request, $headers);
+    }
+
+    /**
+     * @param int $categoryId
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteCategory(int $categoryId, array $headers = []): void
+    {
+        DeleteCategory::run($this, $categoryId, $headers);
+    }
+
+    /**
+     * @param int $categoryId
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteCategoryAsync(int $categoryId, array $headers = []): mixed
+    {
+        return DeleteCategory::runAsync($this, $categoryId, $headers);
     }
 }
 
