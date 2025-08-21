@@ -12,6 +12,7 @@ use Taler\Api\Inventory\Actions\CreateProduct;
 use Taler\Api\Inventory\Actions\UpdateProduct;
 use Taler\Api\Inventory\Actions\GetProducts;
 use Taler\Api\Inventory\Actions\GetProduct;
+use Taler\Api\Inventory\Actions\DeleteProduct;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
@@ -241,6 +242,30 @@ class InventoryClient extends AbstractApiClient
     public function getProductAsync(string $productId, array $headers = []): mixed
     {
         return GetProduct::runAsync($this, $productId, $headers);
+    }
+
+    /**
+     * @param string $productId
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteProduct(string $productId, array $headers = []): void
+    {
+        DeleteProduct::run($this, $productId, $headers);
+    }
+
+    /**
+     * @param string $productId
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteProductAsync(string $productId, array $headers = []): mixed
+    {
+        return DeleteProduct::runAsync($this, $productId, $headers);
     }
 }
 
