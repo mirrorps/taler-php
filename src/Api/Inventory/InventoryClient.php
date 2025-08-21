@@ -10,12 +10,15 @@ use Taler\Api\Inventory\Actions\UpdateCategory;
 use Taler\Api\Inventory\Actions\DeleteCategory;
 use Taler\Api\Inventory\Actions\CreateProduct;
 use Taler\Api\Inventory\Actions\UpdateProduct;
+use Taler\Api\Inventory\Actions\GetProducts;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
 use Taler\Api\Inventory\Dto\CategoryCreatedResponse;
 use Taler\Api\Inventory\Dto\ProductAddDetail;
 use Taler\Api\Inventory\Dto\ProductPatchDetail;
+use Taler\Api\Inventory\Dto\GetProductsRequest;
+use Taler\Api\Inventory\Dto\InventorySummaryResponse;
 use Taler\Exception\TalerException;
 
 class InventoryClient extends AbstractApiClient
@@ -188,6 +191,30 @@ class InventoryClient extends AbstractApiClient
     public function updateProductAsync(string $productId, ProductPatchDetail $details, array $headers = []): mixed
     {
         return UpdateProduct::runAsync($this, $productId, $details, $headers);
+    }
+
+    /**
+     * @param GetProductsRequest|null $request
+     * @param array<string, string> $headers Optional request headers
+     * @return InventorySummaryResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getProducts(?GetProductsRequest $request = null, array $headers = []): InventorySummaryResponse|array
+    {
+        return GetProducts::run($this, $request, $headers);
+    }
+
+    /**
+     * @param GetProductsRequest|null $request
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getProductsAsync(?GetProductsRequest $request = null, array $headers = []): mixed
+    {
+        return GetProducts::runAsync($this, $request, $headers);
     }
 }
 
