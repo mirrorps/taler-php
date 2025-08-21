@@ -63,16 +63,7 @@ class DeleteCategory
 
     private function handleResponse(ResponseInterface $response): void
     {
-        // Accept 204 or 404 as per docs
-        $status = $response->getStatusCode();
-        if ($status !== 204 && $status !== 404) {
-            $this->client->parseResponseBody($response, 204); // will throw with actual status
-            return;
-        }
-        // For 204/404, ensure body parsing doesn't throw; treat as success/no-op
-        if ($status === 204) {
-            $this->client->parseResponseBody($response, 204);
-        }
+        $this->client->parseResponseBody($response, 204);
     }
 }
 
