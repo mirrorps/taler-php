@@ -13,6 +13,7 @@ use Taler\Api\Inventory\Actions\UpdateProduct;
 use Taler\Api\Inventory\Actions\GetProducts;
 use Taler\Api\Inventory\Actions\GetProduct;
 use Taler\Api\Inventory\Actions\DeleteProduct;
+use Taler\Api\Inventory\Actions\GetPos;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
@@ -22,6 +23,7 @@ use Taler\Api\Inventory\Dto\ProductPatchDetail;
 use Taler\Api\Inventory\Dto\GetProductsRequest;
 use Taler\Api\Inventory\Dto\InventorySummaryResponse;
 use Taler\Api\Inventory\Dto\ProductDetail;
+use Taler\Api\Inventory\Dto\FullInventoryDetailsResponse;
 use Taler\Exception\TalerException;
 
 class InventoryClient extends AbstractApiClient
@@ -266,6 +268,28 @@ class InventoryClient extends AbstractApiClient
     public function deleteProductAsync(string $productId, array $headers = []): mixed
     {
         return DeleteProduct::runAsync($this, $productId, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return FullInventoryDetailsResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getPos(array $headers = []): FullInventoryDetailsResponse|array
+    {
+        return GetPos::run($this, $headers);
+    }
+
+    /**
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getPosAsync(array $headers = []): mixed
+    {
+        return GetPos::runAsync($this, $headers);
     }
 }
 
