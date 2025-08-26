@@ -63,16 +63,6 @@ class DeleteProduct
 
     private function handleResponse(ResponseInterface $response): void
     {
-        $status = $response->getStatusCode();
-        if ($status === 204) {
-            $this->client->parseResponseBody($response, 204);
-            return;
-        }
-        if ($status === 404) {
-            // treat as no-op per docs
-            return;
-        }
-
         // for other statuses (e.g., 409), throw
         $this->client->parseResponseBody($response, 204);
     }
