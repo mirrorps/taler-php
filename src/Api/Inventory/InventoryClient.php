@@ -14,6 +14,7 @@ use Taler\Api\Inventory\Actions\GetProducts;
 use Taler\Api\Inventory\Actions\GetProduct;
 use Taler\Api\Inventory\Actions\DeleteProduct;
 use Taler\Api\Inventory\Actions\GetPos;
+use Taler\Api\Inventory\Actions\LockProduct;
 use Taler\Api\Inventory\Dto\CategoryListResponse;
 use Taler\Api\Inventory\Dto\CategoryProductList;
 use Taler\Api\Inventory\Dto\CategoryCreateRequest;
@@ -24,6 +25,7 @@ use Taler\Api\Inventory\Dto\GetProductsRequest;
 use Taler\Api\Inventory\Dto\InventorySummaryResponse;
 use Taler\Api\Inventory\Dto\ProductDetail;
 use Taler\Api\Inventory\Dto\FullInventoryDetailsResponse;
+use Taler\Api\Inventory\Dto\LockRequest;
 use Taler\Exception\TalerException;
 
 class InventoryClient extends AbstractApiClient
@@ -290,6 +292,32 @@ class InventoryClient extends AbstractApiClient
     public function getPosAsync(array $headers = []): mixed
     {
         return GetPos::runAsync($this, $headers);
+    }
+
+    /**
+     * @param string $productId
+     * @param LockRequest $request
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function lockProduct(string $productId, LockRequest $request, array $headers = []): void
+    {
+        LockProduct::run($this, $productId, $request, $headers);
+    }
+
+    /**
+     * @param string $productId
+     * @param LockRequest $request
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function lockProductAsync(string $productId, LockRequest $request, array $headers = []): mixed
+    {
+        return LockProduct::runAsync($this, $productId, $request, $headers);
     }
 }
 
