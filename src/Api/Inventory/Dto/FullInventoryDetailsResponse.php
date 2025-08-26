@@ -19,33 +19,45 @@ class FullInventoryDetailsResponse
     ) {}
 
     /**
-     * @param array{
-     *   products: array<int, array{
-     *     product_serial: int,
-     *     product_id: string,
-     *     product_name: string,
-     *     categories: array<int,int>,
-     *     description: string,
-     *     description_i18n: array<string,string>,
-     *     unit: string,
-     *     price: string,
-     *     image?: string,
-     *     taxes?: array<int, array{name: string, tax: string}>,
-     *     total_stock?: int,
-     *     minimum_age?: int
-     *   }>,
-     *   categories: array<int, array{id: int, name: string, name_i18n?: array<string,string>}>}
+     * @param array<string, mixed> $data
      */
     public static function createFromArray(array $data): self
     {
+        /**
+         * @var array<int, array{
+         *   product_serial: int,
+         *   product_id: string,
+         *   product_name: string,
+         *   categories: array<int, int>,
+         *   description: string,
+         *   description_i18n: array<string, string>,
+         *   unit: string,
+         *   price: string,
+         *   image?: string,
+         *   taxes?: array<int, array{name: string, tax: string}>,
+         *   total_stock?: int,
+         *   minimum_age?: int
+         * }> $products
+         */
+        $products = $data['products'];
+
+        /**
+         * @var array<int, array{
+         *   id: int,
+         *   name: string,
+         *   name_i18n?: array<string, string>
+         * }> $categories
+         */
+        $categories = $data['categories'];
+
         return new self(
             products: array_map(
                 static fn(array $p) => MerchantPosProductDetail::createFromArray($p),
-                $data['products']
+                $products
             ),
             categories: array_map(
                 static fn(array $c) => MerchantCategory::createFromArray($c),
-                $data['categories']
+                $categories
             )
         );
     }
