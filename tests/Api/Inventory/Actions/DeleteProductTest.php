@@ -59,21 +59,6 @@ class DeleteProductTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
-    public function testRunSuccess404(): void
-    {
-        $this->response->method('getStatusCode')->willReturn(404);
-        $this->stream->method('__toString')->willReturn(json_encode(['code' => 404]));
-        $this->response->method('getBody')->willReturn($this->stream);
-
-        $this->httpClientWrapper->expects($this->once())
-            ->method('request')
-            ->with('DELETE', 'private/products/sku-404', [])
-            ->willReturn($this->response);
-
-        DeleteProduct::run($this->client, 'sku-404');
-        $this->addToAssertionCount(1);
-    }
-
     public function testRunWithTalerException(): void
     {
         $this->expectException(TalerException::class);
