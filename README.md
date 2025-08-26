@@ -403,6 +403,192 @@ Array response example:
 
 ---
 
+## Inventory
+
+Reference: Merchant Backend Inventory API.
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$inventory = $taler->inventory();
+```
+
+### Categories
+
+#### Get Categories
+
+```php
+$list = $inventory->getCategories(); // CategoryListResponse
+
+foreach ($list->categories as $entry) {
+    echo $entry->category_id;  // int
+    echo $entry->name;         // string
+    echo $entry->product_count;// int
+}
+```
+
+#### Get Category
+
+```php
+$category = $inventory->getCategory(1); // CategoryProductList
+
+echo $category->name; // string
+foreach ($category->products as $p) {
+    echo $p->product_id; // string
+}
+```
+
+#### Create Category
+
+```php
+use Taler\Api\Inventory\Dto\CategoryCreateRequest;
+
+$req = new CategoryCreateRequest(
+    name: 'Beverages',
+    name_i18n: ['de' => 'Getränke']
+);
+
+$created = $inventory->createCategory($req); // CategoryCreatedResponse
+echo $created->category_id; // int
+```
+
+#### Update Category
+
+```php
+use Taler\Api\Inventory\Dto\CategoryCreateRequest;
+
+$patch = new CategoryCreateRequest(
+    name: 'Drinks'
+);
+
+$inventory->updateCategory(1, $patch); // 204 No Content on success
+```
+
+#### Delete Category
+
+```php
+$inventory->deleteCategory(1); // 204 No Content. May throw on not found.
+```
+
+### Products
+
+#### Get Products
+
+```php
+use Taler\Api\Inventory\Dto\GetProductsRequest;
+
+$req = new GetProductsRequest(limit: 20, offset: '10');
+$summary = $inventory->getProducts($req); // InventorySummaryResponse
+
+foreach ($summary->products as $entry) {
+    echo $entry->product_id;    // string
+    echo $entry->product_serial; // int
+}
+```
+
+#### Get Product
+
+```php
+$product = $inventory->getProduct('coffee-1kg'); // ProductDetail
+
+echo $product->product_name; // string
+echo $product->price;        // Amount as string, e.g. "EUR:12.50"
+```
+
+#### Create Product
+
+```php
+use Taler\Api\Inventory\Dto\ProductAddDetail;
+use Taler\Api\Dto\RelativeTime;
+
+$details = new ProductAddDetail(
+    product_id: 'coffee-1kg',
+    description: 'Arabica beans 1kg',
+    unit: 'kg',
+    price: 'EUR:12.50',
+    total_stock: 100,
+    product_name: 'Coffee Beans',
+);
+
+$inventory->createProduct($details); // 204 No Content
+```
+
+#### Update Product
+
+```php
+use Taler\Api\Inventory\Dto\ProductPatchDetail;
+
+$patch = new ProductPatchDetail(
+    description: 'Arabica beans 1kg (fresh roast)',
+    unit: 'kg',
+    price: 'EUR:12.50',
+    total_stock: 150
+);
+
+$inventory->updateProduct('coffee-1kg', $patch); // 204 No Content
+```
+
+#### Delete Product
+
+```php
+$inventory->deleteProduct('coffee-1kg'); // 204 No Content. 404 may be treated as no-op.
+```
+
+### POS Configuration
+
+```php
+$pos = $inventory->getPos(); // FullInventoryDetailsResponse
+
+foreach ($pos->categories as $cat) {
+    echo $cat->id . ':' . $cat->name . "\n";
+}
+
+foreach ($pos->products as $p) {
+    echo $p->product_id . ' => ' . $p->price . "\n";
+}
+```
+
+### Lock Product Quantity
+
+Lock or unlock a quantity for a short duration.
+
+```php
+use Taler\Api\Inventory\Dto\LockRequest;
+use Taler\Api\Dto\RelativeTime;
+
+$lock = new LockRequest(
+    lock_uuid: '123e4567-e89b-12d3-a456-426614174000',
+    duration: new RelativeTime(60_000_000), // 60 seconds
+    quantity: 2                              
+);
+
+$inventory->lockProduct('coffee-1kg', $lock); // 204 No Content
+```
+
+### Raw Array Response
+
+Like other clients, you can disable DTO wrapping:
+
+```php
+$array = $taler
+    ->config(['wrapResponse' => false])
+    ->inventory()
+    ->getProducts();
+```
+
+### Asynchronous Operations
+
+All Inventory methods support asynchronous operations using the `Async` suffix (e.g., `getProductsAsync`, `getPosAsync`, `lockProductAsync`).
+
+---
+
 ## Tracking Wire Transfers
 Reference: [Merchant Backend: GET /instances/$INSTANCE/private/transfers](https://docs.taler.net/core/api-merchant.html#get-[-instances-$INSTANCE]-private-transfers)
 
