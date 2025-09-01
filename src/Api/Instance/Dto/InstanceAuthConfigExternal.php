@@ -7,7 +7,7 @@ namespace Taler\Api\Instance\Dto;
  *
  * @deprecated since v20
  */
-class InstanceAuthConfigExternal
+class InstanceAuthConfigExternal implements \JsonSerializable
 {
     const METHOD = 'external';
     
@@ -29,5 +29,17 @@ class InstanceAuthConfigExternal
     public static function createFromArray(array $data): self
     {
         return new self();
+    }
+
+    /**
+     * Serializes the object to JSON.
+     *
+     * @return array{method: string}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'method' => self::METHOD
+        ];
     }
 }
