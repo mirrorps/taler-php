@@ -10,6 +10,7 @@ use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\Exchange\ExchangeClient;
 use Taler\Api\OtpDevices\OtpDevicesClient;
 use Taler\Api\Inventory\InventoryClient;
+use Taler\Api\Instance\InstanceClient;
 use Taler\Api\WireTransfers\WireTransfersClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
@@ -33,6 +34,7 @@ class Taler
     protected \Taler\Api\TokenFamilies\TokenFamiliesClient $tokenFamilies;
     protected WebhooksClient $webhooks;
     protected InventoryClient $inventory;
+    protected InstanceClient $instance;
     /**
      * Taler constructor.
      * 
@@ -260,6 +262,21 @@ class Taler
         );
 
         return $this->inventory;
+    }
+
+    /**
+     * Get the Instance API client instance
+     *
+     * @return InstanceClient
+     */
+    public function instance(): InstanceClient
+    {
+        $this->instance ??= new InstanceClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->instance;
     }
 
     /**
