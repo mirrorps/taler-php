@@ -99,7 +99,7 @@ class InstanceClientTest extends TestCase
     public function testForgotPasswordReturnsChallenge(): void
     {
         $authConfig = new InstanceAuthConfigToken('new-password');
-        $challenge = new Challenge('challenge-123', 'sms');
+        $challenge = new Challenge('challenge-123');
 
         $this->instanceClient
             ->expects($this->once())
@@ -109,8 +109,7 @@ class InstanceClientTest extends TestCase
 
         $result = $this->instanceClient->forgotPassword('test-instance', $authConfig, []);
         $this->assertInstanceOf(Challenge::class, $result);
-        $this->assertEquals('challenge-123', $result->getId());
-        $this->assertEquals('sms', $result->getType());
+        $this->assertEquals('challenge-123', $result->getChallengeId());
     }
 
     /**

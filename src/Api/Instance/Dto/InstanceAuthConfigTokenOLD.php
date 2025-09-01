@@ -7,7 +7,7 @@ namespace Taler\Api\Instance\Dto;
  *
  * @deprecated since v19
  */
-class InstanceAuthConfigTokenOLD
+class InstanceAuthConfigTokenOLD implements \JsonSerializable
 {
     const METHOD = 'token';
     
@@ -54,5 +54,18 @@ class InstanceAuthConfigTokenOLD
         return new self(
             token: $data['token']
         );
+    }
+
+    /**
+     * Serializes the object to JSON.
+     *
+     * @return array{method: string, token: string}
+     */
+    public function jsonSerialize(): array
+    {
+        return [
+            'method' => self::METHOD,
+            'token' => $this->token
+        ];
     }
 }
