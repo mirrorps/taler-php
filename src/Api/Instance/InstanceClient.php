@@ -10,6 +10,8 @@ use Taler\Api\Instance\Dto\InstanceAuthConfigExternal;
 use Taler\Api\Instance\Dto\Challenge;
 use Taler\Api\Instance\Dto\LoginTokenRequest;
 use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
+use Taler\Api\Instance\Dto\GetAccessTokensRequest;
+use Taler\Api\Instance\Dto\TokenInfos;
 use Taler\Exception\TalerException;
 
 /**
@@ -163,5 +165,45 @@ class InstanceClient extends AbstractApiClient
         array $headers = []
     ): mixed {
         return Actions\GetAccessToken::runAsync($this, $instanceId, $loginTokenRequest, $headers);
+    }
+
+    /**
+     * Retrieve a list of issued access tokens.
+     *
+     * @param string $instanceId The instance ID
+     * @param GetAccessTokensRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return TokenInfos|array<string, mixed>|null Null if 204 No Content
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getAccessTokens(
+        string $instanceId,
+        ?GetAccessTokensRequest $request = null,
+        array $headers = []
+    ): TokenInfos|array|null {
+        return Actions\GetAccessTokens::run($this, $instanceId, $request, $headers);
+    }
+
+    /**
+     * Retrieve a list of issued access tokens asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param GetAccessTokensRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getAccessTokensAsync(
+        string $instanceId,
+        ?GetAccessTokensRequest $request = null,
+        array $headers = []
+    ): mixed {
+        return Actions\GetAccessTokens::runAsync($this, $instanceId, $request, $headers);
     }
 }
