@@ -8,6 +8,8 @@ use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
 use Taler\Api\Instance\Dto\InstanceAuthConfigTokenOLD;
 use Taler\Api\Instance\Dto\InstanceAuthConfigExternal;
 use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\Instance\Dto\LoginTokenRequest;
+use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
 use Taler\Exception\TalerException;
 
 /**
@@ -121,5 +123,45 @@ class InstanceClient extends AbstractApiClient
         array $headers = []
     ): mixed {
         return Actions\UpdateAuth::runAsync($this, $instanceId, $authConfig, $headers);
+    }
+
+    /**
+     * Retrieve an access token for the merchant API for instance $INSTANCE.
+     *
+     * @param string $instanceId The instance ID
+     * @param LoginTokenRequest $loginTokenRequest The login token request
+     * @param array<string, string> $headers Optional request headers
+     * @return LoginTokenSuccessResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getAccessToken(
+        string $instanceId,
+        LoginTokenRequest $loginTokenRequest,
+        array $headers = []
+    ): LoginTokenSuccessResponse|array {
+        return Actions\GetAccessToken::run($this, $instanceId, $loginTokenRequest, $headers);
+    }
+
+    /**
+     * Retrieve an access token asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param LoginTokenRequest $loginTokenRequest The login token request
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getAccessTokenAsync(
+        string $instanceId,
+        LoginTokenRequest $loginTokenRequest,
+        array $headers = []
+    ): mixed {
+        return Actions\GetAccessToken::runAsync($this, $instanceId, $loginTokenRequest, $headers);
     }
 }
