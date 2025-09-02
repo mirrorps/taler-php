@@ -82,4 +82,44 @@ class InstanceClient extends AbstractApiClient
     ): mixed {
         return Actions\ForgotPassword::runAsync($this, $instanceId, $authConfig, $headers);
     }
+
+    /**
+     * Updates the authentication settings for a merchant instance.
+     *
+     * @param string $instanceId The instance ID
+     * @param InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig The authentication configuration
+     * @param array<string, string> $headers Optional request headers
+     * @return Challenge|null Returns Challenge if 2FA is required, null on success
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v21
+     */
+    public function updateAuth(
+        string $instanceId,
+        InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig,
+        array $headers = []
+    ): ?Challenge {
+        return Actions\UpdateAuth::run($this, $instanceId, $authConfig, $headers);
+    }
+
+    /**
+     * Updates the authentication settings for a merchant instance asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig The authentication configuration
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v21
+     */
+    public function updateAuthAsync(
+        string $instanceId,
+        InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig,
+        array $headers = []
+    ): mixed {
+        return Actions\UpdateAuth::runAsync($this, $instanceId, $authConfig, $headers);
+    }
 }
