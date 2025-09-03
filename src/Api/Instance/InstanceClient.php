@@ -12,6 +12,7 @@ use Taler\Api\Instance\Dto\LoginTokenRequest;
 use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
 use Taler\Api\Instance\Dto\GetAccessTokensRequest;
 use Taler\Api\Instance\Dto\TokenInfos;
+use Taler\Api\Instance\Dto\InstanceReconfigurationMessage;
 use Taler\Exception\TalerException;
 
 /**
@@ -281,5 +282,45 @@ class InstanceClient extends AbstractApiClient
         array $headers = []
     ): mixed {
         return Actions\DeleteAccessTokenBySerial::runAsync($this, $instanceId, $serial, $headers);
+    }
+
+    /**
+     * Update the configuration of a merchant instance.
+     *
+     * @param string $instanceId The instance ID
+     * @param InstanceReconfigurationMessage $message The reconfiguration message
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function updateInstance(
+        string $instanceId,
+        InstanceReconfigurationMessage $message,
+        array $headers = []
+    ): void {
+        Actions\UpdateInstance::run($this, $instanceId, $message, $headers);
+    }
+
+    /**
+     * Update the configuration of a merchant instance asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param InstanceReconfigurationMessage $message The reconfiguration message
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function updateInstanceAsync(
+        string $instanceId,
+        InstanceReconfigurationMessage $message,
+        array $headers = []
+    ): mixed {
+        return Actions\UpdateInstance::runAsync($this, $instanceId, $message, $headers);
     }
 }
