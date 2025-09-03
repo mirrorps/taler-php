@@ -206,4 +206,40 @@ class InstanceClient extends AbstractApiClient
     ): mixed {
         return Actions\GetAccessTokens::runAsync($this, $instanceId, $request, $headers);
     }
+
+    /**
+     * Delete the token presented in the authorization header for the instance.
+     *
+     * @param string $instanceId The instance ID
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function deleteAccessToken(
+        string $instanceId,
+        array $headers = []
+    ): void {
+        Actions\DeleteAccessToken::run($this, $instanceId, $headers);
+    }
+
+    /**
+     * Delete the token asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function deleteAccessTokenAsync(
+        string $instanceId,
+        array $headers = []
+    ): mixed {
+        return Actions\DeleteAccessToken::runAsync($this, $instanceId, $headers);
+    }
 }
