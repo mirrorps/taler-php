@@ -323,4 +323,34 @@ class InstanceClient extends AbstractApiClient
     ): mixed {
         return Actions\UpdateInstance::runAsync($this, $instanceId, $message, $headers);
     }
+
+    /**
+     * Retrieve the list of all merchant instances (admin only).
+     *
+     * @param array<string, string> $headers Optional request headers
+     * @return \Taler\Api\Instance\Dto\InstancesResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getInstances(array $headers = []): \Taler\Api\Instance\Dto\InstancesResponse|array
+    {
+        return Actions\GetInstances::run($this, $headers);
+    }
+
+    /**
+     * Retrieve the list of all merchant instances asynchronously.
+     *
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getInstancesAsync(array $headers = []): mixed
+    {
+        return Actions\GetInstances::runAsync($this, $headers);
+    }
 }
