@@ -242,4 +242,44 @@ class InstanceClient extends AbstractApiClient
     ): mixed {
         return Actions\DeleteAccessToken::runAsync($this, $instanceId, $headers);
     }
+
+    /**
+     * Delete a token for $INSTANCE API access by its $SERIAL.
+     *
+     * @param string $instanceId The instance ID
+     * @param int $serial The token serial to delete
+     * @param array<string, string> $headers Optional request headers
+     * @return void
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function deleteAccessTokenBySerial(
+        string $instanceId,
+        int $serial,
+        array $headers = []
+    ): void {
+        Actions\DeleteAccessTokenBySerial::run($this, $instanceId, $serial, $headers);
+    }
+
+    /**
+     * Delete a token by serial asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param int $serial The token serial to delete
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function deleteAccessTokenBySerialAsync(
+        string $instanceId,
+        int $serial,
+        array $headers = []
+    ): mixed {
+        return Actions\DeleteAccessTokenBySerial::runAsync($this, $instanceId, $serial, $headers);
+    }
 }
