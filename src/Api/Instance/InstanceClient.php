@@ -13,6 +13,7 @@ use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
 use Taler\Api\Instance\Dto\GetAccessTokensRequest;
 use Taler\Api\Instance\Dto\TokenInfos;
 use Taler\Api\Instance\Dto\InstanceReconfigurationMessage;
+use Taler\Api\Instance\Dto\QueryInstancesResponse;
 use Taler\Exception\TalerException;
 
 /**
@@ -352,5 +353,37 @@ class InstanceClient extends AbstractApiClient
     public function getInstancesAsync(array $headers = []): mixed
     {
         return Actions\GetInstances::runAsync($this, $headers);
+    }
+
+    /**
+     * Query a specific merchant instance.
+     *
+     * @param string $instanceId The instance ID
+     * @param array<string, string> $headers Optional request headers
+     * @return QueryInstancesResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getInstance(string $instanceId, array $headers = []): QueryInstancesResponse|array
+    {
+        return Actions\GetInstance::run($this, $instanceId, $headers);
+    }
+
+    /**
+     * Query a specific merchant instance asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     *
+     * @since v19
+     */
+    public function getInstanceAsync(string $instanceId, array $headers = []): mixed
+    {
+        return Actions\GetInstance::runAsync($this, $instanceId, $headers);
     }
 }
