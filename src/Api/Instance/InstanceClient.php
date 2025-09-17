@@ -386,4 +386,44 @@ class InstanceClient extends AbstractApiClient
     {
         return Actions\GetInstance::runAsync($this, $instanceId, $headers);
     }
+
+    /**
+     * Retrieve merchant statistics where values are amounts for the given $SLUG.
+     *
+     * @param string $instanceId The instance ID
+     * @param string $slug The statistics slug
+     * @param \Taler\Api\Instance\Dto\GetMerchantStatisticsAmountRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return \Taler\Api\Instance\Dto\MerchantStatisticsAmountResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getMerchantStatisticsAmount(
+        string $instanceId,
+        string $slug,
+        ?\Taler\Api\Instance\Dto\GetMerchantStatisticsAmountRequest $request = null,
+        array $headers = []
+    ): \Taler\Api\Instance\Dto\MerchantStatisticsAmountResponse|array {
+        return Actions\GetMerchantStatisticsAmount::run($this, $instanceId, $slug, $request, $headers);
+    }
+
+    /**
+     * Retrieve merchant statistics where values are amounts asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param string $slug The statistics slug
+     * @param \Taler\Api\Instance\Dto\GetMerchantStatisticsAmountRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getMerchantStatisticsAmountAsync(
+        string $instanceId,
+        string $slug,
+        ?\Taler\Api\Instance\Dto\GetMerchantStatisticsAmountRequest $request = null,
+        array $headers = []
+    ): mixed {
+        return Actions\GetMerchantStatisticsAmount::runAsync($this, $instanceId, $slug, $request, $headers);
+    }
 }
