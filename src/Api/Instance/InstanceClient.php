@@ -210,6 +210,42 @@ class InstanceClient extends AbstractApiClient
     }
 
     /**
+     * Check KYC status of a particular payment target.
+     *
+     * @param string $instanceId The instance ID
+     * @param \Taler\Api\Instance\Dto\GetKycStatusRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return \Taler\Api\Instance\Dto\MerchantAccountKycRedirectsResponse|array<string, mixed>|null Null if 204 No Content
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getKycStatus(
+        string $instanceId,
+        ?\Taler\Api\Instance\Dto\GetKycStatusRequest $request = null,
+        array $headers = []
+    ): \Taler\Api\Instance\Dto\MerchantAccountKycRedirectsResponse|array|null {
+        return Actions\GetKycStatus::run($this, $instanceId, $request, $headers);
+    }
+
+    /**
+     * Check KYC status asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param \Taler\Api\Instance\Dto\GetKycStatusRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getKycStatusAsync(
+        string $instanceId,
+        ?\Taler\Api\Instance\Dto\GetKycStatusRequest $request = null,
+        array $headers = []
+    ): mixed {
+        return Actions\GetKycStatus::runAsync($this, $instanceId, $request, $headers);
+    }
+
+    /**
      * Delete the token presented in the authorization header for the instance.
      *
      * @param string $instanceId The instance ID
