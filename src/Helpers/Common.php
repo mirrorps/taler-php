@@ -25,6 +25,13 @@ if (!function_exists('isValidUrl')) {
             return false;
         }
 
+        // Disallow userinfo (user:pass@) in URLs
+        $user = parse_url($sanitizedUrl, PHP_URL_USER);
+        $pass = parse_url($sanitizedUrl, PHP_URL_PASS);
+        if ($user !== null || $pass !== null) {
+            return false;
+        }
+
         // Get host from URL
         $host = parse_url($sanitizedUrl, PHP_URL_HOST);
         if ($host === false || $host === null) {

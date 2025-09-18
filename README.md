@@ -1892,15 +1892,26 @@ $taler = Factory::create([
 
 The SDK logs the following information:
 
-- HTTP request details (URL, method, headers, body)
-- HTTP response details (status code, headers, body)
+- HTTP request details (URL, method, headers)
+- HTTP response details (status code, sanitized headers, sanitized body preview)
 - Error conditions and exceptions
 - API operation failures
+
+Notes:
+- Request body logging is disabled.
+- Response body logging is sanitized and truncated:
+  - Secrets (e.g., Authorization tokens, access_token, api_key, client_secret, password) are redacted.
+  - Sensitive headers such as Authorization, Cookie, and Set-Cookie are redacted.
+  - URL userinfo (user:pass@) is redacted in logs.
+  - Only a preview (up to ~4KB) is logged; non-seekable streams are skipped.
 
 ### Log Levels Used
 
 - **DEBUG**: Detailed request/response information
 - **ERROR**: API errors, request failures, and exceptions
+
+Performance note:
+- Enabling DEBUG logging increases overhead due to header redaction and response body sanitization. For large responses this can be noticeable. If you do not need logging, do not provide a logger when creating the Taler instance.
 
 ### Example Log Output
 
