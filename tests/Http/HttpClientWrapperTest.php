@@ -18,6 +18,8 @@ use Psr\Http\Message\ResponseInterface;
 use League\Uri\Http;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
+use Monolog\Logger as MonoLogger;
+use Monolog\Handler\TestHandler;
 
 class HttpClientWrapperTest extends TestCase
 {
@@ -299,6 +301,58 @@ class HttpClientWrapperTest extends TestCase
         $lastRequest = $this->mockClient->getLastRequest();
 
         $this->assertEquals(self::AUTH_TOKEN, $lastRequest->getHeaderLine('Authorization'));
+    }
+
+    /** @test */
+    public function it_logs_response_body_and_sanitizes_and_truncates(): void
+    {
+        $testHandler = new TestHandler(MonoLogger::DEBUG);
+        $monoLogger = new MonoLogger('test');
+        $monoLogger->pushHandler($testHandler);
+
+        $wrapper = new HttpClientWrapper(
+            $this->config,
+            $this->mockClient,
+            $monoLogger,
+            $this->factory,
+            $this->factory,
+            true
+        );
+
+        $payload = json_encode([
+            'access_token' => 'abc123',
+            'details' => ['password' => 'top-secret', 'note' => 'ok']
+        ], JSON_THROW_ON_ERROR);
+        $response = $this->factory->createResponse(200)
+            ->withHeader('Content-Type', 'application/json')
+            ->withHeader('Set-Cookie', 'sid=xyz; HttpOnly');
+        $response = $response->withBody($this->factory->createStream($payload));
+        $this->mockClient->addResponse($response);
+
+        $wrapper->request('GET', 'config');
+
+        $records = $testHandler->getRecords();
+
+        $responseHeadersRecord = null;
+        $responseBodyRecord = null;
+        foreach ($records as $rec) {
+            if (isset($rec['message']) && $rec['message'] === 'Taler response headers: ') {
+                $responseHeadersRecord = $rec;
+            }
+            if (isset($rec['message']) && str_starts_with($rec['message'], 'Taler response body: ')) {
+                $responseBodyRecord = $rec;
+            }
+        }
+
+        $this->assertNotNull($responseHeadersRecord, 'Response headers were not logged');
+        $this->assertArrayHasKey('Set-Cookie', $responseHeadersRecord['context']);
+        $this->assertSame(['***'], $responseHeadersRecord['context']['Set-Cookie']);
+
+        $this->assertNotNull($responseBodyRecord, 'Response body was not logged');
+        $this->assertStringNotContainsString('abc123', $responseBodyRecord['message']);
+        $this->assertStringNotContainsString('top-secret', $responseBodyRecord['message']);
+        $this->assertStringContainsString('"access_token":"***"', $responseBodyRecord['message']);
+        $this->assertStringContainsString('"password":"***"', $responseBodyRecord['message']);
     }
 
     /** @test */
