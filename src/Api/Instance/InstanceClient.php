@@ -466,4 +466,40 @@ class InstanceClient extends AbstractApiClient
     ): mixed {
         return Actions\GetMerchantStatisticsCounter::runAsync($this, $instanceId, $slug, $request, $headers);
     }
+
+    /**
+     * Delete (disable) or purge a merchant instance.
+     *
+     * @param string $instanceId The instance ID
+     * @param bool $purge If true, include purge=YES
+     * @param array<string, string> $headers Optional request headers
+     * @return Dto\Challenge|null Returns Challenge if 2FA is required (202), null on success (204)
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteInstance(
+        string $instanceId,
+        bool $purge = false,
+        array $headers = []
+    ): ?Dto\Challenge {
+        return Actions\DeleteInstance::run($this, $instanceId, $purge, $headers);
+    }
+
+    /**
+     * Delete (disable) or purge a merchant instance asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param bool $purge If true, include purge=YES
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function deleteInstanceAsync(
+        string $instanceId,
+        bool $purge = false,
+        array $headers = []
+    ): mixed {
+        return Actions\DeleteInstance::runAsync($this, $instanceId, $purge, $headers);
+    }
 }
