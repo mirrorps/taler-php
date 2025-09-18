@@ -426,4 +426,44 @@ class InstanceClient extends AbstractApiClient
     ): mixed {
         return Actions\GetMerchantStatisticsAmount::runAsync($this, $instanceId, $slug, $request, $headers);
     }
+
+    /**
+     * Retrieve merchant statistics where values are counters for the given $SLUG.
+     *
+     * @param string $instanceId The instance ID
+     * @param string $slug The statistics slug
+     * @param \Taler\Api\Instance\Dto\GetMerchantStatisticsCounterRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return \Taler\Api\Instance\Dto\MerchantStatisticsCounterResponse|array<string, mixed>
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getMerchantStatisticsCounter(
+        string $instanceId,
+        string $slug,
+        ?\Taler\Api\Instance\Dto\GetMerchantStatisticsCounterRequest $request = null,
+        array $headers = []
+    ): \Taler\Api\Instance\Dto\MerchantStatisticsCounterResponse|array {
+        return Actions\GetMerchantStatisticsCounter::run($this, $instanceId, $slug, $request, $headers);
+    }
+
+    /**
+     * Retrieve merchant statistics where values are counters asynchronously.
+     *
+     * @param string $instanceId The instance ID
+     * @param string $slug The statistics slug
+     * @param \Taler\Api\Instance\Dto\GetMerchantStatisticsCounterRequest|null $request Optional query parameters
+     * @param array<string, string> $headers Optional request headers
+     * @return mixed
+     * @throws TalerException
+     * @throws \Throwable
+     */
+    public function getMerchantStatisticsCounterAsync(
+        string $instanceId,
+        string $slug,
+        ?\Taler\Api\Instance\Dto\GetMerchantStatisticsCounterRequest $request = null,
+        array $headers = []
+    ): mixed {
+        return Actions\GetMerchantStatisticsCounter::runAsync($this, $instanceId, $slug, $request, $headers);
+    }
 }
