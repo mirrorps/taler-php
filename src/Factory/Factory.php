@@ -20,7 +20,8 @@ class Factory
      *     client?: ClientInterface|null,
      *     logger?: LoggerInterface|null,
      *     cache?: CacheInterface|null,
-     *     wrapResponse?: bool
+     *     wrapResponse?: bool,
+     *     debugLoggingEnabled?: bool
      * } $options Configuration options for creating Taler instance
      * @throws InvalidArgumentException when base_url is empty
      */
@@ -31,11 +32,13 @@ class Factory
         $logger = $options['logger'] ?? null;
         $cache = $options['cache'] ?? null;
         $wrapResponse = $options['wrapResponse'] ?? true;
+        $debugLoggingEnabled = $options['debugLoggingEnabled'] ?? false;
 
         $config = new TalerConfig(
             baseUrl: $options['base_url'],
             authToken: $token,
-            wrapResponse: $wrapResponse
+            wrapResponse: $wrapResponse,
+            debugLoggingEnabled: $debugLoggingEnabled
         );
 
         return new Taler(

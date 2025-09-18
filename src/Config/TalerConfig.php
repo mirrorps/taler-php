@@ -17,7 +17,8 @@ class TalerConfig
     public function __construct(
         private string $baseUrl,
         private string $authToken = '',
-        private bool $wrapResponse = true
+        private bool $wrapResponse = true,
+        private bool $debugLoggingEnabled = false
     ) {
         $this->validate();
     }
@@ -50,6 +51,15 @@ class TalerConfig
     public function getWrapResponse(): bool
     {
         return $this->wrapResponse;
+    }
+
+    /**
+     * Whether DEBUG-level SDK logging is enabled.
+     * When disabled, request/response debug logging is skipped entirely to avoid overhead.
+     */
+    public function isDebugLoggingEnabled(): bool
+    {
+        return $this->debugLoggingEnabled;
     }
 
     /**
@@ -107,7 +117,8 @@ class TalerConfig
     {
         return json_encode([
             'baseUrl'      => $this->baseUrl,
-            'wrapResponse' => $this->wrapResponse
+            'wrapResponse' => $this->wrapResponse,
+            'debugLogging' => $this->debugLoggingEnabled
         ], JSON_THROW_ON_ERROR);
     }
 

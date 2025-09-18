@@ -61,6 +61,8 @@ $taler = Factory::create([
 - `token`: Your authentication token ( ⚠️ do **not** hardcode; use environment variables or secure storage in your application).
 - `wrapResponse`: (Optional) Boolean flag to control DTO wrapping of responses. Defaults to `true`. When set to `false`, methods return raw array responses from Taler.
 - `httpClient`: (Optional) A PSR-18 compatible HTTP client instance.
+- `logger`: (Optional) A PSR-3 compatible logger. If omitted, the SDK performs no logging.
+- `debugLoggingEnabled`: (Optional) Boolean flag to enable SDK DEBUG logging. Defaults to `false`. When `false`, the SDK skips all debug logging work (zero overhead).
 
 ### Basic Example
 ```php
@@ -1880,11 +1882,12 @@ use Monolog\Handler\StreamHandler;
 $logger = new Logger('taler');
 $logger->pushHandler(new StreamHandler('path/to/your.log', Logger::DEBUG));
 
-// Initialize Taler with logger
+// Initialize Taler with logger (and enable SDK debug logging)
 $taler = Factory::create([
     'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
     'token'    => 'Bearer token',
-    'logger'   => $logger
+    'logger'   => $logger,
+    'debugLoggingEnabled' => true
 ]);
 ```
 
@@ -1898,11 +1901,14 @@ The SDK logs the following information:
 - API operation failures
 
 Notes:
+- Logging is performed only when `debugLoggingEnabled` is `true`. Otherwise, the SDK does not execute any logging code paths (zero overhead).
 - Request body logging is disabled.
 - Response body logging is sanitized and truncated:
   - Secrets (e.g., Authorization tokens, access_token, api_key, client_secret, password) are redacted.
   - Sensitive headers such as Authorization, Cookie, and Set-Cookie are redacted.
   - URL userinfo (user:pass@) is redacted in logs.
+  - Sensitive query parameters in URLs (e.g., `authorization`, `access_token`, `token`, `api_key`, `api-key`, `client_secret`, `password`, `pwd`, `merchant_sig`, `lpt`) are redacted.
+  - URL-bearing headers like `Location` and `Content-Location` are sanitized (including query redaction).
   - Only a preview (up to ~4KB) is logged; non-seekable streams are skipped.
 
 ### Log Levels Used
@@ -1911,7 +1917,19 @@ Notes:
 - **ERROR**: API errors, request failures, and exceptions
 
 Performance note:
-- Enabling DEBUG logging increases overhead due to header redaction and response body sanitization. For large responses this can be noticeable. If you do not need logging, do not provide a logger when creating the Taler instance.
+- Enabling DEBUG logging increases overhead due to header redaction and response body sanitization. For large responses this can be noticeable. If you do not need logging, do not provide a logger and keep `debugLoggingEnabled` as `false` (default).
+
+### Toggle at Runtime
+
+You can enable or disable SDK debug logging at runtime:
+
+```php
+// Enable
+$taler->config(['debugLoggingEnabled' => true]);
+
+// Disable
+$taler->config(['debugLoggingEnabled' => false]);
+```
 
 ### Example Log Output
 

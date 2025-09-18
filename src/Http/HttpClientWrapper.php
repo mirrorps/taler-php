@@ -65,12 +65,17 @@ class HttpClientWrapper
 	): ResponseInterface
 	{
 		$request = $this->createRequest($method, $endpoint, $headers, $body);
-		$this->logRequest($request);
+        
+        if ($this->config->isDebugLoggingEnabled()) {
+            $this->logRequest($request);
+        }
 
 		try {
 			$response = $this->client->sendRequest($request);
 		
-			$this->logResponse($response);
+            if ($this->config->isDebugLoggingEnabled()) {
+                $this->logResponse($response);
+            }
 
 			if ($this->wrapResponse) {
 				return new TalerResponse($response);
@@ -113,7 +118,9 @@ class HttpClientWrapper
 
 		$request = $this->createRequest($method, $endpoint, $headers, $body);
 		
-		$this->logRequest($request);
+        if ($this->config->isDebugLoggingEnabled()) {
+            $this->logRequest($request);
+        }
 		
 		try {
 			return $this->client->sendAsyncRequest($request); // @phpstan-ignore-line: $this->client is guaranteed to be an async client by the instanceof check above
@@ -211,7 +218,60 @@ class HttpClientWrapper
 
 	private function sanitizeUri(string $uri): string
 	{
-		return preg_replace('#//[^/@:]+:[^/@]*@#', '//***:***@', $uri) ?? $uri;
+        // Parse and rebuild the URL while redacting userinfo and sensitive query params
+        $parts = @parse_url($uri);
+        if ($parts === false) {
+            return preg_replace('#//[^/@:]+:[^/@]*@#', '//***:***@', $uri) ?? $uri;
+        }
+
+        $scheme = $parts['scheme'] ?? null;
+        $host = $parts['host'] ?? '';
+        $port = isset($parts['port']) ? (int) $parts['port'] : null;
+        $path = $parts['path'] ?? '';
+        $fragment = $parts['fragment'] ?? null;
+
+        // Redact sensitive query parameters
+        $queryString = '';
+        if (isset($parts['query'])) {
+            $params = [];
+            parse_str((string) $parts['query'], $params);
+            $sensitive = [
+                'authorization', 'access_token', 'token', 'api_key', 'api-key',
+                'client_secret', 'password', 'pwd', 'merchant_sig', 'lpt'
+            ];
+            $redactedParams = [];
+            foreach ($params as $key => $value) {
+                $lk = strtolower((string) $key);
+                if (in_array($lk, $sensitive, true)) {
+                    if (is_array($value)) {
+                        $redactedParams[$key] = array_fill(0, count($value), '***');
+                    } else {
+                        $redactedParams[$key] = '***';
+                    }
+                } else {
+                    $redactedParams[$key] = $value;
+                }
+            }
+            $queryString = http_build_query($redactedParams, '', '&', PHP_QUERY_RFC3986);
+        }
+
+        // Rebuild without userinfo
+        $schemePart = $scheme !== null ? $scheme . '://' : '';
+        $authority = $host !== '' ? $host : '';
+        if ($port !== null && $port > 0) {
+            $authority .= ':' . $port;
+        }
+
+        $rebuilt = $schemePart . $authority . $path;
+        if ($queryString !== '') {
+            $rebuilt .= '?' . $queryString;
+        }
+        if ($fragment !== null && $fragment !== '') {
+            $rebuilt .= '#' . $fragment;
+        }
+
+        // Fallback redact any leftover userinfo patterns
+        return preg_replace('#//[^/@:]+:[^/@]*@#', '//***:***@', $rebuilt) ?? $rebuilt;
 	}
 
 	/**
@@ -339,7 +399,17 @@ class HttpClientWrapper
 
 	private function logResponse(ResponseInterface $response): void
 	{
-		$headers = $this->redactHeaders($response->getHeaders(), ['set-cookie']);
+        $headers = $this->redactHeaders($response->getHeaders(), ['set-cookie']);
+        // Sanitize any URL-like headers such as Location/Content-Location
+        foreach (['Location', 'Content-Location'] as $hname) {
+            if (isset($headers[$hname])) {
+                $sanitizedValues = [];
+                foreach ($headers[$hname] as $v) {
+                    $sanitizedValues[] = $this->sanitizeUri((string) $v);
+                }
+                $headers[$hname] = $sanitizedValues;
+            }
+        }
 
 		$this->logger->debug('Taler response: ' . $response->getStatusCode() . ', ' . $response->getReasonPhrase());
 		$this->logger->debug('Taler response headers: ', $headers);
