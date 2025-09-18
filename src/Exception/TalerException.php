@@ -30,7 +30,12 @@ class TalerException extends Exception
      */
     protected static function sanitize(string $message): string
     {
-        return preg_replace('/(secret|access_token)=[a-z0-9-]+/i', '$1=***', $message);
+        $patterns = [
+            '/(Authorization:?\s*(?:Bearer|Basic)\s+)[^\s]+/i',
+            '/\b(secret|access_token|api[_-]?key|token|client_secret|password|pwd)\s*[:=]\s*[^&\s]+/i',
+        ];
+        $replacements = ['$1***', '$1=***'];
+        return (string) preg_replace($patterns, $replacements, $message);
     }
 
     /**
