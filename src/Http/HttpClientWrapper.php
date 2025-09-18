@@ -233,11 +233,14 @@ class HttpClientWrapper
 		return $redacted;
 	}
 
-	private function isJsonContentType(array $headers): bool
+    /**
+     * @param array<string, string|array<int, string>> $headers
+     */
+    private function isJsonContentType(array $headers): bool
 	{
 		$contentTypes = $headers['Content-Type'] ?? $headers['content-type'] ?? [];
 		$first = is_array($contentTypes) ? ($contentTypes[0] ?? '') : (string) $contentTypes;
-		$type = strtolower(trim(explode(';', $first)[0] ?? ''));
+		$type = strtolower(trim(explode(';', $first)[0]));
 		return $type === 'application/json' || (function_exists('str_ends_with') ? str_ends_with($type, '+json') : substr($type, -5) === '+json');
 	}
 
@@ -256,7 +259,7 @@ class HttpClientWrapper
 			return $sanitized;
 		}
 		if ($data instanceof \stdClass) {
-			foreach ($data as $k => $v) {
+			foreach (get_object_vars($data) as $k => $v) {
 				$lowerKey = strtolower((string) $k);
 				if (in_array($lowerKey, ['authorization', 'access_token', 'secret', 'api_key', 'api-key', 'token', 'client_secret', 'password', 'pwd'], true)) {
 					$data->$k = '***';
@@ -277,47 +280,6 @@ class HttpClientWrapper
 		];
 		$replacements = ['$1***', '$1=***'];
 		return (string) preg_replace($patterns, $replacements, $body);
-	}
-
-	private function getRequestBodyPreview(RequestInterface $request, int $maxBytes = 4096): ?string
-	{
-		$stream = $request->getBody();
-		if ($stream->getSize() === 0) {
-			return null;
-		}
-
-		if ($stream->isSeekable()) {
-			$pos = $stream->tell();
-			try { $stream->rewind(); } catch (\Throwable) {}
-			$contents = (string) $stream->getContents();
-			try { $stream->seek($pos); } catch (\Throwable) {}
-		} else {
-			// Avoid consuming non-seekable streams
-			return null;
-		}
-
-		if ($contents === '') {
-			return '';
-		}
-
-		$headers = $request->getHeaders();
-		if ($this->isJsonContentType($headers)) {
-			$decoded = json_decode($contents);
-			if (json_last_error() === JSON_ERROR_NONE) {
-				$sanitized = $this->sanitizeJsonData($decoded);
-				$reencoded = json_encode($sanitized);
-				$contents = is_string($reencoded) ? $reencoded : $contents;
-			} else {
-				$contents = $this->sanitizeBodyString($contents);
-			}
-		} else {
-			$contents = $this->sanitizeBodyString($contents);
-		}
-
-		if (strlen($contents) > $maxBytes) {
-			return substr($contents, 0, $maxBytes) . ' [truncated]';
-		}
-		return $contents;
 	}
 
 	private function getResponseBodyPreview(ResponseInterface $response, int $maxBytes = 4096): ?string
