@@ -306,6 +306,9 @@ class HttpClientWrapperTest extends TestCase
     /** @test */
     public function it_logs_response_body_and_sanitizes_and_truncates(): void
     {
+        // Enable SDK debug logging so logging code paths execute
+        $this->config->setAttribute('debugLoggingEnabled', true);
+
         $testHandler = new TestHandler(MonoLogger::DEBUG);
         $monoLogger = new MonoLogger('test');
         $monoLogger->pushHandler($testHandler);
@@ -325,7 +328,8 @@ class HttpClientWrapperTest extends TestCase
         ], JSON_THROW_ON_ERROR);
         $response = $this->factory->createResponse(200)
             ->withHeader('Content-Type', 'application/json')
-            ->withHeader('Set-Cookie', 'sid=xyz; HttpOnly');
+            ->withHeader('Set-Cookie', 'sid=xyz; HttpOnly')
+            ->withHeader('Location', 'https://example.com/callback?access_token=abc123&merchant_sig=deadbeef');
         $response = $response->withBody($this->factory->createStream($payload));
         $this->mockClient->addResponse($response);
 
@@ -347,6 +351,14 @@ class HttpClientWrapperTest extends TestCase
         $this->assertNotNull($responseHeadersRecord, 'Response headers were not logged');
         $this->assertArrayHasKey('Set-Cookie', $responseHeadersRecord['context']);
         $this->assertSame(['***'], $responseHeadersRecord['context']['Set-Cookie']);
+        // Location header should be present and have redacted query parameters
+        $this->assertArrayHasKey('Location', $responseHeadersRecord['context']);
+        $locationJoined = implode(',', $responseHeadersRecord['context']['Location']);
+        $decoded = urldecode($locationJoined);
+        $this->assertStringNotContainsString('abc123', $decoded);
+        $this->assertStringNotContainsString('deadbeef', $decoded);
+        $this->assertStringContainsString('access_token=***', $decoded);
+        $this->assertStringContainsString('merchant_sig=***', $decoded);
 
         $this->assertNotNull($responseBodyRecord, 'Response body was not logged');
         $this->assertStringNotContainsString('abc123', $responseBodyRecord['message']);
