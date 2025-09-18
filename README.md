@@ -1680,6 +1680,192 @@ Array response example:
 ```
 
 ---
+## Instance Management
+
+Manage merchant instances and access tokens. Reference: Merchant Backend Instance API.
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$instances = $taler->instance();
+```
+
+### Create Instance
+
+```php
+use Taler\Api\Instance\Dto\InstanceConfigurationMessage;
+use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
+use Taler\Api\Dto\Location;
+use Taler\Api\Dto\RelativeTime;
+
+$config = new InstanceConfigurationMessage(
+    id: 'shop-1',
+    name: 'My Shop',
+    auth: new InstanceAuthConfigToken(password: 'super-secret'),
+    address: new Location(country: 'DE', town: 'Berlin'),
+    jurisdiction: new Location(country: 'DE', town: 'Berlin'),
+    use_stefan: true,
+    default_wire_transfer_delay: new RelativeTime(3600_000_000), // 1 hour
+    default_pay_delay: new RelativeTime(300_000_000),            // 5 minutes
+    email: 'merchant@example.com'
+);
+
+// 204 No Content on success (no return value)
+$instances->createInstance($config);
+```
+
+### Update Instance
+
+```php
+use Taler\Api\Instance\Dto\InstanceReconfigurationMessage;
+use Taler\Api\Dto\Location;
+use Taler\Api\Dto\RelativeTime;
+
+$patch = new InstanceReconfigurationMessage(
+    name: 'My Shop GmbH',
+    address: new Location(country: 'DE', town: 'Berlin'),
+    jurisdiction: new Location(country: 'DE', town: 'Berlin'),
+    use_stefan: true,
+    default_wire_transfer_delay: new RelativeTime(7200_000_000), // 2 hours
+    default_pay_delay: new RelativeTime(600_000_000),             // 10 minutes
+    website: 'https://shop.example.com'
+);
+
+// 204 No Content on success
+$instances->updateInstance('shop-1', $patch);
+```
+
+### Get Instances
+
+```php
+$list = $instances->getInstances(); // InstancesResponse
+
+foreach ($list->instances as $i) {
+    echo $i->id . ' => ' . $i->name . "\n";
+}
+```
+
+### Get Instance
+
+```php
+$details = $instances->getInstance('shop-1'); // QueryInstancesResponse
+
+echo $details->name;                          // e.g., "My Shop GmbH"
+echo $details->merchant_pub;                  // EddsaPublicKey
+echo $details->default_pay_delay->d_us;       // microseconds
+```
+
+### Authentication & Access Tokens
+
+Request a login token for an instance and list or revoke tokens.
+
+```php
+use Taler\Api\Instance\Dto\LoginTokenRequest;
+use Taler\Api\Dto\RelativeTime;
+
+// Request a login token (Authorization header value)
+$req = new LoginTokenRequest(
+    scope: 'order-full',
+    duration: new RelativeTime(3_600_000_000),
+    description: 'Backoffice session'
+);
+
+$token = $instances->getAccessToken('shop-1', $req); // LoginTokenSuccessResponse
+echo $token->access_token;                            // RFC 8959 prefix included
+
+// List issued tokens (latest first by default)
+use Taler\Api\Instance\Dto\GetAccessTokensRequest;
+$tokens = $instances->getAccessTokens('shop-1', new GetAccessTokensRequest(limit: -20));
+if ($tokens !== null) {
+    foreach ($tokens->tokens as $t) {
+        echo $t->serial . ' ' . $t->scope . "\n";
+    }
+}
+
+// Revoke the token presented in the Authorization header
+$instances->deleteAccessToken('shop-1'); // 204 No Content
+
+// Revoke a token by its serial number
+$instances->deleteAccessTokenBySerial('shop-1', 123); // 204 No Content
+```
+
+### KYC Status
+
+```php
+use Taler\Api\Instance\Dto\GetKycStatusRequest;
+
+$kyc = $instances->getKycStatus('shop-1', new GetKycStatusRequest(
+    h_wire: 'H_WIRE_HASH',
+    lpt: 3,
+    timeout_ms: 30_000
+));
+
+if ($kyc !== null) {
+    // MerchantAccountKycRedirectsResponse
+    foreach ($kyc->kyc_redirects as $r) {
+        echo $r->exchange_url . "\n";
+    }
+}
+```
+
+### Merchant Statistics
+
+```php
+use Taler\Api\Instance\Dto\GetMerchantStatisticsAmountRequest;
+use Taler\Api\Instance\Dto\GetMerchantStatisticsCounterRequest;
+
+$amounts = $instances->getMerchantStatisticsAmount('shop-1', 'ORDERS', new GetMerchantStatisticsAmountRequest(by: 'BUCKET'));
+echo $amounts->by_bucket[0]->amount; // e.g., "EUR:10.00"
+
+$counters = $instances->getMerchantStatisticsCounter('shop-1', 'VISITS', new GetMerchantStatisticsCounterRequest(by: 'INTERVAL'));
+echo $counters->by_interval[0]->count; // integer
+```
+
+### Delete or Purge Instance
+
+Disable or permanently purge an instance. When 2FA is required, a `Challenge` is returned (HTTP 202).
+
+```php
+// Disable instance (204 on success, or Challenge on 202)
+$challenge = $instances->deleteInstance('shop-1');
+if ($challenge instanceof Taler\Api\Instance\Dto\Challenge) {
+    echo $challenge->getChallengeId();
+}
+
+// Purge instance (irreversible)
+$instances->deleteInstance('shop-1', purge: true);
+```
+
+### Raw Array Responses
+
+Like other clients, you can disable DTO wrapping:
+
+```php
+$array = $taler
+    ->config(['wrapResponse' => false])
+    ->instance()
+    ->getInstances();
+```
+
+### Asynchronous Operations
+
+All Instance methods also support asynchronous operations using the Async suffix.
+
+```php
+$promise = $taler->instance()->getInstancesAsync();
+$promise->then(function ($result) {
+    // $result is InstancesResponse when wrapResponse is true
+});
+```
+
+---
 ## Logging
 
 The TalerPHP SDK supports logging through PSR-3 LoggerInterface. You can provide your own PSR-3 compatible logger (like Monolog) for logging of API interactions.
@@ -1825,5 +2011,3 @@ If you have questions or need help, open an issue or start a discussion on the r
 
 - [GNU Taler](https://taler.net/)
 - All contributors and the open source community
-
----
