@@ -180,7 +180,17 @@ class HttpClientWrapper
 		$request = $this->requestFactory->createRequest($method, $url);
 
 		foreach ($headers as $name => $value) {
-			$request = $request->withHeader($name, $value);
+			// Defensive: strip CR/LF to prevent header injection/log-poisoning
+			$safeName = str_replace(["\r", "\n"], '', (string) $name);
+			if (is_array($value)) {
+				$cleanValues = [];
+				foreach ($value as $v) {
+					$cleanValues[] = str_replace(["\r", "\n"], '', (string) $v);
+				}
+				$request = $request->withHeader($safeName, $cleanValues);
+			} else {
+				$request = $request->withHeader($safeName, str_replace(["\r", "\n"], '', (string) $value));
+			}
 		}
 
 		if ($body !== null) {
