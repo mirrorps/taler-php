@@ -43,7 +43,8 @@ class GetOrder
             throw $e;
         }
         catch (\Throwable $e) {
-            $walletClient->getTaler()->getLogger()->error("Taler get public order request failed (wallet API): {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $walletClient->getTaler()->getLogger()->error("Taler get public order request failed (wallet API): {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

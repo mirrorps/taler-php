@@ -51,7 +51,8 @@ class CreateInstance
             throw $e;
         }
         catch (\Throwable $e) {
-            $instanceClient->getTaler()->getLogger()->error("Taler create instance request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $instanceClient->getTaler()->getLogger()->error("Taler create instance request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

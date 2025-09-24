@@ -47,7 +47,8 @@ class GetInstance
         } catch (TalerException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            $instanceClient->getTaler()->getLogger()->error("Taler get instance request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $instanceClient->getTaler()->getLogger()->error("Taler get instance request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

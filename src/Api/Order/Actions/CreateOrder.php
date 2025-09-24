@@ -55,7 +55,8 @@ class CreateOrder
             throw $e;
         }
         catch (\Throwable $e) {
-            $orderClient->getTaler()->getLogger()->error("Taler create order request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $orderClient->getTaler()->getLogger()->error("Taler create order request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

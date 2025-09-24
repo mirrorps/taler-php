@@ -52,7 +52,8 @@ class GetKycStatus
         } catch (TalerException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            $instanceClient->getTaler()->getLogger()->error("Taler get KYC status request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $instanceClient->getTaler()->getLogger()->error("Taler get KYC status request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

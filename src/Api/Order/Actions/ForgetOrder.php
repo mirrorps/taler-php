@@ -53,7 +53,8 @@ class ForgetOrder
             // NOTE: Logging is not necessary here; TalerException is already logged in HttpClientWrapper::run.
             throw $e;
         } catch (\Throwable $e) {
-            $orderClient->getTaler()->getLogger()->error("Taler forget request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $orderClient->getTaler()->getLogger()->error("Taler forget request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

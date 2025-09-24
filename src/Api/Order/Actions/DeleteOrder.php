@@ -45,7 +45,8 @@ class DeleteOrder
             throw $e;
         }
         catch (\Throwable $e) {
-            $orderClient->getTaler()->getLogger()->error("Taler delete order request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $orderClient->getTaler()->getLogger()->error("Taler delete order request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

@@ -48,7 +48,8 @@ class UpdateAccount
         } catch (TalerException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            $client->getTaler()->getLogger()->error("Taler update bank account request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $client->getTaler()->getLogger()->error("Taler update bank account request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }
