@@ -62,10 +62,6 @@ To suggest an enhancement, [open an issue](https://github.com/mirrorps/taler-php
 - Pull requests should be focused and address a single concern.
 - Be responsive to review feedback.
 
-## Code of Conduct
-
-Please be respectful and considerate. By participating, you agree to follow our [Code of Conduct](CODE_OF_CONDUCT.md).
-
 ## Questions or Help
 
 If you have questions, open an issue or start a discussion. We’re happy to help!
