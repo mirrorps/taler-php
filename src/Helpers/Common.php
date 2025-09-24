@@ -52,7 +52,7 @@ if (!function_exists('sanitizeString')) {
     {
         $patterns = [
             '/(Authorization:?\s*(?:Bearer|Basic)\s+)[^\s]+/i',
-            '/\b(secret|access_token|api[_-]?key|token|client_secret|password|pwd)\s*[:=]\s*[^&\s]+/i',
+            '/\b(secret|access_token|refresh_token|id_token|jwt|api[_-]?key|token|client_secret|password|pwd|session|session_id)\s*[:=]\s*[^&\s]+/i',
         ];
         $replacements = ['$1***', '$1=***'];
         return (string) preg_replace($patterns, $replacements, $message);
