@@ -14,11 +14,21 @@ use Psr\Http\Message\ResponseInterface;
 use PsrDiscovery\Discover;
 use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
+use function Taler\Helpers\sanitizeString;
 
 class HttpClientWrapper
 {
     /** @var string */
     protected $userAgent = 'Mirrorps_Taler_PHP (https://github.com/mirrorps/taler-php)';
+
+    /**
+     * @var array<int, string>
+     */
+    private array $sensitiveKeys = [
+		'authorization', 'access_token', 'refresh_token', 'id_token', 'jwt',
+		'token', 'api_key', 'api-key', 'client_secret', 'password', 'pwd',
+		'merchant_sig', 'lpt', 'session', 'session_id'
+	];
 
     /**
 	 * @param TalerConfig $config
@@ -84,7 +94,7 @@ class HttpClientWrapper
 			return $response;
 		} catch (\Throwable $e) {
 
-			$sanitizedMessage = $this->sanitizeBodyString((string) $e->getMessage());
+			$sanitizedMessage = sanitizeString((string) $e->getMessage());
 			$this->logger->error("Taler request failed: {$e->getCode()}, {$sanitizedMessage}");
 
 			if ($this->wrapResponse) {
@@ -127,7 +137,7 @@ class HttpClientWrapper
 			return $this->client->sendAsyncRequest($request); // @phpstan-ignore-line: $this->client is guaranteed to be an async client by the instanceof check above
 		} catch (\Throwable $e) {
 
-			$sanitizedMessage = $this->sanitizeBodyString((string) $e->getMessage());
+			$sanitizedMessage = sanitizeString((string) $e->getMessage());
 			$this->logger->error("Taler request failed: {$e->getCode()}, {$sanitizedMessage}");
 
 			if ($this->wrapResponse) {
@@ -302,10 +312,7 @@ class HttpClientWrapper
         if (isset($parts['query'])) {
             $params = [];
             parse_str((string) $parts['query'], $params);
-            $sensitive = [
-                'authorization', 'access_token', 'token', 'api_key', 'api-key',
-                'client_secret', 'password', 'pwd', 'merchant_sig', 'lpt'
-            ];
+            $sensitive = $this->sensitiveKeys;
             $redactedParams = [];
             foreach ($params as $key => $value) {
                 $lk = strtolower((string) $key);
@@ -377,7 +384,7 @@ class HttpClientWrapper
 			$sanitized = [];
 			foreach ($data as $key => $value) {
 				$lowerKey = is_string($key) ? strtolower($key) : $key;
-				if (in_array($lowerKey, ['authorization', 'access_token', 'secret', 'api_key', 'api-key', 'token', 'client_secret', 'password', 'pwd'], true)) {
+                if (in_array($lowerKey, $this->sensitiveKeys, true)) {
 					$sanitized[$key] = '***';
 				} else {
 					$sanitized[$key] = $this->sanitizeJsonData($value);
@@ -388,7 +395,7 @@ class HttpClientWrapper
 		if ($data instanceof \stdClass) {
 			foreach (get_object_vars($data) as $k => $v) {
 				$lowerKey = strtolower((string) $k);
-				if (in_array($lowerKey, ['authorization', 'access_token', 'secret', 'api_key', 'api-key', 'token', 'client_secret', 'password', 'pwd'], true)) {
+                if (in_array($lowerKey, $this->sensitiveKeys, true)) {
 					$data->$k = '***';
 				} else {
 					$data->$k = $this->sanitizeJsonData($v);
@@ -397,16 +404,6 @@ class HttpClientWrapper
 			return $data;
 		}
 		return $data;
-	}
-
-	private function sanitizeBodyString(string $body): string
-	{
-		$patterns = [
-			'/(Authorization:?\\s*(Bearer|Basic)\\s+)[^\\s]+/i',
-			'/\\b(secret|access_token|api[_-]?key|token|client_secret|password|pwd)\\s*[:=]\\s*[^\\s,]+/i',
-		];
-		$replacements = ['$1***', '$1=***'];
-		return (string) preg_replace($patterns, $replacements, $body);
 	}
 
 	private function getResponseBodyPreview(ResponseInterface $response, int $maxBytes = 4096): ?string
@@ -443,10 +440,10 @@ class HttpClientWrapper
 				$reencoded = json_encode($sanitized);
 				$contents = is_string($reencoded) ? $reencoded : $contents;
 			} else {
-				$contents = $this->sanitizeBodyString($contents);
+				$contents = sanitizeString($contents);
 			}
 		} else {
-			$contents = $this->sanitizeBodyString($contents);
+			$contents = sanitizeString($contents);
 		}
 
 		if (strlen($contents) > $maxBytes) {
