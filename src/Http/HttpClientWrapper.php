@@ -248,13 +248,34 @@ class HttpClientWrapper
 			throw new \InvalidArgumentException('Encoded slashes are not allowed in endpoints.');
 		}
 
-		// Ensure the resolved URI is still "under" the original base URI's scheme, authority, and path prefix.
-		$baseUriForCheck = Uri::new($this->getBaseUrl());
-		$baseUriPrefixString = $baseUriForCheck->withPath($baseUriForCheck->getPath())->__toString();
+        // Ensure the resolved URI is still within the original base URI's scheme/authority and path prefix with segment boundary.
+        $base = Uri::new($this->getBaseUrl());
 
-		if (strpos($finalUrl->__toString(), $baseUriPrefixString) !== 0) {
-			 throw new \InvalidArgumentException('Endpoint results in a URL outside the configured base path. Resolved URL: ' . $finalUrl->__toString() . ', Base prefix: ' . $baseUriPrefixString);
-		}
+        // Check scheme/host/port containment
+        if ($finalUrl->getScheme() !== $base->getScheme()
+            || $finalUrl->getHost() !== $base->getHost()
+            || $finalUrl->getPort() !== $base->getPort()) {
+            throw new \InvalidArgumentException('Endpoint results in a URL outside the configured base authority.');
+        }
+
+        // Path boundary check: final path must equal base path or start with base path followed by '/'
+        $basePath = $base->getPath();
+        $finalPath = $finalUrl->getPath();
+        $basePathTrimmed = rtrim($basePath, '/');
+
+        if ($basePathTrimmed === '') {
+            // Base path is root; any absolute path is acceptable
+            if ($finalPath === '' || $finalPath[0] !== '/') {
+                throw new \InvalidArgumentException('Resolved path is not under the configured base path.');
+            }
+            return;
+        }
+
+        $validSame = ($finalPath === $basePathTrimmed);
+        $validSub = (strpos($finalPath, $basePathTrimmed . '/') === 0);
+        if (!$validSame && !$validSub) {
+            throw new \InvalidArgumentException('Endpoint results in a URL outside the configured base path.');
+        }
 	}
 
 	private function getBaseUrl(): string
