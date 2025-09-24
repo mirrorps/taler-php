@@ -91,6 +91,12 @@ class TalerConfig
             throw new \InvalidArgumentException("The attribute '$name' does not exist.");
         }
 
+        // Prevent mutation of security-critical settings after construction
+        if ($name === 'baseUrl' || $name === 'debugLoggingEnabled') {
+            throw new \InvalidArgumentException("The attribute '$name' cannot be modified after construction.");
+        }
+
+        // For all other attributes, assign as requested
         $this->$name = $value;
     }
 

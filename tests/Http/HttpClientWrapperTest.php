@@ -306,15 +306,20 @@ class HttpClientWrapperTest extends TestCase
     /** @test */
     public function it_logs_response_body_and_sanitizes_and_truncates(): void
     {
-        // Enable SDK debug logging so logging code paths execute
-        $this->config->setAttribute('debugLoggingEnabled', true);
+        // Create a config with SDK debug logging enabled so logging code paths execute
+        $config = new TalerConfig(
+            self::BASE_URL,
+            self::AUTH_TOKEN,
+            true,
+            true
+        );
 
         $testHandler = new TestHandler(MonoLogger::DEBUG);
         $monoLogger = new MonoLogger('test');
         $monoLogger->pushHandler($testHandler);
 
         $wrapper = new HttpClientWrapper(
-            $this->config,
+            $config,
             $this->mockClient,
             $monoLogger,
             $this->factory,
@@ -326,10 +331,12 @@ class HttpClientWrapperTest extends TestCase
             'access_token' => 'abc123',
             'details' => ['password' => 'top-secret', 'note' => 'ok']
         ], JSON_THROW_ON_ERROR);
+        
         $response = $this->factory->createResponse(200)
             ->withHeader('Content-Type', 'application/json')
             ->withHeader('Set-Cookie', 'sid=xyz; HttpOnly')
-            ->withHeader('Location', 'https://example.com/callback?access_token=abc123&merchant_sig=deadbeef');
+            ->withHeader('Location', 'https://example.com/callback?access_token=abc123&merchant_sig=deadbeef')
+            ->withHeader('Referer', 'https://example.com/from?token=abc123');
         $response = $response->withBody($this->factory->createStream($payload));
         $this->mockClient->addResponse($response);
 
@@ -359,6 +366,9 @@ class HttpClientWrapperTest extends TestCase
         $this->assertStringNotContainsString('deadbeef', $decoded);
         $this->assertStringContainsString('access_token=***', $decoded);
         $this->assertStringContainsString('merchant_sig=***', $decoded);
+        // Referer should be fully redacted
+        $this->assertArrayHasKey('Referer', $responseHeadersRecord['context']);
+        $this->assertSame(['***'], $responseHeadersRecord['context']['Referer']);
 
         $this->assertNotNull($responseBodyRecord, 'Response body was not logged');
         $this->assertStringNotContainsString('abc123', $responseBodyRecord['message']);

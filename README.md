@@ -81,7 +81,20 @@ If the SDK's auto-discovery doesn't find a PSR-18 compatible HTTP client, or if 
 use Http\Adapter\Guzzle7\Client as GuzzleAdapter;
 
 // Create PSR-18 client using Guzzle
-$httpClient = GuzzleAdapter::createWithConfig(['timeout' => 30]);
+$httpClient = GuzzleAdapter::createWithConfig([
+    // Strongly recommended: always set sane timeouts
+    // Overall request timeout (seconds)
+    'timeout' => 10.0,
+    // Connection establishment timeout (seconds)
+    'connect_timeout' => 5.0,
+
+    // Redirect policy: prevent protocol downgrade and limit hops
+    'allow_redirects' => [
+        'max' => 3,                 // limit redirect chain length
+        'protocols' => ['https'],   // disallow downgrade to http
+        'referer' => false
+    ],
+]);
 
 $taler = Factory::create([
     'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
@@ -89,6 +102,19 @@ $taler = Factory::create([
     'client' => $httpClient
 ]);
 ```
+
+### Security: Timeouts and Redirect Policies (Important)
+
+- Request timeouts (HIGH):
+  - Always inject a PSR-18 client configured with explicit timeouts. Without timeouts, network calls may hang indefinitely under network partitions or server issues, causing thread/worker exhaustion and cascading failures.
+  - At minimum set both a connection timeout and a total request timeout. Example with Guzzle adapter above uses `connect_timeout` and `timeout`.
+
+- Redirect handling (MEDIUM):
+  - Enforce an upper bound on redirect chains to avoid redirect loops and reduce SSRF blast radius. Example above uses `allow_redirects.max`.
+  - Disallow protocol downgrades to `http` by restricting `allow_redirects.protocols` to `['https']`. This prevents leaking credentials or tokens over plaintext during redirects.
+
+Notes:
+- PSR-18 does not define a standard for these options; use your chosen client's native configuration (e.g., Guzzle options). When using other clients, consult their documentation to apply equivalent settings (timeouts and redirect limits/HTTPS-only redirects).
 
 ---
 
@@ -2000,6 +2026,20 @@ $taler->cacheDelete('exchange_config');
 If you want to implement your own cache, it must implement `Psr\SimpleCache\CacheInterface`. 
 
 ---
+## Security notes
+
+- Do not enable DEBUG logging in production
+  - Keep `debugLoggingEnabled` set to `false` in production. If you don’t need SDK logs, omit the `logger` entirely for zero overhead.
+
+- Never include credentials in the base URL
+  - Avoid userinfo (user:pass@) and secrets in query strings. Pass tokens via headers (e.g., `Authorization`) and configuration.
+
+- Configure timeouts, TLS verification, and redirect policy in the injected HTTP client
+  - Always set `timeout` and `connect_timeout`. Ensure TLS verification is ON (e.g., Guzzle `verify => true` or a CA bundle path). Limit redirects and restrict to HTTPS only (see example above).
+
+- Avoid caching responses containing sensitive data
+  - If you use the PSR-16 cache integration, do not cache endpoints that may include tokens. Prefer short TTLs and explicit cache keys; clear cached entries promptly when no longer needed.
+---
 
 ## Running Tests
 
@@ -2040,3 +2080,11 @@ If you have questions or need help, open an issue or start a discussion on the r
 
 - [GNU Taler](https://taler.net/)
 - All contributors and the open source community
+
+---
+
+## Funding
+
+This project is funded through [NGI TALER Fund](https://nlnet.nl/taler), a fund established by [NLnet](https://nlnet.nl) with financial support from the European Commission's [Next Generation Internet](https://ngi.eu) program. Learn more at the [NLnet project page](https://nlnet.nl/project/TalerPHP).
+
+[<img src="https://nlnet.nl/logo/banner.png" alt="NLnet foundation logo" width="20%" />](https://nlnet.nl)

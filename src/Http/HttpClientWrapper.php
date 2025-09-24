@@ -84,7 +84,8 @@ class HttpClientWrapper
 			return $response;
 		} catch (\Throwable $e) {
 
-			$this->logger->error("Taler request failed: {$e->getCode()}, {$e->getMessage()}");
+			$sanitizedMessage = $this->sanitizeBodyString((string) $e->getMessage());
+			$this->logger->error("Taler request failed: {$e->getCode()}, {$sanitizedMessage}");
 
 			if ($this->wrapResponse) {
 				throw new TalerException($e->getMessage(), $e->getCode());
@@ -126,7 +127,8 @@ class HttpClientWrapper
 			return $this->client->sendAsyncRequest($request); // @phpstan-ignore-line: $this->client is guaranteed to be an async client by the instanceof check above
 		} catch (\Throwable $e) {
 
-			$this->logger->error("Taler request failed: {$e->getCode()}, {$e->getMessage()}");
+			$sanitizedMessage = $this->sanitizeBodyString((string) $e->getMessage());
+			$this->logger->error("Taler request failed: {$e->getCode()}, {$sanitizedMessage}");
 
 			if ($this->wrapResponse) {
 				throw new TalerException($e->getMessage(), $e->getCode());
@@ -182,6 +184,7 @@ class HttpClientWrapper
 	private function buildUrl(string $endpoint): string
 	{
 		try {
+			$endpoint = $this->encodeEndpointPath($endpoint);
 			// Resolve the endpoint URI against the base URI.
 			// Uri::fromBaseUri handles path normalization (e.g., removing dot segments like "/./", "/../")
 			// and resolves the endpoint relative to the base URI according to RFC 3986.
@@ -194,6 +197,49 @@ class HttpClientWrapper
 		} catch (\League\Uri\Contracts\UriException | \InvalidArgumentException $e) {
 			throw new TalerException('Failed to build URL: ' . $e->getMessage(), 0, $e);
 		}
+	}
+
+	/**
+	 * Ensure each path segment of the provided endpoint is safely URL-encoded.
+	 * This prevents path injection and guarantees reserved characters within
+	 * variables are encoded instead of interpreted as path delimiters.
+	 */
+	private function encodeEndpointPath(string $endpoint): string
+	{
+		// Reject absolute or scheme-based endpoints (must be relative to base)
+		if (preg_match('/^[A-Za-z][A-Za-z0-9+.-]*:\/\//', $endpoint) === 1 || str_starts_with($endpoint, '//')) {
+			throw new \InvalidArgumentException('Absolute URLs are not allowed in endpoints.');
+		}
+
+		// Split query from path (we keep query untouched as callers already use http_build_query)
+		$questionPos = strpos($endpoint, '?');
+		$pathOnly = $questionPos === false ? $endpoint : substr($endpoint, 0, $questionPos);
+		$queryOnly = $questionPos === false ? '' : substr($endpoint, $questionPos);
+
+		// Normalize leading/trailing slashes are preserved; encode per segment
+		$leadingSlash = str_starts_with($pathOnly, '/');
+		$trailingSlash = $pathOnly !== '' && str_ends_with($pathOnly, '/');
+		$segments = $pathOnly === '' ? [] : explode('/', trim($pathOnly, '/'));
+		$encodedSegments = [];
+		foreach ($segments as $seg) {
+			if ($seg === '') { continue; }
+			$decoded = rawurldecode($seg);
+			// Reject encoded slashes within a segment
+			if (strpos($decoded, '/') !== false) {
+				throw new \InvalidArgumentException('Encoded slashes are not allowed in endpoints.');
+			}
+			$encodedSegments[] = rawurlencode($decoded);
+		}
+
+		$rebuiltPath = implode('/', $encodedSegments);
+		if ($leadingSlash) {
+			$rebuiltPath = '/' . $rebuiltPath;
+		}
+		if ($trailingSlash && $rebuiltPath !== '') {
+			$rebuiltPath .= '/';
+		}
+
+		return $rebuiltPath . $queryOnly;
 	}
 
 	private function validateFinalUrl(string $endpoint, Uri $finalUrl): void
@@ -391,7 +437,11 @@ class HttpClientWrapper
 	private function logRequest(RequestInterface $request): void
 	{
 		$sanitizedUri = $this->sanitizeUri((string) $request->getUri());
-		$headers = $this->redactHeaders($request->getHeaders(), ['authorization', 'cookie']);
+        $headers = $this->redactHeaders($request->getHeaders(), [
+            'authorization', 'proxy-authorization', 'cookie', 'set-cookie', 'referer',
+            'x-api-key', 'x-auth-token', 'x-csrf-token', 'x-xsrf-token', 'apikey',
+            'authentication', 'x-client-secret', 'signature', 'digest'
+        ]);
 
 		$this->logger->debug('Taler request: ' . $sanitizedUri . ', ' . $request->getMethod());
 		$this->logger->debug('Taler request headers: ', $headers);
@@ -399,7 +449,11 @@ class HttpClientWrapper
 
 	private function logResponse(ResponseInterface $response): void
 	{
-        $headers = $this->redactHeaders($response->getHeaders(), ['set-cookie']);
+        $headers = $this->redactHeaders($response->getHeaders(), [
+            'authorization', 'proxy-authorization', 'cookie', 'set-cookie', 'referer',
+            'x-api-key', 'x-auth-token', 'x-csrf-token', 'x-xsrf-token', 'apikey',
+            'authentication', 'x-client-secret', 'signature', 'digest'
+        ]);
         // Sanitize any URL-like headers such as Location/Content-Location
         foreach (['Location', 'Content-Location'] as $hname) {
             if (isset($headers[$hname])) {
