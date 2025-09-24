@@ -68,12 +68,10 @@ class TalerTest extends TestCase
     public function testConfigUpdate(): void
     {
         $this->taler->config([
-            'baseUrl' => self::BASE_URL . '/new',
             'wrapResponse' => false
         ]);
 
         $config = $this->taler->getConfig();
-        $this->assertSame(self::BASE_URL . '/new', $config->getBaseUrl());
         $this->assertFalse($config->getWrapResponse());
     }
 
@@ -89,11 +87,11 @@ class TalerTest extends TestCase
     public function testFluentConfigInterface(): void
     {
         $result = $this->taler->config([
-            'baseUrl' => 'https://another.api.taler.net'
+            'wrapResponse' => false
         ]);
 
         $this->assertSame($this->taler, $result);
-        $this->assertSame('https://another.api.taler.net', $this->taler->getConfig()->getBaseUrl());
+        $this->assertFalse($this->taler->getConfig()->getWrapResponse());
     }
 
     public function testOrderClientCreation(): void

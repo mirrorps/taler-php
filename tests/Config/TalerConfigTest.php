@@ -63,8 +63,9 @@ class TalerConfigTest extends TestCase
         $this->config->setAttribute('wrapResponse', false);
         $this->assertFalse($this->config->getWrapResponse());
 
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("The attribute 'baseUrl' cannot be modified after construction.");
         $this->config->setAttribute('baseUrl', self::BASE_URL . '/new');
-        $this->assertSame(self::BASE_URL . '/new', $this->config->getBaseUrl());
     }
 
     public function testSetAttributeThrowsExceptionOnInvalidAttribute(): void
@@ -77,15 +78,13 @@ class TalerConfigTest extends TestCase
 
     public function testSetMultipleAttributes(): void
     {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage("The attribute 'baseUrl' cannot be modified after construction.");
         $this->config->setAttributes([
             'authToken' => self::AUTH_TOKEN,
             'wrapResponse' => false,
             'baseUrl' => self::BASE_URL . '/new'
         ]);
-
-        $this->assertSame(self::AUTH_TOKEN, $this->config->getAuthToken());
-        $this->assertFalse($this->config->getWrapResponse());
-        $this->assertSame(self::BASE_URL . '/new', $this->config->getBaseUrl());
     }
 
     public function testSetAttributesThrowsExceptionOnInvalidAttribute(): void
