@@ -48,7 +48,8 @@ class UpdateWebhook
         } catch (TalerException $e) {
             throw $e;
         } catch (\Throwable $e) {
-            $client->getTaler()->getLogger()->error("Taler update webhook request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $client->getTaler()->getLogger()->error("Taler update webhook request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

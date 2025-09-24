@@ -128,7 +128,8 @@ class Keys
         }
         catch (\Throwable $e) {
             $cacheWrapper?->clearCacheSettings();
-            $exchangeClient->getTaler()->getLogger()->error("Taler keys request failed: {$e->getCode()}, {$e->getMessage()}");
+            $sanitized = \Taler\Helpers\sanitizeString((string) $e->getMessage());
+            $exchangeClient->getTaler()->getLogger()->error("Taler keys request failed: {$e->getCode()}, {$sanitized}");
             throw $e;
         }
     }

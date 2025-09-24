@@ -5,6 +5,8 @@ namespace Taler\Exception;
 use Exception;
 use Psr\Http\Message\ResponseInterface;
 
+use function Taler\Helpers\sanitizeString;
+
 class TalerException extends Exception
 {
     /**
@@ -20,22 +22,8 @@ class TalerException extends Exception
         private ?ResponseInterface $response = null
     )
     {
-        $message = static::sanitize($message);
+        $message = sanitizeString($message);
         parent::__construct($message, $code, $previous);
-    }
-
-    /**
-     * @param string $message
-     * @return string
-     */
-    protected static function sanitize(string $message): string
-    {
-        $patterns = [
-            '/(Authorization:?\s*(?:Bearer|Basic)\s+)[^\s]+/i',
-            '/\b(secret|access_token|api[_-]?key|token|client_secret|password|pwd)\s*[:=]\s*[^&\s]+/i',
-        ];
-        $replacements = ['$1***', '$1=***'];
-        return (string) preg_replace($patterns, $replacements, $message);
     }
 
     /**
