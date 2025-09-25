@@ -493,6 +493,33 @@ class HttpClientWrapper
             }
         }
 
+        // Sanitize Refresh header: typically "<seconds>; url=<URL>"
+        if (isset($headers['Refresh'])) {
+            $sanitizedValues = [];
+            foreach ($headers['Refresh'] as $v) {
+                $s = (string) $v;
+                if (preg_match('/^\s*([0-9]+\s*;\s*url=)(.+)$/i', $s, $m) === 1) {
+                    $sanitizedValues[] = $m[1] . $this->sanitizeUri($m[2]);
+                } else {
+                    $sanitizedValues[] = $s;
+                }
+            }
+            $headers['Refresh'] = $sanitizedValues;
+        }
+
+        // Sanitize Link header URIs inside angle brackets: <URL>; rel="next", ...
+        if (isset($headers['Link'])) {
+            $sanitizedValues = [];
+            foreach ($headers['Link'] as $v) {
+                $s = (string) $v;
+                $s = (string) preg_replace_callback('/<([^>]+)>/', function ($m) {
+                    return '<' . $this->sanitizeUri($m[1]) . '>';
+                }, $s);
+                $sanitizedValues[] = $s;
+            }
+            $headers['Link'] = $sanitizedValues;
+        }
+
 		$this->logger->debug('Taler response: ' . $response->getStatusCode() . ', ' . $response->getReasonPhrase());
 		$this->logger->debug('Taler response headers: ', $headers);
 		$preview = $this->getResponseBodyPreview($response);
