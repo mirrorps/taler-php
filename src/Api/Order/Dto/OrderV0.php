@@ -82,12 +82,17 @@ class OrderV0
         public ?RelativeTime $auto_refund = null,
         public ?object $extra = null,
         public ?array $special_fields = null,
+        bool $validate = true,
     ) {
         if (isset($special_fields)) {
             foreach ($special_fields as $key => $value) {
                 $this->$key = $value;
             }
             $this->special_fields = null;
+        }
+
+        if ($validate) {
+            $this->validate();
         }
     }
 
@@ -97,31 +102,14 @@ class OrderV0
      */
     public static function createFromArray(array $data): self
     {
-        if (!isset($data['summary']) || !is_string($data['summary']) || empty(trim($data['summary']))) {
-            throw new InvalidArgumentException('Summary is required and must be a non-empty string');
+        // Pre-construction guard to produce consistent exceptions (and avoid TypeErrors)
+        if (isset($data['order_id']) && !is_string($data['order_id'])) {
+            throw new InvalidArgumentException('Order ID must be a string');
         }
 
-        if (!isset($data['amount']) || !is_string($data['amount']) || empty(trim($data['amount']))) {
-            throw new InvalidArgumentException('Amount is required and must be a non-empty string');
-        }
-
+        // Minimal type guards to avoid type errors on constructor
         if (isset($data['summary_i18n']) && !is_array($data['summary_i18n'])) {
             throw new InvalidArgumentException('Summary i18n must be an array of strings');
-        }
-
-        if (isset($data['order_id'])) {
-            if (!is_string($data['order_id'])) {
-                throw new InvalidArgumentException('Order ID must be a string');
-            }
-            if (!preg_match('/^[A-Za-z0-9.:_-]+$/', $data['order_id'])) {
-                throw new InvalidArgumentException('Order ID can only contain A-Za-z0-9.:_- characters');
-            }
-        }
-
-        if (isset($data['minimum_age'])) {
-            if (!is_int($data['minimum_age']) || $data['minimum_age'] <= 0) {
-                throw new InvalidArgumentException('Minimum age must be a positive integer');
-            }
         }
 
         if (isset($data['products'])) {
@@ -135,18 +123,9 @@ class OrderV0
             }
         }
 
-        if (isset($data['merchant_base_url'])) {
-            if (!is_string($data['merchant_base_url']) || !str_ends_with($data['merchant_base_url'], '/')) {
-                throw new InvalidArgumentException('Merchant base URL must be an absolute URL that ends with a slash');
-            }
-            if (!filter_var($data['merchant_base_url'], FILTER_VALIDATE_URL)) {
-                throw new InvalidArgumentException('Merchant base URL must be a valid URL');
-            }
-        }
-
         $instance = new self(
-            summary: $data['summary'],
-            amount: $data['amount'],
+            summary: $data['summary'] ?? '',
+            amount: $data['amount'] ?? '',
             max_fee: $data['max_fee'] ?? null,
             summary_i18n: $data['summary_i18n'] ?? null,
             order_id: $data['order_id'] ?? null,
@@ -169,8 +148,78 @@ class OrderV0
             auto_refund: isset($data['auto_refund']) ? RelativeTime::fromArray($data['auto_refund']) : null,
             extra: isset($data['extra']) ? $data['extra'] : null,
             special_fields: isset($data['special_fields']) ? $data['special_fields'] : null,
+            validate: isset($data['validate']) ? $data['validate'] : true,
         );
 
         return $instance;
+    }
+
+    /**
+     * Validates the DTO data.
+     *
+     * @throws InvalidArgumentException
+     */
+    public function validate(): void
+    {
+        if ($this->summary === '' || trim($this->summary) === '') {
+            throw new InvalidArgumentException('Summary is required and must be a non-empty string');
+        }
+
+        if ($this->amount === '' || trim($this->amount) === '') {
+            throw new InvalidArgumentException('Amount is required and must be a non-empty string');
+        }
+
+        if ($this->summary_i18n !== null) {
+            // @phpstan-ignore-next-line: Runtime guard retained for defensive programming
+            if (!is_array($this->summary_i18n)) {
+                throw new InvalidArgumentException('Summary i18n must be an array of strings');
+            }
+            foreach ($this->summary_i18n as $k => $v) {
+                // @phpstan-ignore-next-line: Keys/values already narrowed by PHPDoc; keep explicit runtime check
+                if (!is_string($k) || !is_string($v)) {
+                    throw new InvalidArgumentException('Summary i18n must be an array of strings');
+                }
+            }
+        }
+
+        if ($this->order_id !== null) {
+            // @phpstan-ignore-next-line: Property typed as string; keep explicit runtime check for robustness
+            if (!is_string($this->order_id)) {
+                throw new InvalidArgumentException('Order ID must be a string');
+            }
+            if (!preg_match('/^[A-Za-z0-9.:_-]+$/', $this->order_id)) {
+                throw new InvalidArgumentException('Order ID can only contain A-Za-z0-9.:_- characters');
+            }
+        }
+
+        if ($this->minimum_age !== null) {
+            // @phpstan-ignore-next-line: Property is int; retain explicit type guard
+            if (!is_int($this->minimum_age) || $this->minimum_age <= 0) {
+                throw new InvalidArgumentException('Minimum age must be a positive integer');
+            }
+        }
+
+        if ($this->products !== null) {
+            // @phpstan-ignore-next-line: Property is array; retain explicit structure guard
+            if (!is_array($this->products)) {
+                throw new InvalidArgumentException('Products must be an array');
+            }
+            foreach ($this->products as $product) {
+                // @phpstan-ignore-next-line: Elements are Product; keep explicit runtime assertion
+                if (!$product instanceof Product) {
+                    throw new InvalidArgumentException('Each product must be an array');
+                }
+            }
+        }
+
+        if ($this->merchant_base_url !== null) {
+            // @phpstan-ignore-next-line: Property typed as string; keep explicit runtime check
+            if (!is_string($this->merchant_base_url) || !str_ends_with($this->merchant_base_url, '/')) {
+                throw new InvalidArgumentException('Merchant base URL must be an absolute URL that ends with a slash');
+            }
+            if (!filter_var($this->merchant_base_url, FILTER_VALIDATE_URL)) {
+                throw new InvalidArgumentException('Merchant base URL must be a valid URL');
+            }
+        }
     }
 } 
