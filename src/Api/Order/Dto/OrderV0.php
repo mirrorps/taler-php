@@ -15,7 +15,6 @@ use Taler\Api\Dto\Timestamp;
  * @phpstan-type OrderV0Array array{
  *   summary: string,
  *   amount: string,
- *   version?: string,
  *   max_fee?: string,
  *   summary_i18n?: array<string, string>,
  *   order_id?: string,
@@ -41,7 +40,6 @@ class OrderV0
     /**
      * @param string $summary Human-readable description of the whole purchase
      * @param string $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
-     * @param string|null $version Optional, defaults to 0 if not set.
      * @param string|null $max_fee Maximum total deposit fee accepted by the merchant for this contract. Overrides defaults of the merchant instance.
      * @param array<string, string>|null $summary_i18n Map from IETF BCP 47 language tags to localized summaries
      * @param string|null $order_id Unique identifier for the order
@@ -65,7 +63,6 @@ class OrderV0
     public function __construct(
         public string $summary,
         public string $amount,
-        public ?string $version = null,
         public ?string $max_fee = null,
         public ?array $summary_i18n = null,
         public ?string $order_id = null,
@@ -108,10 +105,6 @@ class OrderV0
             throw new InvalidArgumentException('Amount is required and must be a non-empty string');
         }
 
-        if (isset($data['version']) && $data['version'] !== '0' && $data['version'] !== 0) {
-            throw new InvalidArgumentException('Version must be 0 or null');
-        }
-
         if (isset($data['summary_i18n']) && !is_array($data['summary_i18n'])) {
             throw new InvalidArgumentException('Summary i18n must be an array of strings');
         }
@@ -151,10 +144,9 @@ class OrderV0
             }
         }
 
-        return new self(
+        $instance = new self(
             summary: $data['summary'],
             amount: $data['amount'],
-            version: $data['version'] ?? '0',
             max_fee: $data['max_fee'] ?? null,
             summary_i18n: $data['summary_i18n'] ?? null,
             order_id: $data['order_id'] ?? null,
@@ -178,5 +170,7 @@ class OrderV0
             extra: isset($data['extra']) ? $data['extra'] : null,
             special_fields: isset($data['special_fields']) ? $data['special_fields'] : null,
         );
+
+        return $instance;
     }
 } 

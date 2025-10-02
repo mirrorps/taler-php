@@ -17,7 +17,6 @@ class OrderV0Test extends TestCase
         $data = [
                          'summary' => 'Test order',
              'amount' => '10.00',
-             'version' => '0',
              'max_fee' => '1.00',
              'summary_i18n' => [
                 'en' => 'Test order',
@@ -61,7 +60,6 @@ class OrderV0Test extends TestCase
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
          $this->assertSame('10.00', $OrderV0->amount);
-         $this->assertSame('0', $OrderV0->version);
          $this->assertSame('1.00', $OrderV0->max_fee);
          $this->assertSame(['en' => 'Test order', 'de' => 'Testbestellung'], $OrderV0->summary_i18n);
         $this->assertSame('test-123', $OrderV0->order_id);
@@ -100,7 +98,6 @@ class OrderV0Test extends TestCase
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
          $this->assertSame('10.00', $OrderV0->amount);
-         $this->assertSame('0', $OrderV0->version);
          $this->assertNull($OrderV0->max_fee);
          $this->assertNull($OrderV0->summary_i18n);
         $this->assertNull($OrderV0->order_id);
@@ -181,7 +178,7 @@ class OrderV0Test extends TestCase
     public function invalidDataProvider(): array
     {
         return [
-                         'missing_summary' => [
+            'missing_summary' => [
                  'data' => ['amount' => '10.00'],
                  'message' => 'Summary is required and must be a non-empty string'
              ],
@@ -192,10 +189,6 @@ class OrderV0Test extends TestCase
              'empty_amount' => [
                  'data' => ['summary' => 'Test', 'amount' => ''],
                  'message' => 'Amount is required and must be a non-empty string'
-             ],
-             'invalid_version' => [
-                 'data' => ['summary' => 'Test', 'amount' => '10.00', 'version' => '1'],
-                 'message' => 'Version must be 0 or null'
              ],
             'empty_summary' => [
                 'data' => ['summary' => ''],
