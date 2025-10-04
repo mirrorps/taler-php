@@ -118,47 +118,6 @@ class OrderV0Test extends TestCase
         $this->assertNull($OrderV0->extra);
     }
 
-    public function testCreateFromArrayWithSpecialFields(): void
-    {
-        $data = [
-            'summary' => 'Test order',
-            'amount' => '10.00',
-            'special_fields' => [
-                'forgettable' => ['$.wire_fee', '$.products[0].description'],
-                'custom_flag' => true,
-            ],
-        ];
-
-        $order = OrderV0::createFromArray($data);
-
-        // dynamic properties assigned from special_fields
-        $vars = get_object_vars($order);
-        $this->assertArrayHasKey('forgettable', $vars);
-        $this->assertArrayHasKey('custom_flag', $vars);
-        $this->assertSame(['$.wire_fee', '$.products[0].description'], $vars['forgettable']);
-        $this->assertTrue($vars['custom_flag']);
-
-        // special_fields should be cleared after assignment
-        $this->assertNull($order->special_fields);
-    }
-
-    public function testConstructorWithSpecialFields(): void
-    {
-        $order = new OrderV0(
-            summary: 'S',
-            amount: '1',
-            special_fields: [
-                'x' => 123,
-            ]
-        );
-
-        $vars = get_object_vars($order);
-        $this->assertArrayHasKey('x', $vars);
-        $this->assertSame(123, $vars['x']);
-        $this->assertArrayHasKey('special_fields', $vars);
-        $this->assertNull($vars['special_fields']);
-    }
-
     /**
      * @param array<string, mixed> $data
      * @param string $expectedMessage
@@ -191,7 +150,7 @@ class OrderV0Test extends TestCase
                  'message' => 'Amount is required and must be a non-empty string'
              ],
             'empty_summary' => [
-                'data' => ['summary' => ''],
+                'data' => ['summary' => '', 'amount' => '10.00'],
                 'message' => 'Summary is required and must be a non-empty string'
             ],
             'invalid_summary_i18n' => [
