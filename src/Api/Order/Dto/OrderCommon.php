@@ -186,7 +186,7 @@ class OrderCommon
             foreach ($this->products as $product) {
                 // @phpstan-ignore-next-line: Elements are Product; keep explicit runtime assertion
                 if (!$product instanceof Product) {
-                    throw new InvalidArgumentException('Each product must be an array');
+                    throw new InvalidArgumentException('Each product must be an instance of Product');
                 }
             }
         }
@@ -198,6 +198,53 @@ class OrderCommon
             }
             if (!filter_var($this->merchant_base_url, FILTER_VALIDATE_URL)) {
                 throw new InvalidArgumentException('Merchant base URL must be a valid URL');
+            }
+        }
+
+        // Either fulfillment_url or fulfillment_message must be specified
+        $hasFulfillmentMessage = $this->fulfillment_message !== null;
+        if ($this->fulfillment_message_i18n !== null) {
+            // @phpstan-ignore-next-line: Defensive runtime check
+            if (!is_array($this->fulfillment_message_i18n)) {
+                throw new InvalidArgumentException('Fulfillment message i18n must be an array of strings');
+            }
+            foreach ($this->fulfillment_message_i18n as $k => $v) {
+                // @phpstan-ignore-next-line: Keep explicit runtime assertion
+                if (!is_string($k) || !is_string($v)) {
+                    throw new InvalidArgumentException('Fulfillment message i18n must be an array of strings');
+                }
+            }
+            if (!empty($this->fulfillment_message_i18n)) {
+                $hasFulfillmentMessage = true;
+            }
+        }
+
+        if ($this->fulfillment_url === null && !$hasFulfillmentMessage) {
+            throw new InvalidArgumentException('Either fulfillment_url or fulfillment_message must be specified');
+        }
+
+        // Delivery date must be in the future
+        if ($this->delivery_date !== null) {
+            $deliveryTs = $this->delivery_date->t_s;
+            if (!is_int($deliveryTs) || $deliveryTs <= time()) {
+                throw new InvalidArgumentException('Delivery date must be in the future');
+            }
+        }
+
+        // Wire transfer deadline must be after refund deadline (if both given)
+        if ($this->refund_deadline !== null && $this->wire_transfer_deadline !== null) {
+            $refundTs = $this->refund_deadline->t_s;
+            $wireTs = $this->wire_transfer_deadline->t_s;
+
+            $refundInt = is_int($refundTs) ? $refundTs : ($refundTs === 'never' ? PHP_INT_MAX : null);
+            $wireInt = is_int($wireTs) ? $wireTs : ($wireTs === 'never' ? PHP_INT_MAX : null);
+
+            if ($refundInt === null || $wireInt === null) {
+                throw new InvalidArgumentException('Timestamps must be integers or "never"');
+            }
+
+            if ($wireInt <= $refundInt) {
+                throw new InvalidArgumentException('Wire transfer deadline must be after refund deadline');
             }
         }
     }

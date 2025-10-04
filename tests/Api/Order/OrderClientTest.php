@@ -52,7 +52,7 @@ class OrderClientTest extends TestCase
     public function testCreateOrder(): void
     {
         $choices = [new OrderChoice(amount: 'KUDOS:1')];
-        $order = new OrderV1(summary: 'Order V1', choices: $choices);
+        $order = new OrderV1(summary: 'Order V1', choices: $choices, fulfillment_message: 'ok');
         $request = new PostOrderRequest(order: $order);
 
         $expected = ['order_id' => 'ord_1', 'token' => 'tok_1'];
@@ -75,7 +75,7 @@ class OrderClientTest extends TestCase
     public function testCreateOrderAsync(): void
     {
         $choices = [new OrderChoice(amount: 'KUDOS:1')];
-        $order = new OrderV1(summary: 'Order V1', choices: $choices);
+        $order = new OrderV1(summary: 'Order V1', choices: $choices, fulfillment_message: 'ok');
         $request = new PostOrderRequest(order: $order);
 
         $expected = ['order_id' => 'ord_2', 'token' => 'tok_2'];
@@ -231,7 +231,7 @@ class OrderClientTest extends TestCase
         $this->expectException(TalerException::class);
 
         $choices = [new OrderChoice(amount: 'KUDOS:1')];
-        $order = new OrderV1(summary: 'Order V1', choices: $choices);
+        $order = new OrderV1(summary: 'Order V1', choices: $choices, fulfillment_message: 'ok');
         $request = new PostOrderRequest(order: $order);
 
         $this->httpClient->method('request')

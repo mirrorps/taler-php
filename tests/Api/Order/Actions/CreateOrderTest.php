@@ -54,7 +54,7 @@ class CreateOrderTest extends TestCase
             )
         ];
         
-        $order = new OrderV1(summary: 'Test order', choices: $choices);
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
         
         $postOrderRequest = new PostOrderRequest(
             order: $order
@@ -94,7 +94,7 @@ class CreateOrderTest extends TestCase
             )
         ];
         
-        $order = new OrderV1(summary: 'Test order', choices: $choices);
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
         
         $postOrderRequest = new PostOrderRequest(
             order: $order
@@ -117,7 +117,7 @@ class CreateOrderTest extends TestCase
             )
         ];
         
-        $order = new OrderV1(summary: 'Test order', choices: $choices);
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
         
         $postOrderRequest = new PostOrderRequest(
             order: $order
@@ -144,7 +144,7 @@ class CreateOrderTest extends TestCase
             )
         ];
         
-        $order = new OrderV1(summary: 'Test order', choices: $choices);
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
         
         $postOrderRequest = new PostOrderRequest(
             order: $order

@@ -50,7 +50,7 @@ class OrderV0Test extends TestCase
                 'address' => 'Test Street 123',
                 'post_code' => '12345'
             ],
-            'delivery_date' => ['t_s' => 1234567891],
+            'delivery_date' => ['t_s' => time() + 3600],
             'auto_refund' => ['d_us' => 86400000],
             'extra' => (object) ['custom_field' => 'value']
         ];
@@ -90,7 +90,8 @@ class OrderV0Test extends TestCase
     {
         $data = [
             'summary' => 'Test order',
-            'amount' => '10.00'
+            'amount' => '10.00',
+            'fulfillment_message' => 'ok'
         ];
 
         $OrderV0 = OrderV0::createFromArray($data);
@@ -103,7 +104,7 @@ class OrderV0Test extends TestCase
         $this->assertNull($OrderV0->order_id);
         $this->assertNull($OrderV0->public_reorder_url);
         $this->assertNull($OrderV0->fulfillment_url);
-        $this->assertNull($OrderV0->fulfillment_message);
+        $this->assertSame('ok', $OrderV0->fulfillment_message);
         $this->assertNull($OrderV0->fulfillment_message_i18n);
         $this->assertNull($OrderV0->minimum_age);
         $this->assertNull($OrderV0->products);
