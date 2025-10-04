@@ -48,7 +48,7 @@ class OrderCommonTest extends TestCase
                 'address' => 'Test Street 123',
                 'post_code' => '12345'
             ],
-            'delivery_date' => ['t_s' => 1234567891],
+            'delivery_date' => ['t_s' => time() + 3600],
             'auto_refund' => ['d_us' => 86400000],
             'extra' => (object) ['custom_field' => 'value']
         ];
@@ -88,6 +88,8 @@ class OrderCommonTest extends TestCase
     {
         $data = [
             'summary' => 'Test order',
+            // Must satisfy fulfillment requirement
+            'fulfillment_message' => 'ok',
         ];
 
         $OrderCommon = OrderCommon::createFromArray($data);
@@ -98,7 +100,7 @@ class OrderCommonTest extends TestCase
         $this->assertNull($OrderCommon->order_id);
         $this->assertNull($OrderCommon->public_reorder_url);
         $this->assertNull($OrderCommon->fulfillment_url);
-        $this->assertNull($OrderCommon->fulfillment_message);
+        $this->assertSame('ok', $OrderCommon->fulfillment_message);
         $this->assertNull($OrderCommon->fulfillment_message_i18n);
         $this->assertNull($OrderCommon->minimum_age);
         $this->assertNull($OrderCommon->products);
@@ -111,6 +113,89 @@ class OrderCommonTest extends TestCase
         $this->assertNull($OrderCommon->delivery_date);
         $this->assertNull($OrderCommon->auto_refund);
         $this->assertNull($OrderCommon->extra);
+    }
+
+    public function testMissingFulfillmentThrows(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Either fulfillment_url or fulfillment_message must be specified');
+
+        OrderCommon::createFromArray([
+            'summary' => 'Test order without fulfillment'
+        ]);
+    }
+
+    public function testFulfillmentMessageI18nOnlyIsAccepted(): void
+    {
+        $dto = OrderCommon::createFromArray([
+            'summary' => 'Has i18n fulfillment only',
+            'fulfillment_message_i18n' => ['en' => 'done']
+        ]);
+
+        $this->assertInstanceOf(OrderCommon::class, $dto);
+        $this->assertNull($dto->fulfillment_message);
+        $this->assertSame(['en' => 'done'], $dto->fulfillment_message_i18n);
+    }
+
+    public function testFulfillmentMessageI18nInvalidShapeThrows(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Fulfillment message i18n must be an array of strings');
+
+        OrderCommon::createFromArray([
+            'summary' => 'Invalid i18n',
+            'fulfillment_message_i18n' => ['en' => 123],
+        ]);
+    }
+
+    public function testDeliveryDateMustBeInFuture(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Delivery date must be in the future');
+
+        OrderCommon::createFromArray([
+            'summary' => 'Past delivery',
+            'fulfillment_message' => 'ok',
+            'delivery_date' => ['t_s' => time() - 10],
+        ]);
+    }
+
+    public function testWireTransferMustBeAfterRefund(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Wire transfer deadline must be after refund deadline');
+
+        OrderCommon::createFromArray([
+            'summary' => 'Bad deadlines',
+            'fulfillment_message' => 'ok',
+            'refund_deadline' => ['t_s' => 5_000],
+            'wire_transfer_deadline' => ['t_s' => 4_000],
+        ]);
+    }
+
+    public function testWireNeverAfterRefundIsAllowed(): void
+    {
+        $dto = OrderCommon::createFromArray([
+            'summary' => 'Wire never okay',
+            'fulfillment_message' => 'ok',
+            'refund_deadline' => ['t_s' => 5_000],
+            'wire_transfer_deadline' => ['t_s' => 'never'],
+        ]);
+
+        $this->assertInstanceOf(OrderCommon::class, $dto);
+    }
+
+    public function testRefundNeverMakesWireInvalid(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Wire transfer deadline must be after refund deadline');
+
+        OrderCommon::createFromArray([
+            'summary' => 'Refund never invalidates finite wire',
+            'fulfillment_message' => 'ok',
+            'refund_deadline' => ['t_s' => 'never'],
+            'wire_transfer_deadline' => ['t_s' => 5_000],
+        ]);
     }
 
     /**
@@ -171,7 +256,24 @@ class OrderCommonTest extends TestCase
             'invalid_merchant_base_url' => [
                 'data' => ['summary' => 'Test', 'amount' => '10.00', 'merchant_base_url' => 'not_a_url/'],
                 'message' => 'Merchant base URL must be a valid URL'
-            ]
+            ],
+            'missing_fulfillment' => [
+                'data' => ['summary' => 'Test'],
+                'message' => 'Either fulfillment_url or fulfillment_message must be specified'
+            ],
+            'delivery_date_not_future' => [
+                'data' => ['summary' => 'Test', 'fulfillment_message' => 'ok', 'delivery_date' => ['t_s' => 0]],
+                'message' => 'Delivery date must be in the future'
+            ],
+            'wire_before_refund' => [
+                'data' => [
+                    'summary' => 'Test',
+                    'fulfillment_message' => 'ok',
+                    'refund_deadline' => ['t_s' => 2000],
+                    'wire_transfer_deadline' => ['t_s' => 1999],
+                ],
+                'message' => 'Wire transfer deadline must be after refund deadline'
+            ],
         ];
     }
 } 

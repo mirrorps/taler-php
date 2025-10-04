@@ -17,7 +17,7 @@ class OrderV1Test extends TestCase
 {
     public function testConstructMinimal(): void
     {
-        $dto = new OrderV1(summary: 'Test order');
+        $dto = new OrderV1(summary: 'Test order', fulfillment_message: 'ok');
 
         $this->assertSame('Test order', $dto->summary);
         $this->assertNull($dto->choices);
@@ -33,7 +33,8 @@ class OrderV1Test extends TestCase
     public function testCreateFromArrayMinimal(): void
     {
         $data = [
-            'summary' => 'Test order'
+            'summary' => 'Test order',
+            'fulfillment_message' => 'ok'
         ];
 
         $dto = OrderV1::createFromArray($data);
@@ -76,7 +77,7 @@ class OrderV1Test extends TestCase
             'wire_transfer_deadline' => ['t_s' => 126],
             'merchant_base_url' => 'https://merchant.example/',
             'delivery_location' => ['country' => 'CH'],
-            'delivery_date' => ['t_s' => 127],
+            'delivery_date' => ['t_s' => time() + 3600],
             'auto_refund' => ['d_us' => 1000],
             'extra' => (object) ['k' => 'v']
         ];
