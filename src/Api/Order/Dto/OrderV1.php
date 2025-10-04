@@ -2,22 +2,18 @@
 
 namespace Taler\Api\Order\Dto;
 
+use InvalidArgumentException;
 use Taler\Api\Dto\Location;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Dto\Timestamp;
 use Taler\Api\Inventory\Dto\Product;
 use Taler\Api\Order\Dto\OrderChoice;
 
-/**
- * OrderV1 DTO
- *
- * Version 1 order supports discounts and subscriptions.
- * @see https://docs.taler.net/design-documents/046-mumimo-contracts.html
- */
-class OrderV1
+class OrderV1 extends OrderCommon
 {
+    public readonly int $version;
+
     /**
-     * @param int $version Version of the order; must be exactly 1
      * @param array<int, OrderChoice>|null $choices List of contract choices that the customer can select from
      * @param string $summary Human-readable description of the whole purchase
      * @param array<string, string>|null $summary_i18n Map from IETF BCP 47 language tags to localized summaries
@@ -37,41 +33,58 @@ class OrderV1
      * @param Timestamp|null $delivery_date Time indicating when the order should be delivered
      * @param RelativeTime|null $auto_refund Specifies how long the wallet should try to get an automatic refund
      * @param object|null $extra Extra data only interpreted by the merchant frontend
-     * @param array<string, mixed>|null $special_fields Data like $forgettable
      * @param bool $validate Whether to validate the data upon construction
      */
     public function __construct(
-        public readonly int $version,
-        public readonly ?array $choices = null,
-        public readonly string $summary = '',
-        public readonly ?array $summary_i18n = null,
-        public readonly ?string $order_id = null,
-        public readonly ?string $public_reorder_url = null,
-        public readonly ?string $fulfillment_url = null,
-        public readonly ?string $fulfillment_message = null,
-        public readonly ?array $fulfillment_message_i18n = null,
-        public readonly ?int $minimum_age = null,
-        public readonly ?array $products = null,
-        public readonly ?Timestamp $timestamp = null,
-        public readonly ?Timestamp $refund_deadline = null,
-        public readonly ?Timestamp $pay_deadline = null,
-        public readonly ?Timestamp $wire_transfer_deadline = null,
-        public readonly ?string $merchant_base_url = null,
-        public readonly ?Location $delivery_location = null,
-        public readonly ?Timestamp $delivery_date = null,
-        public readonly ?RelativeTime $auto_refund = null,
-        public readonly ?object $extra = null,
-        public ?array $special_fields = null,
+        public string $summary,
+        public ?array $choices = null,
+        public ?array $summary_i18n = null,
+        public ?string $order_id = null,
+        public ?string $public_reorder_url = null,
+        public ?string $fulfillment_url = null,
+        public ?string $fulfillment_message = null,
+        public ?array $fulfillment_message_i18n = null,
+        public ?int $minimum_age = null,
+        public ?array $products = null,
+        public ?Timestamp $timestamp = null,
+        public ?Timestamp $refund_deadline = null,
+        public ?Timestamp $pay_deadline = null,
+        public ?Timestamp $wire_transfer_deadline = null,
+        public ?string $merchant_base_url = null,
+        public ?Location $delivery_location = null,
+        public ?Timestamp $delivery_date = null,
+        public ?RelativeTime $auto_refund = null,
+        public ?object $extra = null,
         bool $validate = true
     ) {
-        if (isset($special_fields)) {
-            foreach ($special_fields as $key => $value) {
-                $this->$key = $value;
-            }
-            $this->special_fields = null;
-        }
+
+        parent::__construct(
+            summary: $summary,
+            summary_i18n: $summary_i18n,
+            order_id: $order_id,
+            public_reorder_url: $public_reorder_url,
+            fulfillment_url: $fulfillment_url,
+            fulfillment_message: $fulfillment_message,
+            fulfillment_message_i18n: $fulfillment_message_i18n,
+            minimum_age: $minimum_age,
+            products: $products,
+            timestamp: $timestamp,
+            refund_deadline: $refund_deadline,
+            pay_deadline: $pay_deadline,
+            wire_transfer_deadline: $wire_transfer_deadline,
+            merchant_base_url: $merchant_base_url,
+            delivery_location: $delivery_location,
+            delivery_date: $delivery_date,
+            auto_refund: $auto_refund,
+            extra: $extra,
+            validate: false,
+        );
+        
+        $this->version = 1;
+
         if ($validate) {
             $this->validate();
+            parent::validate();
         }
     }
 
@@ -80,12 +93,14 @@ class OrderV1
      */
     public function validate(): void
     {
-        if ($this->version !== 1) {
-            throw new \InvalidArgumentException('Version must be 1');
-        }
-
-        if ($this->summary === '') {
-            throw new \InvalidArgumentException('Summary must be a non-empty string');
+        if ($this->choices !== null) {
+            foreach ($this->choices as $choice) {
+                // @phpstan-ignore-next-line: Runtime guard retained; input may be untyped at runtime
+                if (!$choice instanceof OrderChoice) {
+                    throw new InvalidArgumentException('Each choice must be an instance of OrderChoice');
+                }
+                $choice->validate();
+            }
         }
     }
 
@@ -93,14 +108,13 @@ class OrderV1
      * Creates a new instance from an array of data
      *
      * @param array{
-     *   version: int,
+     *   summary: string,
      *   choices?: array<int, array{
      *     amount: string,
      *     inputs?: array<int, array{token_family_slug: string, count?: int|null}>,
      *     outputs?: array<int, (array{type: 'token', token_family_slug: string, count?: int|null, valid_at?: array{t_s: int|string}}|array{type: 'tax-receipt'})>,
      *     max_fee?: string
      *   }>,
-     *   summary: string,
      *   summary_i18n?: array<string, string>,
      *   order_id?: string,
      *   public_reorder_url?: string,
@@ -139,11 +153,36 @@ class OrderV1
      *   delivery_date?: array{t_s: int|string},
      *   auto_refund?: array{d_us: int|string},
      *   extra?: object,
-     *   special_fields?: array<string, mixed>
      * } $data
      */
     public static function createFromArray(array $data): self
     {
+        // Pre-construction guard to produce consistent exceptions (and avoid TypeErrors)
+        // @phpstan-ignore-next-line: Input may be untyped at runtime; keep defensive guard
+        if (isset($data['order_id']) && !is_string($data['order_id'])) {
+            throw new InvalidArgumentException('Order ID must be a string');
+        }
+
+        // Minimal type guards to avoid type errors on constructor
+        // @phpstan-ignore-next-line: Input may be untyped at runtime; keep defensive guard
+        if (isset($data['summary_i18n']) && !is_array($data['summary_i18n'])) {
+            throw new InvalidArgumentException('Summary i18n must be an array of strings');
+        }
+
+        if (isset($data['products'])) {
+            // @phpstan-ignore-next-line: Input may be untyped at runtime; keep defensive guard
+            if (!is_array($data['products'])) {
+                throw new InvalidArgumentException('Products must be an array');
+            }
+            
+            foreach ($data['products'] as $product) {
+                // @phpstan-ignore-next-line: Elements may be untyped at runtime; keep defensive guard
+                if (!is_array($product)) {
+                    throw new InvalidArgumentException('Each product must be an array');
+                }
+            }
+        }
+
         $choices = null;
         if (isset($data['choices'])) {
             $choices = [];
@@ -162,7 +201,6 @@ class OrderV1
         }
 
         return new self(
-            version: $data['version'],
             choices: $choices,
             summary: $data['summary'],
             summary_i18n: $data['summary_i18n'] ?? null,
@@ -182,7 +220,6 @@ class OrderV1
             delivery_date: isset($data['delivery_date']) ? Timestamp::fromArray($data['delivery_date']) : null,
             auto_refund: isset($data['auto_refund']) ? RelativeTime::fromArray($data['auto_refund']) : null,
             extra: $data['extra'] ?? null,
-            special_fields: $data['special_fields'] ?? null
         );
     }
 }

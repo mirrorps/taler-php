@@ -17,32 +17,28 @@ class OrderV1Test extends TestCase
 {
     public function testConstructMinimal(): void
     {
-        $dto = new OrderV1(version: 1, summary: 'Test order');
+        $dto = new OrderV1(summary: 'Test order');
 
-        $this->assertSame(1, $dto->version);
         $this->assertSame('Test order', $dto->summary);
         $this->assertNull($dto->choices);
     }
 
     public function testConstructWithoutValidation(): void
     {
-        $dto = new OrderV1(version: 1, summary: '', validate: false);
+        $dto = new OrderV1(summary: '', validate: false);
 
-        $this->assertSame(1, $dto->version);
         $this->assertSame('', $dto->summary);
     }
 
     public function testCreateFromArrayMinimal(): void
     {
         $data = [
-            'version' => 1,
             'summary' => 'Test order'
         ];
 
         $dto = OrderV1::createFromArray($data);
 
         $this->assertInstanceOf(OrderV1::class, $dto);
-        $this->assertSame(1, $dto->version);
         $this->assertSame('Test order', $dto->summary);
         $this->assertNull($dto->choices);
     }
@@ -50,7 +46,6 @@ class OrderV1Test extends TestCase
     public function testCreateFromArrayFull(): void
     {
         $data = [
-            'version' => 1,
             'summary' => 'Full order',
             'choices' => [
                 [
@@ -117,53 +112,10 @@ class OrderV1Test extends TestCase
         $this->assertIsObject($dto->extra);
     }
 
-    public function testCreateFromArrayWithSpecialFields(): void
-    {
-        $data = [
-            'version' => 1,
-            'summary' => 'S',
-            'special_fields' => [
-                'forgettable' => ['$.wire_fee'],
-                'flag' => true,
-            ],
-        ];
-
-        $dto = OrderV1::createFromArray($data);
-
-        $vars = get_object_vars($dto);
-        $this->assertArrayHasKey('forgettable', $vars);
-        $this->assertArrayHasKey('flag', $vars);
-        $this->assertSame(['$.wire_fee'], $vars['forgettable']);
-        $this->assertTrue($vars['flag']);
-        $this->assertArrayHasKey('special_fields', $vars);
-        $this->assertNull($vars['special_fields']);
-    }
-
-    public function testConstructorWithSpecialFields(): void
-    {
-        $dto = new OrderV1(
-            version: 1,
-            summary: 'S',
-            special_fields: ['x' => 1]
-        );
-
-        $vars = get_object_vars($dto);
-        $this->assertArrayHasKey('x', $vars);
-        $this->assertSame(1, $vars['x']);
-        $this->assertArrayHasKey('special_fields', $vars);
-        $this->assertNull($vars['special_fields']);
-    }
-
-    public function testValidationFailsOnWrongVersion(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        OrderV1::createFromArray(['version' => 0, 'summary' => 'x']);
-    }
-
     public function testValidationFailsOnEmptySummary(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        new OrderV1(version: 1, summary: '');
+        new OrderV1(summary: '');
     }
 }
 
