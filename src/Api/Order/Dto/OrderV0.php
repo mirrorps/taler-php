@@ -8,35 +8,10 @@ use Taler\Api\Inventory\Dto\Product;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Dto\Timestamp;
 
-
-/**
- * OrderV0 DTO
- *
- * @phpstan-type OrderV0Array array{
- *   summary: string,
- *   amount: string,
- *   max_fee?: string,
- *   summary_i18n?: array<string, string>,
- *   order_id?: string,
- *   public_reorder_url?: string,
- *   fulfillment_url?: string,
- *   fulfillment_message?: string,
- *   fulfillment_message_i18n?: array<string, string>,
- *   minimum_age?: int,
- *   products?: array<Product>,
- *   timestamp?: Timestamp,
- *   refund_deadline?: Timestamp,
- *   pay_deadline?: Timestamp,
- *   wire_transfer_deadline?: Timestamp,
- *   merchant_base_url?: string,
- *   delivery_location?: Location,
- *   delivery_date?: Timestamp,
- *   auto_refund?: RelativeTime,
- *   extra?: object
- * }
- */
 class OrderV0 extends OrderCommon
 {
+    public readonly int $version;
+
     /**
      * @param string $summary Human-readable description of the whole purchase
      * @param string $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
@@ -102,8 +77,10 @@ class OrderV0 extends OrderCommon
             delivery_date: $delivery_date,
             auto_refund: $auto_refund,
             extra: $extra,
-            validate: $validate,
+            validate: false,
         );
+
+        $this->version = 0;
 
         if ($validate) {
             $this->validate();

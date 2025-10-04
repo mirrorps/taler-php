@@ -28,7 +28,6 @@ class PostOrderRequestTest extends TestCase
         );
 
         $this->order_v1 = OrderV1::createFromArray([
-            'version' => 1,
             'summary' => 'Test Order V1',
             'choices' => [
                 [
