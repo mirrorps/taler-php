@@ -39,6 +39,38 @@ class TalerConfigTest extends TestCase
         $this->assertFalse($config->getWrapResponse());
     }
 
+    public function testRequestCompressionDefaults(): void
+    {
+        $config = new TalerConfig(self::BASE_URL);
+        $this->assertTrue($config->isRequestCompressionEnabled());
+        $this->assertSame(4096, $config->getRequestCompressionThresholdBytes());
+    }
+
+    public function testRequestCompressionCustomConfig(): void
+    {
+        $config = new TalerConfig(
+            baseUrl: self::BASE_URL,
+            authToken: self::AUTH_TOKEN,
+            wrapResponse: false,
+            debugLoggingEnabled: false,
+            requestCompressionEnabled: false,
+            requestCompressionThresholdBytes: 1024
+        );
+
+        $this->assertFalse($config->isRequestCompressionEnabled());
+        $this->assertSame(1024, $config->getRequestCompressionThresholdBytes());
+    }
+
+    public function testSetAttributeAllowsChangingCompressionSettings(): void
+    {
+        $config = new TalerConfig(self::BASE_URL);
+        $config->setAttribute('requestCompressionEnabled', false);
+        $config->setAttribute('requestCompressionThresholdBytes', 8192);
+
+        $this->assertFalse($config->isRequestCompressionEnabled());
+        $this->assertSame(8192, $config->getRequestCompressionThresholdBytes());
+    }
+
     public function testConstructorThrowsExceptionOnEmptyBaseUrl(): void
     {
         $this->expectException(\InvalidArgumentException::class);
