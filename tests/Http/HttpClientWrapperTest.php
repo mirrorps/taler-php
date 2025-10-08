@@ -79,6 +79,11 @@ class HttpClientWrapperTest extends TestCase
         $result = $wrapper->request('POST', 'users', [], '{"name":"test"}');
         $this->assertInstanceOf(ResponseInterface::class, $result);
         $this->assertEquals(201, $response->getStatusCode());
+
+        $lastRequest = $this->mockClient->getLastRequest();
+        $this->assertSame('application/json', $lastRequest->getHeaderLine('Accept'));
+        $this->assertSame('application/json', $lastRequest->getHeaderLine('Content-Type'));
+        $this->assertSame('gzip', $lastRequest->getHeaderLine('Accept-Encoding'));
     }
 
     /** @test */
@@ -146,6 +151,10 @@ class HttpClientWrapperTest extends TestCase
             '{"name":"test"}',
             (string)$result->getBody()
         );
+
+        $this->assertSame('application/json', $result->getHeaderLine('Accept'));
+        $this->assertSame('application/json', $result->getHeaderLine('Content-Type'));
+        $this->assertSame('gzip', $result->getHeaderLine('Accept-Encoding'));
 
     }
 
@@ -387,6 +396,69 @@ class HttpClientWrapperTest extends TestCase
         $lastRequest = $this->mockClient->getLastRequest();
 
         $this->assertStringContainsString('Mirrorps_Taler_PHP', $lastRequest->getHeaderLine('User-Agent'));
+    }
+
+    /** @test */
+    public function it_compresses_large_request_bodies_and_sets_content_encoding(): void
+    {
+        $wrapper = $this->getWrapper();
+        $this->mockClient->addResponse($this->factory->createResponse(200));
+
+        $payloadArray = ['data' => str_repeat('x', 10000)];
+        $payload = json_encode($payloadArray, JSON_THROW_ON_ERROR);
+
+        $wrapper->request('POST', 'bulk', [], $payload);
+
+        $lastRequest = $this->mockClient->getLastRequest();
+        $this->assertSame('gzip', $lastRequest->getHeaderLine('Content-Encoding'));
+        $this->assertGreaterThan(0, strlen((string)$lastRequest->getBody()));
+
+        // Check gzip magic bytes 0x1f 0x8b
+        $bin = (string)$lastRequest->getBody();
+        $this->assertTrue(strlen($bin) > 2);
+        $this->assertSame("\x1f", $bin[0]);
+        $this->assertSame("\x8b", $bin[1]);
+    }
+
+    /** @test */
+    public function it_does_not_compress_when_disabled_in_config(): void
+    {
+        $config = new TalerConfig(
+            self::BASE_URL,
+            self::AUTH_TOKEN,
+            true,
+            false,
+            false,
+            64
+        );
+
+        $wrapper = new HttpClientWrapper(
+            $config,
+            $this->mockClient,
+            $this->logger,
+            $this->factory,
+            $this->factory,
+            true
+        );
+
+        $this->mockClient->addResponse($this->factory->createResponse(200));
+        $payload = json_encode(['data' => str_repeat('y', 10000)], JSON_THROW_ON_ERROR);
+        $wrapper->request('POST', 'bulk', [], $payload);
+
+        $lastRequest = $this->mockClient->getLastRequest();
+        $this->assertSame('', $lastRequest->getHeaderLine('Content-Encoding'));
+    }
+
+    /** @test */
+    public function it_respects_existing_content_encoding_header(): void
+    {
+        $wrapper = $this->getWrapper();
+        $this->mockClient->addResponse($this->factory->createResponse(200));
+
+        $payload = json_encode(['data' => str_repeat('z', 10000)], JSON_THROW_ON_ERROR);
+        $wrapper->request('POST', 'bulk', ['Content-Encoding' => 'br'], $payload);
+        $lastRequest = $this->mockClient->getLastRequest();
+        $this->assertSame('br', $lastRequest->getHeaderLine('Content-Encoding'));
     }
 
     /**

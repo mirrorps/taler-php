@@ -18,7 +18,9 @@ class TalerConfig
         private string $baseUrl,
         private string $authToken = '',
         private bool $wrapResponse = true,
-        private bool $debugLoggingEnabled = false
+        private bool $debugLoggingEnabled = false,
+        private bool $requestCompressionEnabled = true,
+        private int $requestCompressionThresholdBytes = 4096
     ) {
         $this->validate();
     }
@@ -60,6 +62,25 @@ class TalerConfig
     public function isDebugLoggingEnabled(): bool
     {
         return $this->debugLoggingEnabled;
+    }
+
+    /**
+     * Whether gzip compression of request bodies is enabled.
+     * Defaults to true; can be disabled in environments where CPU is constrained
+     * or compression offers little benefit (e.g., loopback).
+     */
+    public function isRequestCompressionEnabled(): bool
+    {
+        return $this->requestCompressionEnabled;
+    }
+
+    /**
+     * Byte size threshold above which request bodies will be compressed.
+     * Defaults to 4096 bytes.
+     */
+    public function getRequestCompressionThresholdBytes(): int
+    {
+        return $this->requestCompressionThresholdBytes;
     }
 
     /**
@@ -124,7 +145,9 @@ class TalerConfig
         return json_encode([
             'baseUrl'      => $this->baseUrl,
             'wrapResponse' => $this->wrapResponse,
-            'debugLogging' => $this->debugLoggingEnabled
+            'debugLogging' => $this->debugLoggingEnabled,
+            'requestCompressionEnabled' => $this->requestCompressionEnabled,
+            'requestCompressionThresholdBytes' => $this->requestCompressionThresholdBytes
         ], JSON_THROW_ON_ERROR);
     }
 

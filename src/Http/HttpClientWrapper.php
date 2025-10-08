@@ -169,12 +169,30 @@ class HttpClientWrapper
 
 		$headers['User-Agent'] = $this->userAgent;
 
+		// Default Accept headers if not provided
+		if (!isset($headers['Accept']) && !isset($headers['accept'])) {
+			$headers['Accept'] = 'application/json';
+		}
+
+		if (!isset($headers['Accept-Encoding']) && !isset($headers['accept-encoding'])) {
+			$headers['Accept-Encoding'] = 'gzip';
+		}
+
 		if ($authToken = $this->config->getAuthToken()) {
 			$headers['Authorization'] = $authToken;
 		}
 
-		if ($body !== null && !isset($headers['Content-Type'])) {
+		if ($body !== null && !isset($headers['Content-Type']) && !isset($headers['content-type'])) {
 			$headers['Content-Type'] = 'application/json';
+		}
+
+		// Optionally compress request body with gzip
+		if ($body !== null && $this->shouldCompressRequestBody($headers, $body)) {
+			$compressed = $this->gzipCompress($body);
+			if ($compressed !== null) {
+				$body = $compressed;
+				$headers['Content-Encoding'] = 'gzip';
+			}
 		}
 
 		$request = $this->requestFactory->createRequest($method, $url);
@@ -199,6 +217,47 @@ class HttpClientWrapper
 		}
 
 		return $request;
+	}
+
+	/**
+	 * Determine whether to gzip-compress the request body.
+	 * Compression may be disabled via config or skipped when an explicit
+	 * Content-Encoding header is already present, or when the payload is
+	 * smaller than the configured threshold.
+	 *
+	 * @param array<string, string|string[]> $headers
+	 */
+	private function shouldCompressRequestBody(array $headers, string $body): bool
+	{
+		if (!$this->config->isRequestCompressionEnabled()) {
+			return false;
+		}
+
+		// Respect explicit caller-provided content-encoding
+		if (isset($headers['Content-Encoding']) || isset($headers['content-encoding'])) {
+			return false;
+		}
+
+		$threshold = $this->config->getRequestCompressionThresholdBytes();
+		return strlen($body) >= $threshold;
+	}
+
+	/**
+	 * Gzip-compress a string. Returns null on failure or if compression
+	 * is not beneficial (larger than original).
+	 */
+	private function gzipCompress(string $data): ?string
+	{
+		$compressed = @gzencode($data, 6);
+		if ($compressed === false) {
+			return null;
+		}
+		
+		// Avoid expanding payloads due to incompressible data
+		if (strlen($compressed) >= strlen($data)) {
+			return null;
+		}
+		return $compressed;
 	}
 
 	private function buildUrl(string $endpoint): string
