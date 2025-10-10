@@ -11,6 +11,10 @@ use Taler\Api\Order\Dto\PostOrderResponse;
 use Taler\Api\Order\Dto\OrderV1;
 use Taler\Api\Order\Dto\OrderChoice;
 use Taler\Exception\TalerException;
+use Taler\Exception\OutOfStockException;
+use Taler\Exception\PaymentDeniedLegallyException;
+use Taler\Api\Inventory\Dto\OutOfStockResponse;
+use Taler\Api\Order\Dto\PaymentDeniedLegallyResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
@@ -177,5 +181,103 @@ class CreateOrderTest extends TestCase
         $this->assertInstanceOf(PostOrderResponse::class, $result->wait());
         $this->assertEquals('test_order_123', $result->wait()->order_id);
         $this->assertEquals('test_token_456', $result->wait()->token);
+    }
+
+    public function testRunOutOfStockException(): void
+    {
+        $choices = [
+            new OrderChoice(
+                amount: '50.00'
+            )
+        ];
+
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
+
+        $postOrderRequest = new PostOrderRequest(
+            order: $order
+        );
+
+        $body = [
+            'product_id' => 'p-123',
+            'requested_quantity' => 5,
+            'available_quantity' => 2,
+            'restock_expected' => ['t_s' => 1731000000],
+        ];
+
+        // 410 Gone -> OutOfStockException
+        $this->response->method('getStatusCode')->willReturn(410);
+        $this->stream->method('__toString')
+            ->willReturn(json_encode($body));
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $headers = [];
+        $requestData = json_encode($postOrderRequest);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('request')
+            ->with('POST', "private/orders", $headers, $requestData)
+            ->willReturn($this->response);
+
+        try {
+            CreateOrder::run($this->orderClient, $postOrderRequest);
+            $this->fail('Expected OutOfStockException to be thrown');
+        } catch (OutOfStockException $ex) {
+            $this->assertSame(410, $ex->getCode());
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(OutOfStockResponse::class, $dto);
+            $this->assertSame('p-123', $dto->product_id);
+            $this->assertSame(5, $dto->requested_quantity);
+            $this->assertSame(2, $dto->available_quantity);
+            $this->assertNotNull($dto->restock_expected);
+            $this->assertSame(1731000000, $dto->restock_expected?->t_s);
+        }
+    }
+
+    public function testRunPaymentDeniedLegallyException(): void
+    {
+        $choices = [
+            new OrderChoice(
+                amount: '50.00'
+            )
+        ];
+
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
+
+        $postOrderRequest = new PostOrderRequest(
+            order: $order
+        );
+
+        $body = [
+            'exchange_base_urls' => [
+                'https://ex1.example.com',
+                'https://ex2.example.com',
+            ],
+        ];
+
+        // 451 Unavailable For Legal Reasons -> PaymentDeniedLegallyException
+        $this->response->method('getStatusCode')->willReturn(451);
+        $this->stream->method('__toString')
+            ->willReturn(json_encode($body));
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $headers = [];
+        $requestData = json_encode($postOrderRequest);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('request')
+            ->with('POST', "private/orders", $headers, $requestData)
+            ->willReturn($this->response);
+
+        try {
+            CreateOrder::run($this->orderClient, $postOrderRequest);
+            $this->fail('Expected PaymentDeniedLegallyException to be thrown');
+        } catch (PaymentDeniedLegallyException $ex) {
+            $this->assertSame(451, $ex->getCode());
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(PaymentDeniedLegallyResponse::class, $dto);
+            $this->assertSame(['https://ex1.example.com', 'https://ex2.example.com'], $dto->exchange_base_urls);
+        }
     }
 }

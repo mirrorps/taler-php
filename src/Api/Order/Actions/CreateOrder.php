@@ -7,6 +7,8 @@ use Taler\Api\Order\Dto\PostOrderResponse;
 use Taler\Api\Order\OrderClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
+use Taler\Exception\OutOfStockException;
+use Taler\Exception\PaymentDeniedLegallyException;
 
 class CreateOrder
 {
@@ -99,11 +101,19 @@ class CreateOrder
      *
      * @param ResponseInterface $response
      * @return PostOrderResponse
-     * @throws TalerException
+     * @throws TalerException|OutOfStockException
      */
     private function handleResponse(ResponseInterface $response): PostOrderResponse
     {
-        $data = $this->orderClient->parseResponseBody($response, 200);
-        return PostOrderResponse::createFromArray($data);
+        try {
+            $data = $this->orderClient->parseResponseBody($response, 200);
+            return PostOrderResponse::createFromArray($data);
+        } catch (TalerException $e) {
+            match ($e->getCode()) {
+                410 => throw new OutOfStockException(response: $response),
+                451 => throw new PaymentDeniedLegallyException(response: $response),
+                default => throw $e,
+            };
+        }
     }
 }
