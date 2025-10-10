@@ -110,8 +110,8 @@ class CreateOrder
             return PostOrderResponse::createFromArray($data);
         } catch (TalerException $e) {
             match ($e->getCode()) {
-                410 => throw new OutOfStockException(response: $response),
-                451 => throw new PaymentDeniedLegallyException(response: $response),
+                OutOfStockException::HTTP_STATUS_CODE           => throw new OutOfStockException(response: $response),
+                PaymentDeniedLegallyException::HTTP_STATUS_CODE => throw new PaymentDeniedLegallyException(response: $response),
                 default => throw $e,
             };
         }

@@ -7,6 +7,7 @@ use Taler\Api\Order\Dto\RefundRequest;
 use Taler\Api\Order\OrderClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
+use Taler\Exception\PaymentDeniedLegallyException;
 
 class RefundOrder
 {
@@ -109,11 +110,18 @@ class RefundOrder
      *
      * @param ResponseInterface $response
      * @return MerchantRefundResponse
-     * @throws TalerException
+     * @throws TalerException|PaymentDeniedLegallyException
      */
     private function handleResponse(ResponseInterface $response): MerchantRefundResponse
     {
-        $data = $this->orderClient->parseResponseBody($response, 200);
-        return MerchantRefundResponse::createFromArray($data);
+        try {
+            $data = $this->orderClient->parseResponseBody($response, 200);
+            return MerchantRefundResponse::createFromArray($data);
+        } catch (TalerException $e) {
+            if ($e->getCode() === PaymentDeniedLegallyException::HTTP_STATUS_CODE) {
+                throw new PaymentDeniedLegallyException(response: $response);
+            }
+            throw $e;
+        }
     }
 } 

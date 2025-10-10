@@ -361,6 +361,38 @@ echo $refund->taler_refund_uri;  // URL for wallet to process refund
 echo $refund->h_contract;        // Contract hash for request authentication
 ```
 
+#### Handle errors for Refund Order
+
+The backend may deny a refund for legal reasons (451). The SDK raises a typed exception with structured data:
+
+```php
+use Taler\Api\Order\Dto\RefundRequest;
+use Taler\Exception\PaymentDeniedLegallyException; // HTTP 451
+use Taler\Exception\TalerException;
+
+$refundRequest = new RefundRequest(
+    refund: 'EUR:10.00',
+    reason: 'Customer request'
+);
+
+try {
+    $refund = $orderClient->refundOrder('order_123', $refundRequest);
+    echo $refund->taler_refund_uri;
+} catch (PaymentDeniedLegallyException $e) { // 451 Unavailable For Legal Reasons
+    $dto = $e->getResponseDTO();
+    if ($dto !== null) {
+        // $dto->exchange_base_urls (array<int, string>)
+    }
+    // Recover: refresh coins from listed exchanges or retry via others
+} catch (TalerException $e) {
+    // Other API errors
+    throw $e;
+} catch (\Throwable $e) {
+    // Transport/runtime errors
+    throw $e;
+}
+```
+
 #### Delete Order
 
 Delete a specific order:
