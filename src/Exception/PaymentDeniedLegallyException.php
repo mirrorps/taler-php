@@ -11,6 +11,7 @@ use Taler\Api\Order\Dto\PaymentDeniedLegallyResponse;
  */
 class PaymentDeniedLegallyException extends TalerException
 {
+    public const HTTP_STATUS_CODE = 451;
     /**
      * @param string $message Human-readable error message
      * @param \Throwable|null $previous Previous exception
@@ -23,7 +24,7 @@ class PaymentDeniedLegallyException extends TalerException
     ) {
         parent::__construct(
             message: $message,
-            code: 451,
+            code: self::HTTP_STATUS_CODE,
             previous: $previous,
             response: $response
         );

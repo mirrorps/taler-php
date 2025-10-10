@@ -9,6 +9,8 @@ use Taler\Api\Order\OrderClient;
 use Taler\Api\Order\Dto\MerchantRefundResponse;
 use Taler\Api\Order\Dto\RefundRequest;
 use Taler\Exception\TalerException;
+use Taler\Exception\PaymentDeniedLegallyException;
+use Taler\Api\Order\Dto\PaymentDeniedLegallyResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
@@ -157,5 +159,49 @@ class RefundOrderTest extends TestCase
         $this->assertInstanceOf(MerchantRefundResponse::class, $result->wait());
         $this->assertEquals('taler://refund/example', $result->wait()->taler_refund_uri);
         $this->assertEquals('HASH123', $result->wait()->h_contract);
+    }
+
+    public function testRunPaymentDeniedLegallyException(): void
+    {
+        $orderId = 'test_order_123';
+        $refundRequest = new RefundRequest(
+            refund: '10.00',
+            reason: 'Customer dissatisfaction'
+        );
+
+        $body = [
+            'exchange_base_urls' => [
+                'https://ex1.example.com',
+                'https://ex2.example.com',
+            ],
+        ];
+
+        // 451 Unavailable For Legal Reasons -> PaymentDeniedLegallyException
+        $this->response->method('getStatusCode')->willReturn(451);
+        $this->stream->method('__toString')
+            ->willReturn(json_encode($body));
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $headers = [];
+        $requestData = json_encode([
+            'refund' => $refundRequest->refund,
+            'reason' => $refundRequest->reason
+        ]);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('request')
+            ->with('POST', "private/orders/{$orderId}/refund", $headers, $requestData)
+            ->willReturn($this->response);
+
+        try {
+            RefundOrder::run($this->orderClient, $orderId, $refundRequest);
+            $this->fail('Expected PaymentDeniedLegallyException to be thrown');
+        } catch (PaymentDeniedLegallyException $ex) {
+            $this->assertSame(PaymentDeniedLegallyException::HTTP_STATUS_CODE, $ex->getCode());
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(PaymentDeniedLegallyResponse::class, $dto);
+            $this->assertSame(['https://ex1.example.com', 'https://ex2.example.com'], $dto->exchange_base_urls);
+        }
     }
 } 

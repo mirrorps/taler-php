@@ -11,6 +11,8 @@ use Taler\Api\Inventory\Dto\OutOfStockResponse;
  */
 class OutOfStockException extends TalerException
 {
+    public const HTTP_STATUS_CODE = 410;
+    
     /**
      * @param string $message Human-readable error message
      * @param \Throwable|null $previous Previous exception
@@ -23,7 +25,7 @@ class OutOfStockException extends TalerException
     ) {
         parent::__construct(
             message: $message,
-            code: 410,
+            code: self::HTTP_STATUS_CODE,
             previous: $previous,
             response: $response
         );
