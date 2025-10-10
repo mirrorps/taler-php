@@ -185,6 +185,56 @@ $result = $orderClient->createOrder($request);
 echo $result->order_id;
 ```
 
+#### Handle errors for Create Order
+
+When creating an order, the backend may return non-200 status codes for normal error conditions. The SDK throws typed exceptions to help you handle these cases with structured DTOs:
+
+```php
+use Taler\Api\Order\Dto\OrderV0;
+use Taler\Api\Order\Dto\PostOrderRequest;
+use Taler\Exception\OutOfStockException;              // HTTP 410
+use Taler\Exception\PaymentDeniedLegallyException;    // HTTP 451
+use Taler\Exception\TalerException;
+
+$order = new OrderV0(
+    summary: 'Coffee Beans 1kg',
+    amount: 'EUR:12.50'
+);
+
+$request = new PostOrderRequest(order: $order);
+
+try {
+    $response = $orderClient->createOrder($request);
+    // $response is PostOrderResponse on success
+    echo $response->order_id . "\n";
+} catch (OutOfStockException $e) { //--- http status code 410 Gone
+    $dto = $e->getResponseDTO();
+    if ($dto !== null) {
+        // Access structured out-of-stock details
+        // $dto->product_id (string)
+        // $dto->requested_quantity (int)
+        // $dto->available_quantity (int)
+        // $dto->restock_expected?->t_s (int|string)
+    }
+    // Recover: show alternative products, adjust quantity, etc.
+
+} catch (PaymentDeniedLegallyException $e) {  //--- http status code 451 Unavailable For Legal Reasons
+    $dto = $e->getResponseDTO();
+    if ($dto !== null) {
+        // Exchanges that denied payment
+        // $dto->exchange_base_urls is array<int, string>
+    }
+    // Recover: refresh coins from these exchanges or retry with others
+} catch (TalerException $e) {
+    // Other Taler API errors (e.g., 404/409). Inspect JSON if needed:
+    // $e->getResponseJson();
+    throw $e;
+} catch (\Throwable $e) {
+    // Transport/runtime errors
+    throw $e;
+}
+```
+
 With custom headers or raw array response:
 
 ```php
