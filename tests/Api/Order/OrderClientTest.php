@@ -19,6 +19,7 @@ use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\OrderClient;
 use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
+use Taler\Api\Dto\ErrorDetail;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
 
@@ -238,6 +239,33 @@ class OrderClientTest extends TestCase
             ->willThrowException(new TalerException('fail'));
 
         $this->client->createOrder($request);
+    }
+
+    public function testCreateOrderThrowsTalerExceptionWithErrorDetail(): void
+    {
+        $choices = [new OrderChoice(amount: 'KUDOS:1')];
+        $order = new OrderV1(summary: 'Order V1', choices: $choices, fulfillment_message: 'ok');
+        $request = new PostOrderRequest(order: $order);
+
+        /** @var ResponseInterface&MockObject $response */
+        $response = $this->createMock(ResponseInterface::class);
+        /** @var StreamInterface&MockObject $stream */
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('__toString')->willReturn(json_encode(['code' => 777, 'hint' => 'oops']));
+        $response->method('getBody')->willReturn($stream);
+
+        $this->httpClient->method('request')
+            ->willThrowException(new TalerException('fail', 400, null, $response));
+
+        try {
+            $this->client->createOrder($request);
+            $this->fail('Expected TalerException');
+        } catch (TalerException $ex) {
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(ErrorDetail::class, $dto);
+            $this->assertSame(777, $dto->code);
+            $this->assertSame('oops', $dto->hint);
+        }
     }
 }
 

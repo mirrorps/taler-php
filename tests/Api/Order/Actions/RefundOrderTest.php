@@ -11,6 +11,7 @@ use Taler\Api\Order\Dto\RefundRequest;
 use Taler\Exception\TalerException;
 use Taler\Exception\PaymentDeniedLegallyException;
 use Taler\Api\Order\Dto\PaymentDeniedLegallyResponse;
+use Taler\Api\Dto\ErrorDetail;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
@@ -98,6 +99,36 @@ class RefundOrderTest extends TestCase
         $this->expectExceptionMessage('Test exception');
 
         RefundOrder::run($this->orderClient, $orderId, $refundRequest);
+    }
+
+    public function testRunWithTalerExceptionParsesErrorDetail(): void
+    {
+        $orderId = 'test_order_123';
+        $refundRequest = new RefundRequest(
+            refund: '10.00',
+            reason: 'Customer dissatisfaction'
+        );
+
+        $errorPayload = json_encode([
+            'code' => 1200,
+            'hint' => 'Refund not allowed'
+        ], JSON_THROW_ON_ERROR);
+
+        $this->stream->method('__toString')->willReturn($errorPayload);
+        $this->response->method('getBody')->willReturn($this->stream);
+
+        $this->httpClientWrapper->method('request')
+            ->willThrowException(new TalerException('Test exception', 400, null, $this->response));
+
+        try {
+            RefundOrder::run($this->orderClient, $orderId, $refundRequest);
+            $this->fail('Expected TalerException to be thrown');
+        } catch (TalerException $ex) {
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(ErrorDetail::class, $dto);
+            $this->assertSame(1200, $dto->code);
+            $this->assertSame('Refund not allowed', $dto->hint);
+        }
     }
 
     public function testRunWithGenericException(): void
