@@ -226,8 +226,9 @@ try {
     }
     // Recover: refresh coins from these exchanges or retry with others
 } catch (TalerException $e) {
-    // Other Taler API errors (e.g., 404/409). Inspect JSON if needed:
-    // $e->getResponseJson();
+    // Other Taler API errors (e.g., 404/409). Inspect structured error details:
+    // $error = $e->getResponseDTO(); // instance of Taler\Api\Dto\ErrorDetail or null
+    // Or raw array JSON if preferred: $e->getResponseJson();
     throw $e;
 } catch (\Throwable $e) {
     // Transport/runtime errors
@@ -467,6 +468,33 @@ try {
 } catch (\Throwable $e) {
     // Handle other errors
     echo $e->getMessage();
+}
+```
+
+#### Inspect structured error details (TalerException::getResponseDTO)
+
+When the backend returns a JSON error response, `TalerException::getResponseDTO()` parses it into an `ErrorDetail` DTO for convenient, typed access.
+
+```php
+use Taler\Exception\TalerException;
+use Taler\Api\Dto\ErrorDetail;
+
+try {
+    $orders = $orderClient->getOrders();
+} catch (TalerException $e) {
+    /** @var ErrorDetail|null $err */
+    $err = $e->getResponseDTO();
+    if ($err !== null) {
+        // Numeric error code unique to the condition
+        echo $err->code . "\n";
+        // Human-readable hint from the server (optional)
+        echo ($err->hint ?? '') . "\n";
+        // Additional optional fields may be present depending on the API
+        // e.g., $err->detail, $err->parameter, $err->path, $err->extra
+    }
+
+    // Fallback to raw array if needed
+    // $json = $e->getResponseJson();
 }
 ```
 
