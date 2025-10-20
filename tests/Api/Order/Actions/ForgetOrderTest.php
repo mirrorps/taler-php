@@ -8,6 +8,7 @@ use Taler\Api\Order\Actions\ForgetOrder;
 use Taler\Api\Order\OrderClient;
 use Taler\Api\Order\Dto\ForgetRequest;
 use Taler\Exception\TalerException;
+use Taler\Api\Dto\ErrorDetail;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
@@ -85,6 +86,35 @@ class ForgetOrderTest extends TestCase
         $this->expectExceptionMessage('Test exception');
 
         ForgetOrder::run($this->orderClient, $orderId, $forgetRequest);
+    }
+
+    public function testRunWithTalerExceptionParsesErrorDetail(): void
+    {
+        $orderId = 'test_order_123';
+        $forgetRequest = new ForgetRequest([
+            '$.wire_fee',
+        ]);
+
+        $errorPayload = json_encode([
+            'code' => 1002,
+            'hint' => 'Invalid forget fields'
+        ], JSON_THROW_ON_ERROR);
+
+        $this->stream->method('__toString')->willReturn($errorPayload);
+        $this->response->method('getBody')->willReturn($this->stream);
+
+        $this->httpClientWrapper->method('request')
+            ->willThrowException(new TalerException('Test exception', 400, null, $this->response));
+
+        try {
+            ForgetOrder::run($this->orderClient, $orderId, $forgetRequest);
+            $this->fail('Expected TalerException to be thrown');
+        } catch (TalerException $ex) {
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(ErrorDetail::class, $dto);
+            $this->assertSame(1002, $dto->code);
+            $this->assertSame('Invalid forget fields', $dto->hint);
+        }
     }
 
     public function testRunWithGenericException(): void

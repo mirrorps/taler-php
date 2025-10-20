@@ -13,6 +13,7 @@ use Taler\Api\Order\Dto\OrderChoice;
 use Taler\Exception\TalerException;
 use Taler\Exception\OutOfStockException;
 use Taler\Exception\PaymentDeniedLegallyException;
+use Taler\Api\Dto\ErrorDetail;
 use Taler\Api\Inventory\Dto\OutOfStockResponse;
 use Taler\Api\Order\Dto\PaymentDeniedLegallyResponse;
 use Psr\Http\Message\ResponseInterface;
@@ -111,6 +112,42 @@ class CreateOrderTest extends TestCase
         $this->expectExceptionMessage('Test exception');
 
         CreateOrder::run($this->orderClient, $postOrderRequest);
+    }
+
+    public function testRunWithTalerExceptionParsesErrorDetail(): void
+    {
+        $choices = [
+            new OrderChoice(
+                amount: '50.00'
+            )
+        ];
+
+        $order = new OrderV1(summary: 'Test order', choices: $choices, fulfillment_message: 'ok');
+
+        $postOrderRequest = new PostOrderRequest(
+            order: $order
+        );
+
+        $errorPayload = json_encode([
+            'code' => 9001,
+            'hint' => 'Bad request'
+        ], JSON_THROW_ON_ERROR);
+
+        $this->stream->method('__toString')->willReturn($errorPayload);
+        $this->response->method('getBody')->willReturn($this->stream);
+
+        $this->httpClientWrapper->method('request')
+            ->willThrowException(new TalerException('Test exception', 400, null, $this->response));
+
+        try {
+            CreateOrder::run($this->orderClient, $postOrderRequest);
+            $this->fail('Expected TalerException to be thrown');
+        } catch (TalerException $ex) {
+            $dto = $ex->getResponseDTO();
+            $this->assertInstanceOf(ErrorDetail::class, $dto);
+            $this->assertSame(9001, $dto->code);
+            $this->assertSame('Bad request', $dto->hint);
+        }
     }
 
     public function testRunWithGenericException(): void
