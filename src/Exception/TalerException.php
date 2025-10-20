@@ -4,6 +4,7 @@ namespace Taler\Exception;
 
 use Exception;
 use Psr\Http\Message\ResponseInterface;
+use Taler\Api\Dto\ErrorDetail;
 
 use function Taler\Helpers\sanitizeString;
 
@@ -49,5 +50,35 @@ class TalerException extends Exception
     {
         if (!$this->response) return null;
         return json_decode((string) $this->response->getBody(), true);
+    }
+
+    /**
+     * Parse the HTTP response body into an ErrorDetail DTO.
+     *
+     * @return ErrorDetail|null
+     */
+    public function getResponseDTO(): mixed
+    {
+        $json = $this->getResponseJson();
+        if (!is_array($json)) {
+            return null;
+        }
+        
+        /** @var array{
+         * code: int,
+         * hint: string,
+         * detail: string,
+         * parameter: string,
+         * path: string,
+         * offset: string,
+         * index: string,
+         * object: string,
+         * currency: string,
+         * type_expected: string,
+         * type_actual: string,
+         * extra: array<string, mixed>
+         * } $json
+         */
+        return ErrorDetail::fromArray($json);
     }
 }
