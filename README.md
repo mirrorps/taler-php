@@ -1818,6 +1818,88 @@ Array response example:
 ```
 
 ---
+## Config API
+
+Reference: [Merchant Backend: GET /config](https://docs.taler.net/core/api-merchant.html#get-config)
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net',
+    'token'    => 'Bearer token'
+]);
+
+$configClient = $taler->configApi();
+```
+
+### Get Merchant Config
+
+```php
+$config = $taler->configApi()->getConfig(); // MerchantVersionResponse
+
+// Core fields
+echo $config->version;   // e.g., "42:1:0" (libtool current:revision:age)
+echo $config->name;      // always "taler-merchant"
+echo $config->currency;  // default currency, e.g., "EUR"
+
+// Currency specifications (map of code => CurrencySpecification)
+foreach ($config->currencies as $code => $spec) {
+    echo $code;                         // e.g., "EUR"
+    echo $spec->name;                   // e.g., "Euro"
+    echo $spec->alt_unit_names['0'];    // base symbol/name, e.g., "€"
+}
+
+// Trusted exchanges
+foreach ($config->exchanges as $ex) { // array of ExchangeConfigInfo
+    echo $ex->base_url;  // e.g., "https://exchange.example.com"
+    echo $ex->currency;  // e.g., "EUR"
+    echo $ex->master_pub; // EddsaPublicKey as string
+}
+
+// Capabilities
+echo $config->have_self_provisioning ? 'yes' : 'no'; // bool
+echo $config->have_donau ? 'yes' : 'no';             // bool
+
+// Optional TAN channels (array of strings: "sms", "email")
+if ($config->mandatory_tan_channels !== null) {
+    foreach ($config->mandatory_tan_channels as $ch) {
+        echo $ch;
+    }
+}
+```
+
+With custom headers:
+
+```php
+$config = $taler->configApi()->getConfig([
+    'X-Custom-Header' => 'value'
+]);
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$array = $taler
+    ->config(['wrapResponse' => false])
+    ->configApi()
+    ->getConfig();
+
+// Example shape (abbreviated):
+// [
+//   'version' => '42:1:0',
+//   'currency' => 'EUR',
+//   'currencies' => [ 'EUR' => [ 'name' => 'Euro', 'currency' => 'EUR', ... ] ],
+//   'exchanges' => [ [ 'base_url' => 'https://exchange.example.com', 'currency' => 'EUR', 'master_pub' => '...' ] ],
+//   'have_self_provisioning' => true,
+//   'have_donau' => false,
+//   'mandatory_tan_channels' => ['sms','email']
+// ]
+```
+
+---
 ## Instance Management
 
 Manage merchant instances and access tokens. Reference: Merchant Backend Instance API.
