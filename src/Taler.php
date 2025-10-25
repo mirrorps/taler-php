@@ -19,6 +19,8 @@ use Taler\Api\Order\OrderClient;
 use Taler\Api\Templates\TemplatesClient;
 use Taler\Api\Wallet\WalletClient;
 use Taler\Api\Webhooks\WebhooksClient;
+use Taler\Api\TokenFamilies\TokenFamiliesClient;
+use \Taler\Api\Config\ConfigClient;
 
 class Taler
 {
@@ -31,10 +33,11 @@ class Taler
     protected WireTransfersClient $wireTransfers;
     protected OtpDevicesClient $otpDevices;
     protected TemplatesClient $templates;
-    protected \Taler\Api\TokenFamilies\TokenFamiliesClient $tokenFamilies;
+    protected TokenFamiliesClient $tokenFamilies;
     protected WebhooksClient $webhooks;
     protected InventoryClient $inventory;
     protected InstanceClient $instance;
+    protected ConfigClient $configApi;
     /**
      * Taler constructor.
      * 
@@ -277,6 +280,21 @@ class Taler
         );
 
         return $this->instance;
+    }
+
+    /**
+     * Get the Config API client instance
+     *
+     * @return ConfigClient
+     */
+    public function configApi(): ConfigClient
+    {
+        $this->configApi ??= new ConfigClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->configApi;
     }
 
     /**
