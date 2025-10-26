@@ -9,6 +9,8 @@ use Taler\Api\Config\Dto\MerchantVersionResponse;
 use Taler\Config\TalerConfig;
 use Taler\Taler;
 use InvalidArgumentException;
+use function Taler\Helpers\parseLibtoolVersion;
+use function Taler\Helpers\isProtocolCompatible;
 
 class Factory
 {
@@ -62,6 +64,27 @@ class Factory
             throw new InvalidArgumentException(
                 sprintf('The configured backend is not a merchant backend (got name="%s").', $name)
             );
+        }
+
+        // Version compatibility warning (non-fatal): parse Taler versioning triplet and compare
+        $version = $configResponse instanceof MerchantVersionResponse
+            ? $configResponse->version
+            : (string) ($configResponse['version'] ?? '');
+        $parsed = $version !== '' ? parseLibtoolVersion($version) : null;
+        if ($parsed !== null) {
+            [$serverCurrent, , $serverAge] = $parsed;
+            $clientCurrent = (int) Taler::TALER_PROTOCOL_VERSION;
+            if (!isProtocolCompatible($serverCurrent, $serverAge, $clientCurrent)) {
+                $taler->getLogger()->warning(
+                    sprintf(
+                        'Merchant backend protocol may be incompatible. Server version=%s (current=%d, age=%d), client current=%d',
+                        $version,
+                        $serverCurrent,
+                        $serverAge,
+                        $clientCurrent
+                    )
+                );
+            }
         }
 
         return $taler;

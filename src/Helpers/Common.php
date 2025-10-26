@@ -58,3 +58,39 @@ if (!function_exists('sanitizeString')) {
         return (string) preg_replace($patterns, $replacements, $message);
     }
 }
+
+if (!function_exists('parseLibtoolVersion')) {
+    /**
+     * Parse Taler versioning triplet "current:revision:age".
+     * Returns [current, revision, age] or null on invalid input.
+     *
+     * @return array{0:int,1:int,2:int}|null
+     */
+    function parseLibtoolVersion(string $version): ?array
+    {
+        $parts = explode(':', trim($version));
+        if (count($parts) !== 3) {
+            return null;
+        }
+
+        foreach ($parts as $p) {
+            if ($p === '' || preg_match('/^\d+$/', $p) !== 1) {
+                return null;
+            }
+        }
+
+        return [(int) $parts[0], (int) $parts[1], (int) $parts[2]];
+    }
+}
+
+if (!function_exists('isProtocolCompatible')) {
+    /**
+     * Determine if a client's expected current version is supported by a server
+     * advertising Taler versioning triplet (current:revision:age).
+     * Compatibility holds if clientCurrent is within [serverCurrent - serverAge, serverCurrent].
+     */
+    function isProtocolCompatible(int $serverCurrent, int $serverAge, int $clientCurrent): bool
+    {
+        return $clientCurrent <= $serverCurrent && $clientCurrent >= ($serverCurrent - $serverAge);
+    }
+}

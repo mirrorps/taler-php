@@ -25,6 +25,11 @@ Before you begin, ensure you have met the following requirements:
 
 ---
 
+## Supported Taler protocol versions
+
+- Supported Taler protocol versions: v12-v20
+---
+
 ## Installation
 
 Install TalerPHP via Composer:
@@ -115,6 +120,33 @@ $taler = Factory::create([
 
 Notes:
 - PSR-18 does not define a standard for these options; use your chosen client's native configuration (e.g., Guzzle options). When using other clients, consult their documentation to apply equivalent settings (timeouts and redirect limits/HTTPS-only redirects).
+
+---
+
+## Backend validation and protocol versioning
+
+When you create a `Taler` instance via the `Factory`, the SDK proactively validates that your backend is a Merchant backend and performs a protocol version compatibility check:
+
+- Merchant backend check (fail-fast): The `Factory` calls `GET /config` and validates `name === "taler-merchant"`. If not, it throws `InvalidArgumentException` during creation.
+- Protocol version triplet parsing: The SDK parses the version string `current:revision:age` from `/config` and compares it against the SDK's client current version (`Taler::TALER_PROTOCOL_VERSION`, currently 20).
+  - Compatibility rule: clientCurrent must be within `[serverCurrent - serverAge, serverCurrent]`.
+  - If out of range, the SDK logs a WARNING via your PSR-3 logger (if provided) to help you detect potential incompatibilities early. Example log message includes server version and the supported range.
+
+Optional helpers for custom checks:
+
+```php
+use function Taler\Helpers\parseLibtoolVersion;      // returns [current, revision, age] or null
+use function Taler\Helpers\isProtocolCompatible;      // boolean
+
+$parsed = parseLibtoolVersion('5:0:1'); // [5, 0, 1]
+[$serverCurrent, , $serverAge] = $parsed;
+$ok = isProtocolCompatible($serverCurrent, $serverAge, (int) Taler::TALER_PROTOCOL_VERSION);
+```
+
+Notes:
+- To receive the WARNING log, pass a PSR-3 logger to the `Factory`.
+- This check is non-fatal (only logs) as long as the backend `name` is valid; the exception is thrown only when the backend is not a merchant backend.
+
 
 ---
 
@@ -537,6 +569,87 @@ Array response example:
     'h_contract' => 'hash_value'
 ]
 */
+```
+
+---
+
+## Config API
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net',
+    'token'    => 'Bearer token'
+]);
+
+$configClient = $taler->configApi();
+```
+
+### Get Merchant Config
+
+```php
+$config = $taler->configApi()->getConfig(); // MerchantVersionResponse
+
+// Core fields
+echo $config->version;   // e.g., "42:1:0" (libtool current:revision:age)
+echo $config->name;      // always "taler-merchant"
+echo $config->currency;  // default currency, e.g., "EUR"
+
+// Currency specifications (map of code => CurrencySpecification)
+foreach ($config->currencies as $code => $spec) {
+    echo $code;                         // e.g., "EUR"
+    echo $spec->name;                   // e.g., "Euro"
+    echo $spec->alt_unit_names['0'];    // base symbol/name, e.g., "€"
+}
+
+// Trusted exchanges
+foreach ($config->exchanges as $ex) { // array of ExchangeConfigInfo
+    echo $ex->base_url;  // e.g., "https://exchange.example.com"
+    echo $ex->currency;  // e.g., "EUR"
+    echo $ex->master_pub; // EddsaPublicKey as string
+}
+
+// Capabilities
+echo $config->have_self_provisioning ? 'yes' : 'no'; // bool
+echo $config->have_donau ? 'yes' : 'no';             // bool
+
+// Optional TAN channels (array of strings: "sms", "email")
+if ($config->mandatory_tan_channels !== null) {
+    foreach ($config->mandatory_tan_channels as $ch) {
+        echo $ch;
+    }
+}
+```
+
+With custom headers:
+
+```php
+$config = $taler->configApi()->getConfig([
+    'X-Custom-Header' => 'value'
+]);
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$array = $taler
+    ->config(['wrapResponse' => false])
+    ->configApi()
+    ->getConfig();
+
+// Example shape (abbreviated):
+// [
+//   'version' => '42:1:0',
+//   'currency' => 'EUR',
+//   'currencies' => [ 'EUR' => [ 'name' => 'Euro', 'currency' => 'EUR', ... ] ],
+//   'exchanges' => [ [ 'base_url' => 'https://exchange.example.com', 'currency' => 'EUR', 'master_pub' => '...' ] ],
+//   'have_self_provisioning' => true,
+//   'have_donau' => false,
+//   'mandatory_tan_channels' => ['sms','email']
+// ]
 ```
 
 ---
@@ -1818,86 +1931,7 @@ Array response example:
 ```
 
 ---
-## Config API
 
-### Basic Setup
-
-```php
-use Taler\Factory\Factory;
-
-$taler = Factory::create([
-    'base_url' => 'https://backend.demo.taler.net',
-    'token'    => 'Bearer token'
-]);
-
-$configClient = $taler->configApi();
-```
-
-### Get Merchant Config
-
-```php
-$config = $taler->configApi()->getConfig(); // MerchantVersionResponse
-
-// Core fields
-echo $config->version;   // e.g., "42:1:0" (libtool current:revision:age)
-echo $config->name;      // always "taler-merchant"
-echo $config->currency;  // default currency, e.g., "EUR"
-
-// Currency specifications (map of code => CurrencySpecification)
-foreach ($config->currencies as $code => $spec) {
-    echo $code;                         // e.g., "EUR"
-    echo $spec->name;                   // e.g., "Euro"
-    echo $spec->alt_unit_names['0'];    // base symbol/name, e.g., "€"
-}
-
-// Trusted exchanges
-foreach ($config->exchanges as $ex) { // array of ExchangeConfigInfo
-    echo $ex->base_url;  // e.g., "https://exchange.example.com"
-    echo $ex->currency;  // e.g., "EUR"
-    echo $ex->master_pub; // EddsaPublicKey as string
-}
-
-// Capabilities
-echo $config->have_self_provisioning ? 'yes' : 'no'; // bool
-echo $config->have_donau ? 'yes' : 'no';             // bool
-
-// Optional TAN channels (array of strings: "sms", "email")
-if ($config->mandatory_tan_channels !== null) {
-    foreach ($config->mandatory_tan_channels as $ch) {
-        echo $ch;
-    }
-}
-```
-
-With custom headers:
-
-```php
-$config = $taler->configApi()->getConfig([
-    'X-Custom-Header' => 'value'
-]);
-```
-
-Raw array response (disable DTO wrapping):
-
-```php
-$array = $taler
-    ->config(['wrapResponse' => false])
-    ->configApi()
-    ->getConfig();
-
-// Example shape (abbreviated):
-// [
-//   'version' => '42:1:0',
-//   'currency' => 'EUR',
-//   'currencies' => [ 'EUR' => [ 'name' => 'Euro', 'currency' => 'EUR', ... ] ],
-//   'exchanges' => [ [ 'base_url' => 'https://exchange.example.com', 'currency' => 'EUR', 'master_pub' => '...' ] ],
-//   'have_self_provisioning' => true,
-//   'have_donau' => false,
-//   'mandatory_tan_channels' => ['sms','email']
-// ]
-```
-
----
 ## Instance Management
 
 Manage merchant instances and access tokens. Reference: Merchant Backend Instance API.
