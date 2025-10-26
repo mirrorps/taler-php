@@ -1820,8 +1820,6 @@ Array response example:
 ---
 ## Config API
 
-Reference: [Merchant Backend: GET /config](https://docs.taler.net/core/api-merchant.html#get-config)
-
 ### Basic Setup
 
 ```php

@@ -47,6 +47,7 @@ class GetConfigTest extends TestCase
     {
         $expected = [
             'version' => '42:1:0',
+            'name' => 'taler-merchant',
             'implementation' => 'urn:gnu:taler:merchant:v1',
             'currency' => 'EUR',
             'currencies' => [
@@ -103,6 +104,7 @@ class GetConfigTest extends TestCase
     {
         $expected = [
             'version' => '42:1:0',
+            'name' => 'taler-merchant',
             'currency' => 'EUR',
             'currencies' => [
                 'EUR' => [

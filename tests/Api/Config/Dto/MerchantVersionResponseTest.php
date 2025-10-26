@@ -13,6 +13,7 @@ class MerchantVersionResponseTest extends TestCase
     {
         $data = [
             'version' => '42:1:0',
+            'name' => 'taler-merchant',
             'implementation' => 'urn:gnu:taler:merchant:v1',
             'currency' => 'EUR',
             'currencies' => [

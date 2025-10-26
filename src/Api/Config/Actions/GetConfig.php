@@ -63,6 +63,7 @@ class GetConfig
     {
         /** @var array{
          *   version: string,
+         *   name: string,
          *   implementation?: string,
          *   currency: string,
          *   currencies: array<string, array{name: string, currency: string, num_fractional_input_digits: int, num_fractional_normal_digits: int, num_fractional_trailing_zero_digits: int, alt_unit_names: array<numeric-string, string>}>,
