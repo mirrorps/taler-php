@@ -138,7 +138,7 @@ Optional helpers for custom checks:
 use function Taler\Helpers\parseLibtoolVersion;      // returns [current, revision, age] or null
 use function Taler\Helpers\isProtocolCompatible;      // boolean
 
-$parsed = parseLibtoolVersion('5:0:1'); // [5, 0, 1]
+$parsed = parseLibtoolVersion('20:0:8'); // [20, 0, 8]
 [$serverCurrent, , $serverAge] = $parsed;
 $ok = isProtocolCompatible($serverCurrent, $serverAge, (int) Taler::TALER_PROTOCOL_VERSION);
 ```
