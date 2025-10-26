@@ -24,6 +24,8 @@ use \Taler\Api\Config\ConfigClient;
 
 class Taler
 {
+    public const TALER_PROTOCOL_VERSION = '20';
+
     protected HttpClientWrapper $httpClientWrapper;
     protected ?CacheWrapper $cacheWrapper;
     protected ExchangeClient $exchange;
