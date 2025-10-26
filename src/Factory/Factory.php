@@ -5,6 +5,7 @@ namespace Taler\Factory;
 use Psr\Http\Client\ClientInterface;
 use Psr\Log\LoggerInterface;
 use Psr\SimpleCache\CacheInterface;
+use Taler\Api\Config\Dto\MerchantVersionResponse;
 use Taler\Config\TalerConfig;
 use Taler\Taler;
 use InvalidArgumentException;
@@ -41,11 +42,28 @@ class Factory
             debugLoggingEnabled: $debugLoggingEnabled
         );
 
-        return new Taler(
+        $taler = new Taler(
             $config,
             $client,
             $logger,
             $cache
         );
+
+        // Early validation: ensure the configured backend is a merchant backend
+        // by checking the name field from GET /config equals "taler-merchant".
+        $configResponse = $taler->configApi()->getConfig();
+        $name = $configResponse instanceof MerchantVersionResponse
+            ? $configResponse->name
+            : (string) ($configResponse['name'] ?? '');
+
+        $name = strtolower($name);
+
+        if ($name !== 'taler-merchant') {
+            throw new InvalidArgumentException(
+                sprintf('The configured backend is not a merchant backend (got name="%s").', $name)
+            );
+        }
+
+        return $taler;
     }
 }
