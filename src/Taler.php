@@ -21,6 +21,7 @@ use Taler\Api\Wallet\WalletClient;
 use Taler\Api\Webhooks\WebhooksClient;
 use Taler\Api\TokenFamilies\TokenFamiliesClient;
 use \Taler\Api\Config\ConfigClient;
+use Taler\Api\DonauCharity\DonauCharityClient;
 
 class Taler
 {
@@ -40,6 +41,7 @@ class Taler
     protected InventoryClient $inventory;
     protected InstanceClient $instance;
     protected ConfigClient $configApi;
+    protected DonauCharityClient $donauCharity;
     /**
      * Taler constructor.
      * 
@@ -297,6 +299,21 @@ class Taler
         );
 
         return $this->configApi;
+    }
+
+    /**
+     * Get the Donau Charity API client instance
+     *
+     * @return DonauCharityClient
+     */
+    public function donauCharity(): DonauCharityClient
+    {
+        $this->donauCharity ??= new DonauCharityClient(
+            $this,
+            $this->httpClientWrapper
+        );
+
+        return $this->donauCharity;
     }
 
     /**
