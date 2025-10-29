@@ -1786,6 +1786,81 @@ $promise->then(function () {
 ```
 
 ---
+
+## Donau Charity
+
+Reference: Merchant Backend Donau Charity endpoints.
+
+### Basic Setup
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$donau = $taler->donauCharity();
+```
+
+### Get Linked Donau Charity Instances
+
+```php
+// Returns DonauInstancesResponse by default
+$response = $donau->getInstances();
+
+foreach ($response->donau_instances as $donau) {
+    echo $donau->donau_instance_serial . "\n"; // int
+    echo $donau->charity_name . "\n";          // string
+    echo $donau->donau_url . "\n";             // string (base URL)
+    echo $donau->charity_id . "\n";            // int
+    echo $donau->charity_pub_key . "\n";       // EddsaPublicKey as string
+    echo $donau->charity_max_per_year . "\n";  // Amount as string, e.g. "EUR:1000"
+    echo $donau->charity_receipts_to_date . "\n"; // Amount as string
+    echo $donau->current_year . "\n";          // int
+}
+```
+
+Raw array response (disable DTO wrapping):
+
+```php
+$array = $taler
+    ->config(['wrapResponse' => false])
+    ->donauCharity()
+    ->getInstances();
+```
+
+### Link (Create) a Donau Charity
+
+Returns no content on success (HTTP 204). When the backend requires MFA (since v21), a Challenge is returned (HTTP 202).
+
+```php
+use Taler\Api\DonauCharity\Dto\PostDonauRequest;
+
+$request = new PostDonauRequest(
+    donau_url: 'https://donau.example', // https base URL of the Donau service
+    charity_id: 7                       // numeric identifier within the Donau service
+);
+
+$challenge = $donau->createDonauCharity($request); // null on 204; Challenge on 202 (optional)
+```
+
+### Unlink (Delete) a Donau Charity by Serial
+
+Returns no content on success (HTTP 204). If the serial does not exist, a `TalerException` is thrown.
+
+```php
+// Delete by Donau instance serial
+$donau->deleteDonauCharityBySerial(321);
+
+// With custom headers
+$donau->deleteDonauCharityBySerial(321, [
+    'X-Custom-Header' => 'value'
+]);
+```
+
+---
 ## Exchange API
 
 The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
@@ -2118,6 +2193,7 @@ $promise->then(function ($result) {
 ```
 
 ---
+
 ## Logging
 
 The TalerPHP SDK supports logging through PSR-3 LoggerInterface. You can provide your own PSR-3 compatible logger (like Monolog) for logging of API interactions.
