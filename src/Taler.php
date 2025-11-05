@@ -351,4 +351,131 @@ class Taler
 
         return $this;
     }
+
+    /**
+     * Diagnose current configuration and credentials using this instance.
+     *
+     * Steps:
+     *  - GET /config (always)
+     *  - If auth token is non-empty: GET private (instance info)
+     *  - If auth token is non-empty: GET private/orders?limit=1 (auth-required)
+     *
+     * Returns a structured report with per-step status and overall ok flag.
+     * Exceptions encountered are returned under the 'exception' key.
+     *
+     * @return array{
+     *   ok: bool,
+     *   config: array{ok: bool, status: int|null, error: string|null, exception?: \Throwable|null},
+     *   instance?: array{ok: bool, status: int|null, error: string|null, exception?: \Throwable|null},
+     *   auth?: array{ok: bool, status: int|null, error: string|null, exception?: \Throwable|null}
+     * }
+     */
+    public function configCheck(): array
+    {
+        $report = [
+            'ok' => false,
+            'config' => ['ok' => false, 'status' => null, 'error' => null],
+        ];
+
+        // 1) /config must be reachable
+        try {
+            $this->configApi()->getConfig();
+            $report['config'] = ['ok' => true, 'status' => 200, 'error' => null];
+        } catch (\Taler\Exception\TalerException $e) {
+            $status = $e->getCode() ?: null;
+            $msg = ($status === 404) ? 'config_not_found' : 'config_request_failed';
+            $report['config'] = [
+                'ok' => false,
+                'status' => is_int($status) ? $status : null,
+                'error' => $msg,
+                'exception' => $e,
+            ];
+        } catch (\Throwable $e) {
+            $report['config'] = [
+                'ok' => false,
+                'status' => null,
+                'error' => 'config_request_failed',
+                'exception' => $e,
+            ];
+        }
+
+        $token = $this->getConfig()->getAuthToken();
+        $instanceChecked = false;
+        $instanceOk = false;
+        $authChecked = false;
+        $authOk = false;
+
+        // Only proceed with instance/auth checks if token is provided (empty accepted -> skip)
+        if ($token !== '') {
+            $instanceChecked = true;
+
+            // 2) Instance information via current base: GET 'private'
+            try {
+                $response = $this->getHttpClientWrapper()->request('GET', 'private');
+                $status = $response->getStatusCode();
+                if ($status !== 200) {
+                    throw new \Taler\Exception\TalerException('Unexpected response status code: ' . $status, $status, null, $response);
+                }
+                $instanceOk = true;
+                $report['instance'] = ['ok' => true, 'status' => 200, 'error' => null];
+            } catch (\Taler\Exception\TalerException $e) {
+                $status = $e->getCode() ?: null;
+                $msg = match ($status) {
+                    404 => 'instance_not_found',
+                    401 => 'unauthorized',
+                    default => 'instance_request_failed',
+                };
+                $report['instance'] = [
+                    'ok' => false,
+                    'status' => is_int($status) ? $status : null,
+                    'error' => $msg,
+                    'exception' => $e,
+                ];
+            } catch (\Throwable $e) {
+                $report['instance'] = [
+                    'ok' => false,
+                    'status' => null,
+                    'error' => 'instance_request_failed',
+                    'exception' => $e,
+                ];
+            }
+
+            // 3) Auth-required harmless call: GET 'private/orders?limit=1'
+            $authChecked = true;
+            try {
+                $this->order()->getOrders(['limit' => '1']);
+                $authOk = true;
+                $report['auth'] = ['ok' => true, 'status' => 200, 'error' => null];
+            } catch (\Taler\Exception\TalerException $e) {
+                $status = $e->getCode() ?: null;
+                $msg = match ($status) {
+                    401 => 'unauthorized',
+                    404 => 'instance_not_found',
+                    default => 'auth_request_failed',
+                };
+                $report['auth'] = [
+                    'ok' => false,
+                    'status' => is_int($status) ? $status : null,
+                    'error' => $msg,
+                    'exception' => $e,
+                ];
+            } catch (\Throwable $e) {
+                $report['auth'] = [
+                    'ok' => false,
+                    'status' => null,
+                    'error' => 'auth_request_failed',
+                    'exception' => $e,
+                ];
+            }
+        }
+
+        $overall = $report['config']['ok']
+            && (!$instanceChecked || $instanceOk)
+            && (!$authChecked || $authOk);
+        $report['ok'] = $overall;
+
+        return $report;
+    }
+
+    
 }

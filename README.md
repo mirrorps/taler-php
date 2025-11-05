@@ -624,6 +624,60 @@ if ($config->mandatory_tan_channels !== null) {
 }
 ```
 
+### Credential Health Check
+
+Quickly validate that your current `Taler` instance is properly configured and authenticated. This performs a minimal set of safe checks using the instance you already created:
+
+- GET `/config` (always)
+- If `token` is non-empty: GET `private` (instance exists and is reachable)
+- If `token` is non-empty: GET `private/orders?limit=1` (auth-only harmless call)
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => 'Bearer token'
+]);
+
+$diagnose = $taler->configCheck();
+
+if ($diagnose['ok']) {
+    // All checks passed – proceed with normal operations
+} else {
+    // Inspect failing step(s): 'config', 'instance', 'auth'
+    // Each step contains: ok (bool), status (?int), error (?string), exception (?Throwable)
+    $failed = array_filter([
+        'config' => $diagnose['config'] ?? null,
+        'instance' => $diagnose['instance'] ?? null,
+        'auth' => $diagnose['auth'] ?? null,
+    ], fn($x) => is_array($x) && ($x['ok'] ?? false) === false);
+
+    // Example: log the most relevant failure
+    if (!empty($failed)) {
+        $first = reset($failed);
+        error_log('Health check failed: ' . (($first['error'] ?? 'unknown') . ' (status=' . (($first['status'] ?? null) ?? 'n/a') . ')'));
+        // Optionally inspect original exception object for details
+        // $ex = $first['exception'] ?? null; // instance of Taler\\Exception\\TalerException or other Throwable
+    }
+}
+```
+
+Example report shape (abbreviated):
+
+```
+[
+  'ok' => false,
+  'config' => ['ok' => true, 'status' => 200, 'error' => null],
+  'instance' => ['ok' => true, 'status' => 200, 'error' => null],
+  'auth' => ['ok' => false, 'status' => 401, 'error' => 'unauthorized', 'exception' => TalerException],
+]
+```
+
+Notes:
+- If the `token` is empty, the instance/auth checks are skipped and `'ok'` reflects only the `/config` result.
+- The `exception` field contains the original exception object for diagnostics; avoid serializing it directly. If you need a compact form, extract `class`, `code`, `message`, and optional response details.
+
 With custom headers:
 
 ```php
