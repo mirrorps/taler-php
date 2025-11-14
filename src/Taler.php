@@ -22,6 +22,7 @@ use Taler\Api\Webhooks\WebhooksClient;
 use Taler\Api\TokenFamilies\TokenFamiliesClient;
 use \Taler\Api\Config\ConfigClient;
 use Taler\Api\DonauCharity\DonauCharityClient;
+use Taler\Api\TwoFactorAuth\TwoFactorAuthClient;
 
 class Taler
 {
@@ -42,6 +43,8 @@ class Taler
     protected InstanceClient $instance;
     protected ConfigClient $configApi;
     protected DonauCharityClient $donauCharity;
+    protected TwoFactorAuthClient $twoFactorAuth;
+
     /**
      * Taler constructor.
      * 
@@ -314,6 +317,21 @@ class Taler
         );
 
         return $this->donauCharity;
+    }
+
+    /**
+     * Get the Two Factor Auth API client instance
+     *
+     * @return TwoFactorAuthClient
+     */
+    public function twoFactorAuth(): TwoFactorAuthClient
+    {
+        $this->twoFactorAuth ??= new TwoFactorAuthClient(
+            $this, 
+            $this->httpClientWrapper
+        );
+        
+        return $this->twoFactorAuth;
     }
 
     /**

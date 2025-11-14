@@ -2248,6 +2248,77 @@ $promise->then(function ($result) {
 
 ---
 
+## Two Factor Auth (2FA)
+
+Certain protected operations (for example “update auth”, “change bank account”, or “delete instance”) may require a two-factor authentication. In such cases, the protected endpoint replies with HTTP 202 and a Challenge ID. You then:
+
+1) Request transmission of a TAN for that Challenge
+2) Confirm the Challenge with the received TAN
+3) Repeat the original protected request with the exact same body and the `Taler-Challenge-Ids` header set to the Challenge ID
+
+### Basic setup
+```php
+use Taler\Factory\Factory;
+use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
+use Taler\Api\TwoFactorAuth\Dto\MerchantChallengeSolveRequest;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net',
+    'token'    => 'Bearer token'
+]);
+
+$instances = $taler->instance();
+$twofa     = $taler->twoFactorAuth();
+```
+
+### 1) Protected call returns Challenge (example: update auth)
+```php
+// Example protected request that may require 2FA
+$authConfig = new InstanceAuthConfigToken(password: 'new-secret');
+
+// If 2FA is required, the method returns a Challenge (HTTP 202).
+// If successful without 2FA, it returns null (HTTP 204).
+$challenge = $instances->updateAuth('shop-1', $authConfig);
+
+if ($challenge !== null) {
+    $challengeId = $challenge->getChallengeId();
+}
+```
+
+### 2) Request TAN for the challenge
+```php
+// The body must be a JSON object, but can be empty; the SDK sends {} by default.
+$response = $twofa->requestChallenge('shop-1', $challengeId);
+
+// $response is ChallengeRequestResponse with timing guidance:
+// $response->solve_expiration->t_s
+// $response->earliest_retransmission->t_s
+```
+
+### 3) Confirm the challenge with the TAN
+```php
+$solve = new MerchantChallengeSolveRequest('123456'); // TAN the merchant received
+$twofa->confirmChallenge('shop-1', $challengeId, $solve); // 204 No Content on success
+```
+
+### 4) Repeat the original protected call with Taler-Challenge-Ids header
+```php
+// IMPORTANT: The repeated request must exactly match the original request body.
+// Provide the challenge ID as a header when repeating the operation:
+$instances->updateAuth(
+    instanceId: 'shop-1',
+    authConfig: $authConfig,
+    headers: ['Taler-Challenge-Ids' => $challengeId]
+); // 204 on success
+```
+
+Notes:
+- Other protected operations (e.g., `deleteInstance`) follow the same pattern: try the operation, handle 202 Challenge, request TAN, confirm, then retry the operation with the `Taler-Challenge-Ids` header.
+- All 2FA-related request/response DTOs use SDK-wide conventions (e.g., factory `createFromArray`, request DTOs validate, response DTOs do not validate).
+- All actions also have methods suffixed with `Async` to run operations asynchronously.
+
+---
+
 ## Logging
 
 The TalerPHP SDK supports logging through PSR-3 LoggerInterface. You can provide your own PSR-3 compatible logger (like Monolog) for logging of API interactions.
