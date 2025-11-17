@@ -5,7 +5,6 @@ namespace Taler\Tests;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Psr\Http\Client\ClientInterface;
-use Taler\Api\Exchange\ExchangeClient;
 use Taler\Api\Order\OrderClient;
 use Taler\Config\TalerConfig;
 use Taler\Http\HttpClientWrapper;
@@ -54,15 +53,6 @@ class TalerTest extends TestCase
         $this->assertInstanceOf(TalerConfig::class, $config);
         $this->assertSame(self::BASE_URL, $config->getBaseUrl());
         $this->assertTrue($config->getWrapResponse());
-    }
-
-    public function testExchangeClientCreation(): void
-    {
-        $exchange = $this->taler->exchange();
-        $this->assertInstanceOf(ExchangeClient::class, $exchange);
-        
-        // Test that the same instance is returned on subsequent calls
-        $this->assertSame($exchange, $this->taler->exchange());
     }
 
     public function testConfigUpdate(): void

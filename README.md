@@ -1914,152 +1914,9 @@ $donau->deleteDonauCharityBySerial(321, [
 ]);
 ```
 
----
-## Exchange API
 
-The Exchange API provides functionality to interact with Taler exchange services. Here's how to use it:
 
-### Basic Setup
 
-```php
-use Taler\Factory\Factory;
-
-$taler = Factory::create([
-    'base_url' => 'https://exchange.demo.taler.net',
-    'token'    => 'Bearer token'
-]);
-
-$exchange = $taler->exchange();
-```
-
-### Available Methods
-
-#### Get Exchange Configuration
-
-Retrieve the exchange's configuration and version information:
-
-```php
-$config = $exchange->getConfig();
-
-// Access configuration details
-echo $config->version;        // Exchange protocol version
-echo $config->name;          // Protocol name (should be "taler-exchange")
-echo $config->currency;      // Supported currency (e.g., "EUR")
-```
-
-#### Get Exchange Keys
-
-Fetch the exchange's cryptographic keys and related information:
-
-```php
-$keys = $exchange->getKeys();
-
-// Access keys and related data
-echo $keys->base_url;           // Exchange's base URL
-echo $keys->currency;           // Exchange's currency
-echo $keys->master_public_key;  // EdDSA master public key
-```
-
-#### Track Wire Transfers
-
-Track a specific wire transfer by its ID:
-
-```php
-$wtid = "your-wire-transfer-id";
-$transfer = $exchange->getTransfer($wtid);
-
-// Access transfer details
-echo $transfer->total;          // Transfer amount excluding wire fee
-echo $transfer->wire_fee;       // Applied wire fee
-echo $transfer->merchant_pub;   // Merchant's public key
-```
-
-#### Track Deposits
-
-Track deposits for a specific transaction:
-
-```php
-$deposits = $exchange->getDeposits(
-    H_WIRE: "wire-hash",
-    MERCHANT_PUB: "merchant-public-key",
-    H_CONTRACT_TERMS: "contract-terms-hash",
-    COIN_PUB: "coin-public-key",
-    merchant_sig: "merchant-signature"
-);
-
-// Access deposit details
-if ($deposits instanceof TrackTransactionResponse) {
-    echo $deposits->wtid;              // Wire transfer ID
-    echo $deposits->coin_contribution; // Coin's contribution to total
-} elseif ($deposits instanceof TrackTransactionAcceptedResponse) {
-    echo $deposits->kyc_ok;           // KYC check status
-    echo $deposits->execution_time;    // Expected execution time
-}
-```
-
-### Asynchronous Operations
-
-All methods support asynchronous operations with the `Async` suffix:
-
-```php
-$configPromise = $exchange->getConfigAsync();
-$keysPromise = $exchange->getKeysAsync();
-
-// Handle promises according to your async client implementation
-$configPromise->then(function ($config) {
-    // Handle configuration response
-});
-```
-
-### Error Handling
-
-The Exchange API methods may throw `TalerException` for various error conditions:
-
-```php
-use Taler\Exception\TalerException;
-
-try {
-    $config = $exchange->getConfig();
-} catch (TalerException $e) {
-    // Handle Taler-specific errors
-    echo $e->getMessage();
-} catch (\Throwable $e) {
-    // Handle other errors
-    echo $e->getMessage();
-}
-```
-
-### Response Configuration
-
-By default, all responses are wrapped in corresponding DTO objects. However, you can configure this behavior at runtime:
-
-```php
-// Disable DTO wrapping to get raw array responses
-// Now methods will return the original array response from Taler
-$config = $taler->config(['wrapResponse' => false])->exchange()->getConfig();
-
-/*
-Array response example:
-[
-    'version' => 'current:revision:age',
-    'name' => 'taler-exchange',
-    'currency' => 'EUR',
-    'currency_specification' => [
-        'name' => 'Euro',
-        'currency' => 'EUR',
-        'num_fractional_input_digits' => 2,
-        'num_fractional_normal_digits' => 2,
-        'num_fractional_trailing_zero_digits' => 2,
-        'alt_unit_names' => []
-    ],
-    'supported_kyc_requirements' => [],
-    // ... other fields
-]
-*/
-
-```
-
----
 
 ## Instance Management
 
@@ -2428,24 +2285,24 @@ You can enable caching for specific API calls using the `cache()` method. The me
 - `minutes`: How long to cache the response (in minutes)
 - `cacheKey`: (Optional) Custom cache key. If not provided, one will be generated automatically
 
-#### Example: Caching Exchange Configuration
+#### Example: Caching Merchant Backend Configuration
 
 ```php
-// Cache the exchange configuration for 60 minutes
+// Cache the merchant backend configuration for 60 minutes
 $config = $taler->cache(60)
-    ->exchange()
+    ->configApi()
     ->getConfig();
 
 // Use a custom cache key
-$config = $taler->cache(60, 'exchange_config')
-    ->exchange()
+$config = $taler->cache(60, 'merchant_config')
+    ->configApi()
     ->getConfig();
 
 // Subsequent calls within the TTL will return cached data
-$cachedConfig = $taler->exchange()->getConfig();
+$cachedConfig = $taler->configApi()->getConfig();
 
 // Force delete cached data
-$taler->cacheDelete('exchange_config');
+$taler->cacheDelete('merchant_config');
 ```
 
 ### Cache Implementation Requirements
