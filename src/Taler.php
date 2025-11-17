@@ -7,7 +7,6 @@ use Psr\Log\LoggerInterface;
 use Psr\Log\NullLogger;
 use Psr\SimpleCache\CacheInterface;
 use Taler\Api\BankAccounts\BankAccountClient;
-use Taler\Api\Exchange\ExchangeClient;
 use Taler\Api\OtpDevices\OtpDevicesClient;
 use Taler\Api\Inventory\InventoryClient;
 use Taler\Api\Instance\InstanceClient;
@@ -30,7 +29,6 @@ class Taler
 
     protected HttpClientWrapper $httpClientWrapper;
     protected ?CacheWrapper $cacheWrapper;
-    protected ExchangeClient $exchange;
     protected OrderClient $order;
     protected WalletClient $wallet;
     protected BankAccountClient $bankAccount;
@@ -114,23 +112,6 @@ class Taler
     public function getLogger(): LoggerInterface
     {
         return $this->logger;
-    }
-
-    /**
-     * Get the Exchange API client instance
-     * 
-     * Creates a new instance if one doesn't exist yet, otherwise returns the existing instance.
-     * 
-     * @return ExchangeClient The Exchange API client
-     */
-    public function exchange(): ExchangeClient
-    {
-        $this->exchange ??= new ExchangeClient(
-            $this,
-            $this->httpClientWrapper
-        );
-
-        return $this->exchange;
     }
 
     /**
