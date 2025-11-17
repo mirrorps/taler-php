@@ -37,6 +37,7 @@
     "monolog/monolog": "^3.0"
   },
   "suggest": {
+    "ext-zlib": "For optional gzip compression of large request bodies",
     "php-http/async-client-implementation": "For async HTTP requests (e.g., symfony/http-client, php-http/guzzle7-adapter)",
     "psr/log-implementation": "For logging support (e.g., monolog/monolog)"
   },

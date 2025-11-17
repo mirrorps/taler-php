@@ -20,7 +20,21 @@ class TalerConfig
         private bool $wrapResponse = true,
         private bool $debugLoggingEnabled = false,
         private bool $requestCompressionEnabled = true,
-        private int $requestCompressionThresholdBytes = 4096
+        private int $requestCompressionThresholdBytes = 4096,
+        /**
+         * Optional callable that acquires (and stores) an access token internally when needed.
+         * The callable should set 'authToken' and optionally 'authTokenExpiresAtTs' via setAttribute().
+         * Not exported in __toString for security/sanity reasons.
+         */
+        private ?\Closure $tokenProvider = null,
+        /**
+         * Unix timestamp (seconds) when the current auth token expires. Null means unknown/never.
+         */
+        private ?int $authTokenExpiresAtTs = null,
+        /**
+         * Seconds before expiry at which to proactively refresh the token.
+         */
+        private int $authTokenRefreshSkewSeconds = 30
     ) {
         $this->validate();
     }
@@ -43,6 +57,30 @@ class TalerConfig
     public function getAuthToken(): string
     {
         return $this->authToken;
+    }
+
+    /**
+     * Optional token provider callable used to lazily acquire/refresh tokens.
+     */
+    public function getTokenProvider(): ?\Closure
+    {
+        return $this->tokenProvider;
+    }
+
+    /**
+     * Returns the configured token expiry timestamp (seconds since epoch) or null if unknown.
+     */
+    public function getAuthTokenExpiresAtTs(): ?int
+    {
+        return $this->authTokenExpiresAtTs;
+    }
+
+    /**
+     * Returns the refresh skew (seconds) used to preemptively refresh tokens before expiry.
+     */
+    public function getAuthTokenRefreshSkewSeconds(): int
+    {
+        return $this->authTokenRefreshSkewSeconds;
     }
 
     /**
@@ -147,7 +185,10 @@ class TalerConfig
             'wrapResponse' => $this->wrapResponse,
             'debugLogging' => $this->debugLoggingEnabled,
             'requestCompressionEnabled' => $this->requestCompressionEnabled,
-            'requestCompressionThresholdBytes' => $this->requestCompressionThresholdBytes
+            'requestCompressionThresholdBytes' => $this->requestCompressionThresholdBytes,
+            // Do not include auth token/provider. Include only expiry metadata.
+            'authTokenExpiresAtTs' => $this->authTokenExpiresAtTs,
+            'authTokenRefreshSkewSeconds' => $this->authTokenRefreshSkewSeconds
         ], JSON_THROW_ON_ERROR);
     }
 
