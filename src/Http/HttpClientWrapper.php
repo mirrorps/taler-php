@@ -266,7 +266,18 @@ class HttpClientWrapper
 	 */
 	private function gzipCompress(string $data): ?string
 	{
-		$compressed = @gzencode($data, 6);
+		// If zlib is not available, gracefully skip compression.
+		if (!function_exists('gzencode')) {
+			return null;
+		}
+
+		try {
+			$compressed = gzencode($data, 6);
+		} catch (\Throwable) {
+			// Any unexpected failure -> skip compression
+			return null;
+		}
+
 		if ($compressed === false) {
 			return null;
 		}
