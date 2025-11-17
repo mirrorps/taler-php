@@ -2297,7 +2297,9 @@ $response = $twofa->requestChallenge('shop-1', $challengeId);
 
 ### 3) Confirm the challenge with the TAN
 ```php
-$solve = new MerchantChallengeSolveRequest('123456'); // TAN the merchant received
+// TAN received out-of-band (e.g., SMS/email/UI input)
+$tan = $merchantProvidedTan;
+$solve = new MerchantChallengeSolveRequest($tan);
 $twofa->confirmChallenge('shop-1', $challengeId, $solve); // 204 No Content on success
 ```
 
