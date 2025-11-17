@@ -178,8 +178,26 @@ class HttpClientWrapper
 			$headers['Accept-Encoding'] = 'gzip';
 		}
 
-		if ($authToken = $this->config->getAuthToken()) {
-			$headers['Authorization'] = $authToken;
+		// If caller did not explicitly supply Authorization, try to manage token automatically.
+		$hasExplicitAuth =
+			isset($headers['Authorization']) ||
+			isset($headers['authorization']);
+
+		if (!$hasExplicitAuth) {
+			$provider = $this->config->getTokenProvider();
+			if ($provider !== null) {
+				$expiresAt = $this->config->getAuthTokenExpiresAtTs();
+				$skew = $this->config->getAuthTokenRefreshSkewSeconds();
+				$needsToken = $this->config->getAuthToken() === '';
+				$needsRefresh = is_int($expiresAt) ? (time() >= max(0, $expiresAt - $skew)) : false;
+				if ($needsToken || $needsRefresh) {
+					// Acquire/refresh token; provider is expected to mutate config with new token/expiry.
+					($provider)();
+				}
+			}
+			if ($authToken = $this->config->getAuthToken()) {
+				$headers['Authorization'] = $authToken;
+			}
 		}
 
 		if ($body !== null && !isset($headers['Content-Type']) && !isset($headers['content-type'])) {
@@ -400,7 +418,7 @@ class HttpClientWrapper
 
         // Rebuild without userinfo
         $schemePart = $scheme !== null ? $scheme . '://' : '';
-        $authority = $host !== '' ? $host : '';
+        $authority = $host;
         if ($port !== null && $port > 0) {
             $authority .= ':' . $port;
         }
