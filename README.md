@@ -58,12 +58,68 @@ $taler = Factory::create([
 
 ```
 
+### Factory-managed authentication (no pre-existing token)
+You can let the SDK obtain and manage the access token for you by providing credentials and the target instance. The SDK will:
+- Request an access token using Basic auth
+- Store the resulting `Authorization` header value internally
+- Refresh the token automatically before it expires when sending requests
+
+```php
+use Taler\Factory\Factory;
+
+$taler = Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'username' => 'merchant-user',
+    'password' => 'merchant-pass',
+    'instance' => 'shop-1',         // instance ID
+    // optional (defaults shown):
+    'scope' => 'readonly',          // "readonly"|"write"|"all"|"order-simple"|"order-pos"|"order-mgmt"|"order-full"
+    'duration_us' => 3600_000_000,  // token validity upper bound in microseconds or "forever"
+    'description' => 'Backoffice session'
+]);
+
+// Use the client as usual; the SDK injects/refreshes the Authorization token automatically.
+$orders = $taler->order()->getOrders(['limit' => '-20']);
+```
+#### Retrieve and persist the managed token
+
+After creation, you can read the in-memory token from the client’s config and save it for reuse:
+
+```php
+// Extract the token and its expiry from the managed-auth client
+$token = $taler->getConfig()->getAuthToken();                // e.g., "Bearer abc..."
+$expiresAt = $taler->getConfig()->getAuthTokenExpiresAtTs(); // int|null (seconds)
+
+// Persist to your storage (DB/Secrets Manager/etc.)
+saveTokenSomewhere($token, $expiresAt);
+```
+
+Later, restore the client with the saved token:
+
+```php
+$taler = \Taler\Factory\Factory::create([
+    'base_url' => 'https://backend.demo.taler.net/instances/sandbox',
+    'token'    => $tokenFromStorage // already includes the "Bearer " prefix
+]);
+```
+
+Note: The token string already includes the required “Bearer ” prefix; store and reuse it as-is.
+Notes:
+- If `token` is provided, it takes precedence and credentials are ignored.
+- The password is only used to acquire a token; the SDK stores the resulting access token and its expiry metadata for refresh.
+
 ---
 
 ## Configuration
 
 - `base_url`: The URL of your Taler backend instance.
 - `token`: Your authentication token ( ⚠️ do **not** hardcode; use environment variables or secure storage in your application).
+- `username` (optional): Merchant instance username for Factory-managed authentication.
+- `password` (optional): Merchant instance password for Factory-managed authentication.
+- `instance` (optional): Target instance ID to authenticate against when using credentials.
+- `scope` (optional): Desired token scope when using credentials. One of `"readonly"|"write"|"all"|"order-simple"|"order-pos"|"order-mgmt"|"order-full"`. Defaults to `"readonly"`.
+- `duration_us` (optional): Upper bound on token validity as microseconds (int) or `"forever"`. The server may override. Defaults to SDK/server defaults.
+- `description` (optional): Human-readable description attached to the issued token.
 - `wrapResponse`: (Optional) Boolean flag to control DTO wrapping of responses. Defaults to `true`. When set to `false`, methods return raw array responses from Taler.
 - `httpClient`: (Optional) A PSR-18 compatible HTTP client instance.
 - `logger`: (Optional) A PSR-3 compatible logger. If omitted, the SDK performs no logging.
@@ -2176,6 +2232,8 @@ $instances->deleteAccessToken('shop-1'); // 204 No Content
 // Revoke a token by its serial number
 $instances->deleteAccessTokenBySerial('shop-1', 123); // 204 No Content
 ```
+
+Alternatively, you can let the SDK manage access tokens automatically via the Factory. Provide `username`, `password`, and `instance` to `Factory::create(...)` (optionally `scope`, `duration_us`, `description`) and the SDK will obtain and refresh the token for you. See “Factory-managed authentication” in the Usage section above.
 
 ### KYC Status
 
