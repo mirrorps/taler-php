@@ -2383,6 +2383,152 @@ If you want to implement your own cache, it must implement `Psr\SimpleCache\Cach
   - If you use the PSR-16 cache integration, do not cache endpoints that may include tokens. Prefer short TTLs and explicit cache keys; clear cached entries promptly when no longer needed.
 ---
 
+## Using TalerPHP in WordPress
+
+You can integrate the SDK into WordPress either from a theme or (recommended) from a dedicated plugin.
+
+### Install the SDK with Composer
+
+Install `mirrorps/taler-php` in a location that WordPress can autoload:
+
+```bash
+# Example: inside a custom plugin directory
+cd wp-content/plugins
+mkdir taler-payments && cd taler-payments
+composer require mirrorps/taler-php
+```
+
+Make sure your plugin (or theme) loads Composer’s autoloader:
+
+```php
+// In wp-content/plugins/taler-payments/taler-payments.php
+require_once __DIR__ . '/vendor/autoload.php';
+```
+
+If your Composer setup lives elsewhere (for example at the WordPress root), adjust the path accordingly (e.g. `require_once ABSPATH . '../vendor/autoload.php';`).
+
+Store secrets such as the backend URL and access token in environment variables or `wp-config.php` (constants), not in your plugin code.
+
+### Minimal plugin: shortcode-based “Pay with Taler” button
+
+Create a plugin file at `wp-content/plugins/taler-payments/taler-payments.php`:
+
+```php
+<?php
+/**
+ * Plugin Name: Taler Payments
+ * Description: Simple integration of the TalerPHP SDK.
+ * Version: 0.1.0
+ */
+
+if (! defined('ABSPATH')) {
+    exit;
+}
+
+// Adjust the path if your composer.json is located elsewhere.
+require_once __DIR__ . '/vendor/autoload.php';
+
+use Taler\Factory\Factory;
+use Taler\Api\Order\Dto\OrderV0;
+use Taler\Api\Order\Dto\PostOrderRequest;
+use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+
+/**
+ * Lazily create and reuse a Taler client.
+ */
+function taler_wp_client(): \Taler\Taler
+{
+    static $client = null;
+
+    if ($client === null) {
+        // Configure via environment variables or wp-config.php constants.
+        $baseUrl = getenv('TALER_BASE_URL') ?: (defined('TALER_BASE_URL') ? TALER_BASE_URL : '');
+        $token   = getenv('TALER_TOKEN') ?: (defined('TALER_TOKEN') ? TALER_TOKEN : '');
+
+        $client = Factory::create([
+            'base_url' => $baseUrl,
+            'token'    => $token, // e.g. "Bearer abc..."
+        ]);
+    }
+
+    return $client;
+}
+
+/**
+ * Shortcode: [taler_pay_button amount="EUR:5.00" summary="Donation"]
+ *
+ * Renders a “Pay with GNU Taler” link that the wallet can use.
+ */
+function taler_wp_render_pay_button($atts): string
+{
+    $atts = shortcode_atts(
+        [
+            'amount'  => 'EUR:5.00',
+            'summary' => 'Donation',
+        ],
+        $atts,
+        'taler_pay_button'
+    );
+
+    $taler       = taler_wp_client();
+    $orderClient = $taler->order();
+
+    $order = new OrderV0(
+        summary: sanitize_text_field($atts['summary']),
+        amount: sanitize_text_field($atts['amount'])
+    );
+
+    $request = new PostOrderRequest(order: $order);
+
+    try {
+        // 1) Create order and get its ID
+        $created = $orderClient->createOrder($request);
+
+        // 2) Fetch unpaid order status, including taler_pay_uri
+        $status = $orderClient->getOrder($created->order_id);
+
+        if ($status instanceof CheckPaymentUnpaidResponse && $status->taler_pay_uri !== null) {
+            return sprintf(
+                '<a href="%s" class="taler-pay-button">Pay with GNU Taler</a>',
+                esc_url($status->taler_pay_uri)
+            );
+        }
+
+        return '<!-- Taler: order created but no unpaid status/pay URI available. -->';
+    } catch (\Taler\Exception\TalerException $e) {
+        if (defined('WP_DEBUG') && WP_DEBUG) {
+            return '<!-- Taler error: ' . esc_html($e->getMessage()) . ' -->';
+        }
+
+        return '<!-- Taler payment temporarily unavailable. -->';
+    } catch (\Throwable $e) {
+        return '<!-- Taler runtime error. -->';
+    }
+}
+
+add_shortcode('taler_pay_button', 'taler_wp_render_pay_button');
+```
+
+Usage inside posts, pages, or blocks:
+
+```text
+[taler_pay_button amount="EUR:12.50" summary="Coffee Beans 1kg"]
+```
+
+The shortcode:
+
+- Creates a Taler order using the SDK’s Order API.
+- Retrieves the unpaid status to obtain the `taler_pay_uri`.
+- Renders a link that compatible Taler wallets can use to start the payment flow.
+
+You can further adapt this example to:
+
+- Redirect to a custom thank-you page after payment confirmation using the Order status API.
+- Log or persist WordPress-side order metadata alongside the Taler `order_id`.
+- Add styling for `.taler-pay-button` via your theme or plugin CSS.
+
+---
+
 ## Running Tests
 
 To run the test suite:
