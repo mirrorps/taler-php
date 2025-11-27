@@ -2392,8 +2392,7 @@ You can integrate the SDK into WordPress either from a theme or (recommended) fr
 Install `mirrorps/taler-php` in a location that WordPress can autoload:
 
 ```bash
-# Example: inside a custom plugin directory
-cd wp-content/plugins
+cd wp-plugins
 mkdir taler-payments && cd taler-payments
 composer require mirrorps/taler-php
 ```
@@ -2475,7 +2474,8 @@ function taler_wp_render_pay_button($atts): string
 
     $order = new OrderV0(
         summary: sanitize_text_field($atts['summary']),
-        amount: sanitize_text_field($atts['amount'])
+        amount: sanitize_text_field($atts['amount']),
+        fulfillment_message: 'Thank you for your purchase. Your order will be fulfilled after payment.'
     );
 
     $request = new PostOrderRequest(order: $order);
@@ -2490,7 +2490,7 @@ function taler_wp_render_pay_button($atts): string
         if ($status instanceof CheckPaymentUnpaidResponse && $status->taler_pay_uri !== null) {
             return sprintf(
                 '<a href="%s" class="taler-pay-button">Pay with GNU Taler</a>',
-                esc_url($status->taler_pay_uri)
+                $status->taler_pay_uri
             );
         }
 
