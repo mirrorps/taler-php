@@ -9,6 +9,7 @@ use Taler\Api\Instance\Dto\InstanceConfigurationMessage;
 use Taler\Api\Dto\Location;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -89,12 +90,67 @@ class CreateInstanceTest extends TestCase
     }
 
     /**
+     * Test 2FA challenge response (202).
+     */
+    public function testTwoFactorChallengeResponse(): void
+    {
+        $challengeData = [
+            'challenges' => [
+                [
+                    'challenge_id' => 'ch-inst-123',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***1234',
+                ],
+            ],
+            'combi_and' => true,
+        ];
+
+        $this->response->expects($this->once())
+            ->method('getStatusCode')
+            ->willReturn(202);
+
+        $stream = $this->createMock(StreamInterface::class);
+        $stream->method('__toString')
+            ->willReturn(json_encode($challengeData));
+
+        $this->response->expects($this->once())
+            ->method('getBody')
+            ->willReturn($stream);
+
+        $this->instanceClient->expects($this->once())
+            ->method('setResponse')
+            ->with($this->response);
+
+        $this->instanceClient->expects($this->once())
+            ->method('getResponse')
+            ->willReturn($this->response);
+
+        $httpClient = $this->createMock(\Taler\Http\HttpClientWrapper::class);
+        $this->instanceClient->expects($this->once())
+            ->method('getClient')
+            ->willReturn($httpClient);
+
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->with('POST', 'instances', [], $this->isType('string'))
+            ->willReturn($this->response);
+
+        $result = CreateInstance::run($this->instanceClient, $this->config);
+
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('ch-inst-123', $result->challenges[0]->challenge_id);
+        $this->assertSame('sms', $result->challenges[0]->tan_channel);
+        $this->assertSame('***1234', $result->challenges[0]->tan_info);
+    }
+
+    /**
      * Test conflict response (409).
      */
     public function testConflictResponse(): void
     {
-        $this->response->expects($this->once())
-            ->method('getStatusCode')
+        $this->response->method('getStatusCode')
             ->willReturn(409);
 
         $this->response->expects($this->once())
@@ -130,8 +186,7 @@ class CreateInstanceTest extends TestCase
      */
     public function testUnexpectedStatusCode(): void
     {
-        $this->response->expects($this->once())
-            ->method('getStatusCode')
+        $this->response->method('getStatusCode')
             ->willReturn(500);
 
         $this->instanceClient->expects($this->once())
@@ -141,11 +196,6 @@ class CreateInstanceTest extends TestCase
         $this->instanceClient->expects($this->once())
             ->method('getResponse')
             ->willReturn($this->response);
-
-        $this->instanceClient->expects($this->once())
-            ->method('parseResponseBody')
-            ->with($this->response, 204)
-            ->willThrowException(new TalerException('Server error', 500));
 
         $httpClient = $this->createMock(\Taler\Http\HttpClientWrapper::class);
         $this->instanceClient->expects($this->once())
@@ -158,7 +208,7 @@ class CreateInstanceTest extends TestCase
             ->willReturn($this->response);
 
         $this->expectException(TalerException::class);
-        $this->expectExceptionMessage('Server error');
+        $this->expectExceptionMessage('Unexpected response status code: 500');
 
         CreateInstance::run($this->instanceClient, $this->config);
     }
