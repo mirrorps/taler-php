@@ -510,7 +510,7 @@ class InstanceClient extends AbstractApiClient
      * @param string $instanceId The instance ID
      * @param bool $purge If true, include purge=YES
      * @param array<string, string> $headers Optional request headers
-     * @return Dto\Challenge|null Returns Challenge if 2FA is required (202), null on success (204)
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required (202), null on success (204)
      * @throws TalerException
      * @throws \Throwable
      */
@@ -518,7 +518,7 @@ class InstanceClient extends AbstractApiClient
         string $instanceId,
         bool $purge = false,
         array $headers = []
-    ): ?Dto\Challenge {
+    ): ?ChallengeResponse {
         return Actions\DeleteInstance::run($this, $instanceId, $purge, $headers);
     }
 

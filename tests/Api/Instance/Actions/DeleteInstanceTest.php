@@ -4,7 +4,7 @@ namespace Taler\Tests\Api\Instance\Actions;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Instance\Actions\DeleteInstance;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
@@ -61,7 +61,14 @@ class DeleteInstanceTest extends TestCase
     public function testRunSuccess202ChallengeOnPurge(): void
     {
         $challengeData = [
-            'challenge_id' => 'challenge-789',
+            'challenges' => [
+                [
+                    'challenge_id' => 'challenge-789',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***5678',
+                ],
+            ],
+            'combi_and' => true,
         ];
 
         $this->response->expects($this->once())
@@ -92,8 +99,10 @@ class DeleteInstanceTest extends TestCase
             ->willReturn($this->response);
 
         $result = DeleteInstance::run($this->instanceClient, 'test-instance', true);
-        $this->assertInstanceOf(Challenge::class, $result);
-        $this->assertEquals('challenge-789', $result->getChallengeId());
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('challenge-789', $result->challenges[0]->challenge_id);
     }
 
     public function testRunAsync(): void
