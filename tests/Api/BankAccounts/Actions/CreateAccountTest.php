@@ -12,6 +12,7 @@ use Taler\Api\BankAccounts\Actions\CreateAccount;
 use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\BankAccounts\Dto\AccountAddDetails;
 use Taler\Api\BankAccounts\Dto\AccountAddResponse;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
 use Taler\Http\HttpClientWrapper;
@@ -70,6 +71,43 @@ class CreateAccountTest extends TestCase
         $this->assertInstanceOf(AccountAddResponse::class, $result);
         $this->assertEquals('hw', $result->h_wire);
         $this->assertEquals('s', $result->salt);
+    }
+
+    public function testRunTwoFactorChallengeResponse(): void
+    {
+        $details = new AccountAddDetails('payto://iban/DE123');
+
+        $expectedData = [
+            'challenges' => [
+                [
+                    'challenge_id' => 'ch-1',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***1234',
+                ],
+            ],
+            'combi_and' => true,
+        ];
+
+        $this->response->method('getStatusCode')->willReturn(202);
+        $this->stream->method('__toString')->willReturn(json_encode($expectedData));
+        $this->response->method('getBody')->willReturn($this->stream);
+
+        $headers = [];
+        $requestData = json_encode($details);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('request')
+            ->with('POST', 'private/accounts', $headers, $requestData)
+            ->willReturn($this->response);
+
+        $result = CreateAccount::run($this->client, $details);
+
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('ch-1', $result->challenges[0]->challenge_id);
+        $this->assertSame('sms', $result->challenges[0]->tan_channel);
+        $this->assertSame('***1234', $result->challenges[0]->tan_info);
     }
 
     public function testRunWithTalerException(): void

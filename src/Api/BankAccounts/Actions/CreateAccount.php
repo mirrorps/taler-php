@@ -6,6 +6,7 @@ use Psr\Http\Message\ResponseInterface;
 use Taler\Api\BankAccounts\BankAccountClient;
 use Taler\Api\BankAccounts\Dto\AccountAddDetails;
 use Taler\Api\BankAccounts\Dto\AccountAddResponse;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 
 class CreateAccount
@@ -18,7 +19,7 @@ class CreateAccount
      * @param BankAccountClient $client
      * @param AccountAddDetails $details
      * @param array<string, string> $headers
-     * @return AccountAddResponse|array<string, mixed>
+     * @return AccountAddResponse|ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
@@ -26,7 +27,7 @@ class CreateAccount
         BankAccountClient $client,
         AccountAddDetails $details,
         array $headers = []
-    ): AccountAddResponse|array {
+    ): AccountAddResponse|ChallengeResponse|array {
         $action = new self($client);
 
         try {
@@ -79,10 +80,22 @@ class CreateAccount
             });
     }
 
-    private function handleResponse(ResponseInterface $response): AccountAddResponse
+    private function handleResponse(ResponseInterface $response): AccountAddResponse|ChallengeResponse
     {
-        $data = $this->client->parseResponseBody($response, 200);
-        return AccountAddResponse::fromArray($data);
+        // $data = $this->client->parseResponseBody($response, 200);
+        // return AccountAddResponse::fromArray($data);
+
+        $data = json_decode((string)$response->getBody(), true);
+
+        return match ($response->getStatusCode()) {
+            200 => AccountAddResponse::fromArray($data), //-- success
+            202 => ChallengeResponse::createFromArray($data), //-- 2FA required
+            default => throw new TalerException(
+                message: 'Unexpected response status code: ' . $response->getStatusCode(),
+                code: $response->getStatusCode(),
+                response: $response
+            )
+        };
     }
 }
 
