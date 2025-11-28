@@ -6,6 +6,12 @@ use Taler\Api\Instance\Dto\InstanceConfigurationMessage;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
+
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+use const Taler\Http\HTTP_STATUS_CODE_NO_CONTENT;
+use const Taler\Http\HTTP_STATUS_CODE_CONFLICT;
+use const Taler\Http\HTTP_STATUS_CODE_SUCCESS;
 
 /**
  * Action for creating a new merchant instance.
@@ -22,7 +28,7 @@ class CreateInstance
      * @param InstanceClient $instanceClient
      * @param InstanceConfigurationMessage $instanceConfiguration The instance configuration data
      * @param array<string, string> $headers Optional request headers
-     * @return void
+     * @return null|ChallengeResponse Returns ChallengeResponse if 2FA is required (202), otherwise null
      * @throws TalerException
      * @throws \Throwable
      */
@@ -30,7 +36,7 @@ class CreateInstance
         InstanceClient $instanceClient,
         InstanceConfigurationMessage $instanceConfiguration,
         array $headers = []
-    ): void {
+    ): null|ChallengeResponse {
         $createInstance = new self($instanceClient);
 
         try {
@@ -45,7 +51,7 @@ class CreateInstance
                 )
             );
 
-            $createInstance->handleResponse($createInstance->instanceClient->getResponse());
+            return $createInstance->handleResponse($createInstance->instanceClient->getResponse());
         } catch (TalerException $e) {
             //--- // NOTE: Logging is not necessary here; TalerException is already logged in HttpClientWrapper::run.
             throw $e;
@@ -95,27 +101,27 @@ class CreateInstance
      * Handles the response from the create instance request.
      *
      * @param ResponseInterface $response
-     * @return void
+     * @return null|ChallengeResponse
      * @throws TalerException
      */
-    private function handleResponse(ResponseInterface $response): void
+    private function handleResponse(ResponseInterface $response): null|ChallengeResponse
     {
-        $statusCode = $response->getStatusCode();
+        $data = json_decode((string)$response->getBody(), true);
 
-        if ($statusCode === 204) {
-            // Success - instance created
-            return;
-        }
-
-        if ($statusCode === 409) {
-            // Conflict - instance already exists or configuration conflict
-            throw new TalerException(
-                'Instance creation failed: ' . $response->getReasonPhrase(),
-                $statusCode
-            );
-        }
-
-        // Handle other status codes
-        $this->instanceClient->parseResponseBody($response, 204);
+        return match ($response->getStatusCode()) {
+            HTTP_STATUS_CODE_SUCCESS    => null, //-- success
+            HTTP_STATUS_CODE_NO_CONTENT => null, //-- success / no content
+            HTTP_STATUS_CODE_ACCEPTED   => ChallengeResponse::createFromArray($data), //-- 2FA required
+            HTTP_STATUS_CODE_CONFLICT   => throw new TalerException(
+                message: 'Instance creation failed: ' . $response->getReasonPhrase(),
+                code: $response->getStatusCode(),
+                response: $response
+            ),
+            default => throw new TalerException(
+                message: 'Unexpected response status code: ' . $response->getStatusCode(),
+                code: $response->getStatusCode(),
+                response: $response
+            )
+        };
     }
 }
