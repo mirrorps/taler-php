@@ -5,8 +5,11 @@ namespace Taler\Api\DonauCharity\Actions;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\DonauCharity\DonauCharityClient;
 use Taler\Api\DonauCharity\Dto\PostDonauRequest;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
+
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+use const Taler\Http\HTTP_STATUS_CODE_NO_CONTENT;
 
 /**
  * Action for linking a new Donau charity instance to the current instance context.
@@ -26,7 +29,7 @@ class CreateDonauCharity
      * @param DonauCharityClient $client
      * @param PostDonauRequest $request
      * @param array<string, string> $headers
-     * @return Challenge|null Returns Challenge if 2FA is required (202), null on success (204)
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required (202), null on success (204)
      * @throws TalerException
      * @throws \Throwable
      */
@@ -34,7 +37,7 @@ class CreateDonauCharity
         DonauCharityClient $client,
         PostDonauRequest $request,
         array $headers = []
-    ): ?Challenge {
+    ): ?ChallengeResponse {
         $self = new self($client);
 
         try {
@@ -94,20 +97,24 @@ class CreateDonauCharity
 
     /**
      * @param ResponseInterface $response
-     * @return Challenge|null
+     * @return ChallengeResponse|null
      * @throws TalerException
      */
-    private function handleResponse(ResponseInterface $response): ?Challenge
+    private function handleResponse(ResponseInterface $response): ?ChallengeResponse
     {
         $statusCode = $response->getStatusCode();
 
-        if ($statusCode === 202) {
-            /** @var array{challenge_id: string} $data */
-            $data = $this->client->parseResponseBody($response, 202);
-            return Challenge::createFromArray($data);
+        if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
+            /** @var array{
+             *   challenges: array<int, array{challenge_id: string, tan_channel: string, tan_info: string}>,
+             *   combi_and: bool
+             * } $data
+             */
+            $data = $this->client->parseResponseBody($response, HTTP_STATUS_CODE_ACCEPTED);
+            return ChallengeResponse::createFromArray($data);
         }
 
-        $this->client->parseResponseBody($response, 204);
+        $this->client->parseResponseBody($response, HTTP_STATUS_CODE_NO_CONTENT);
 
         return null;
     }

@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Taler\Api\DonauCharity\Dto\PostDonauRequest;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Api\DonauCharity\DonauCharityClient;
 use Taler\Api\DonauCharity\Actions\CreateDonauCharity;
 use Taler\Exception\TalerException;
@@ -69,7 +69,16 @@ class CreateDonauCharityTest extends TestCase
 
     public function testRun202Challenge(): void
     {
-        $challengeData = ['challenge_id' => 'abc-123'];
+        $challengeData = [
+            'challenges' => [
+                [
+                    'challenge_id' => 'abc-123',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***999',
+                ],
+            ],
+            'combi_and' => true,
+        ];
 
         $this->response->expects($this->once())
             ->method('getStatusCode')
@@ -106,8 +115,10 @@ class CreateDonauCharityTest extends TestCase
             ->willReturn($this->response);
 
         $result = CreateDonauCharity::run($this->client, $dto);
-        $this->assertInstanceOf(Challenge::class, $result);
-        $this->assertEquals('abc-123', $result->getChallengeId());
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('abc-123', $result->challenges[0]->challenge_id);
     }
 
     public function testUnexpectedStatusCode(): void

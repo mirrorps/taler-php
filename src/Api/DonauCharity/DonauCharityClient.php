@@ -8,7 +8,7 @@ use Taler\Api\DonauCharity\Actions\CreateDonauCharity;
 use Taler\Api\DonauCharity\Actions\DeleteDonauCharityBySerial as DonauDeleteBySerialAction;
 use Taler\Api\DonauCharity\Dto\DonauInstancesResponse;
 use Taler\Api\DonauCharity\Dto\PostDonauRequest;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 
 class DonauCharityClient extends AbstractApiClient
@@ -38,11 +38,11 @@ class DonauCharityClient extends AbstractApiClient
      *
      * @param PostDonauRequest $request
      * @param array<string, string> $headers
-     * @return Challenge|null Returns Challenge if 2FA is required (202), null on success (204)
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required (202), null on success (204)
      * @throws TalerException
      * @throws \Throwable
      */
-    public function createDonauCharity(PostDonauRequest $request, array $headers = []): ?Challenge
+    public function createDonauCharity(PostDonauRequest $request, array $headers = []): ?ChallengeResponse
     {
         return CreateDonauCharity::run($this, $request, $headers);
     }
