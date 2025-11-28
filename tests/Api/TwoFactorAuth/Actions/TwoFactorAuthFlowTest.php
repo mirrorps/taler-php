@@ -38,7 +38,16 @@ final class TwoFactorAuthFlowTest extends TestCase
         $responseChallenge = $this->createMock(ResponseInterface::class);
         $streamChallenge = $this->createMock(StreamInterface::class);
         $responseChallenge->method('getStatusCode')->willReturn(202);
-        $streamChallenge->method('__toString')->willReturn(json_encode(['challenge_id' => 'ch-xyz']));
+        $streamChallenge->method('__toString')->willReturn(json_encode([
+            'challenges' => [
+                [
+                    'challenge_id' => 'ch-xyz',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***1234',
+                ],
+            ],
+            'combi_and' => true,
+        ]));
         $responseChallenge->method('getBody')->willReturn($streamChallenge);
 
         $responseRequest = $this->createMock(ResponseInterface::class);
@@ -109,23 +118,25 @@ final class TwoFactorAuthFlowTest extends TestCase
                 }
             });
 
-        // 1) Protected call -> returns Challenge(202)
-        $challenge = \Taler\Api\Instance\Actions\UpdateAuth::run($this->instanceClient, $instanceId, $authConfig);
-        $this->assertInstanceOf(\Taler\Api\Instance\Dto\Challenge::class, $challenge);
-        $this->assertSame('ch-xyz', $challenge->getChallengeId());
+        // 1) Protected call -> returns ChallengeResponse (202)
+        $challengeResponse = \Taler\Api\Instance\Actions\UpdateAuth::run($this->instanceClient, $instanceId, $authConfig);
+        $this->assertInstanceOf(\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse::class, $challengeResponse);
+        $this->assertCount(1, $challengeResponse->challenges);
+        $challengeId = $challengeResponse->challenges[0]->challenge_id;
+        $this->assertSame('ch-xyz', $challengeId);
 
         // 2) Request TAN for challenge
-        $this->twoFaClient->requestChallenge($instanceId, $challenge->getChallengeId());
+        $this->twoFaClient->requestChallenge($instanceId, $challengeId);
 
         // 3) Confirm TAN
-        $this->twoFaClient->confirmChallenge($instanceId, $challenge->getChallengeId(), new MerchantChallengeSolveRequest('123456'));
+        $this->twoFaClient->confirmChallenge($instanceId, $challengeId, new MerchantChallengeSolveRequest('123456'));
 
         // 4) Repeat original protected call with header and exact body
         $result = \Taler\Api\Instance\Actions\UpdateAuth::run(
             $this->instanceClient,
             $instanceId,
             $authConfig,
-            ['Taler-Challenge-Ids' => $challenge->getChallengeId()]
+            ['Taler-Challenge-Ids' => $challengeId]
         );
         $this->assertNull($result);
         $this->assertSame(4, $step, 'Expected exactly 4 HTTP calls in flow');

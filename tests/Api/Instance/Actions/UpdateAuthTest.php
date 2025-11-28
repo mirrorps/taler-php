@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Taler\Api\Instance\Actions\UpdateAuth;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -72,7 +72,14 @@ class UpdateAuthTest extends TestCase
     public function testTwoFactorChallengeResponse(): void
     {
         $challengeData = [
-            'challenge_id' => 'challenge-456'
+            'challenges' => [
+                [
+                    'challenge_id' => 'challenge-456',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***1234',
+                ],
+            ],
+            'combi_and' => true,
         ];
 
         $this->response->expects($this->once())
@@ -104,8 +111,10 @@ class UpdateAuthTest extends TestCase
 
         $result = UpdateAuth::run($this->instanceClient, 'test-instance', $this->authConfig);
 
-        $this->assertInstanceOf(Challenge::class, $result);
-        $this->assertEquals('challenge-456', $result->getChallengeId());
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('challenge-456', $result->challenges[0]->challenge_id);
     }
 
     /**
