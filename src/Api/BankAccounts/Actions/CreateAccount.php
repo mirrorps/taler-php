@@ -9,6 +9,9 @@ use Taler\Api\BankAccounts\Dto\AccountAddResponse;
 use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 
+use const Taler\Http\HTTP_STATUS_CODE_SUCCESS;
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+
 class CreateAccount
 {
     public function __construct(
@@ -88,8 +91,8 @@ class CreateAccount
         $data = json_decode((string)$response->getBody(), true);
 
         return match ($response->getStatusCode()) {
-            200 => AccountAddResponse::fromArray($data), //-- success
-            202 => ChallengeResponse::createFromArray($data), //-- 2FA required
+            HTTP_STATUS_CODE_SUCCESS  => AccountAddResponse::fromArray($data), //-- success
+            HTTP_STATUS_CODE_ACCEPTED => ChallengeResponse::createFromArray($data), //-- 2FA required
             default => throw new TalerException(
                 message: 'Unexpected response status code: ' . $response->getStatusCode(),
                 code: $response->getStatusCode(),

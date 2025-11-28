@@ -7,7 +7,8 @@
       "Taler\\": "src/"
     },
     "files": [
-      "src/Helpers/Common.php"
+      "src/Helpers/Common.php",
+      "src/Http/HttpStatusCodes.php"
     ]
   },
   "autoload-dev": {
