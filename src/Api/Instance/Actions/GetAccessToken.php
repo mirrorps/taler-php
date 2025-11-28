@@ -6,7 +6,10 @@ use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Instance\Dto\LoginTokenRequest;
 use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
 use Taler\Api\Instance\InstanceClient;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
+
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
 
 class GetAccessToken
 {
@@ -23,7 +26,7 @@ class GetAccessToken
      * @param string $instanceId
      * @param LoginTokenRequest $loginTokenRequest
      * @param array<string, string> $headers
-     * @return LoginTokenSuccessResponse|array<string, mixed>
+     * @return LoginTokenSuccessResponse|ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
@@ -32,7 +35,7 @@ class GetAccessToken
         string $instanceId,
         LoginTokenRequest $loginTokenRequest,
         array $headers = []
-    ): LoginTokenSuccessResponse|array {
+    ): LoginTokenSuccessResponse|ChallengeResponse|array {
         $action = new self($instanceClient);
 
         try {
@@ -97,11 +100,19 @@ class GetAccessToken
     /**
      * Handle 200 OK response
      */
-    private function handleResponse(ResponseInterface $response): LoginTokenSuccessResponse
+    private function handleResponse(ResponseInterface $response): LoginTokenSuccessResponse|ChallengeResponse
     {
         // Read status code explicitly to satisfy expectations and mirror other actions
         $statusCode = $response->getStatusCode();
+
+        if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
+            // 2FA required - return challenge
+            $data = $this->instanceClient->parseResponseBody($response, 202);
+            return ChallengeResponse::createFromArray($data);
+        }
+
         $data = $this->instanceClient->parseResponseBody($response, 200);
+        
         return LoginTokenSuccessResponse::createFromArray($data);
     }
 }

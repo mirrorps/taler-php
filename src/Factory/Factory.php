@@ -8,6 +8,7 @@ use Psr\SimpleCache\CacheInterface;
 use Taler\Api\Config\Dto\MerchantVersionResponse;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Instance\Dto\LoginTokenRequest;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Config\TalerConfig;
 use Taler\Taler;
 use InvalidArgumentException;
@@ -97,9 +98,17 @@ class Factory
                 if ($response instanceof \Taler\Api\Instance\Dto\LoginTokenSuccessResponse) {
                     $accessToken = $response->access_token;
                     $expires = $response->expiration->t_s;
+                } elseif ($response instanceof ChallengeResponse) {
+                    // Factory-managed auth cannot complete 2FA flows; surface a clear error
+                    throw new \Taler\Exception\TalerException(
+                        message: 'Two-factor authentication is required to obtain an access token; Factory-managed auth does not support 2FA. Use an explicit token or TwoFactorAuthClient.',
+                        code: 0
+                    );
                 } else {
-                    $accessToken = (string) ($response['access_token'] ?? '');
-                    $expires = $response['expiration']['t_s'] ?? null;
+                    /** @var array<string, mixed> $responseArray */
+                    $responseArray = $response;
+                    $accessToken = (string) ($responseArray['access_token'] ?? '');
+                    $expires = $responseArray['expiration']['t_s'] ?? null;
                 }
 
                 $taler->getConfig()->setAttribute('authToken', $accessToken);

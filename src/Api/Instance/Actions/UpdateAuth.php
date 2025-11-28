@@ -10,6 +10,8 @@ use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+
 /**
  * Action for updating the authentication settings for an instance.
  *
@@ -111,7 +113,7 @@ class UpdateAuth
     {
         $statusCode = $response->getStatusCode();
 
-        if ($statusCode === 202) {
+        if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
             $data = $this->instanceClient->parseResponseBody($response, 202);
             return Challenge::createFromArray($data);
         }

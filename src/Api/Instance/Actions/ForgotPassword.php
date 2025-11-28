@@ -10,6 +10,8 @@ use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+
 /**
  * Action for resetting instance password.
  *
@@ -110,7 +112,7 @@ class ForgotPassword
     {
         $statusCode = $response->getStatusCode();
 
-        if ($statusCode === 202) {
+        if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
             // 2FA required - return challenge
             $data = $this->instanceClient->parseResponseBody($response, 202);
             return Challenge::createFromArray($data);
