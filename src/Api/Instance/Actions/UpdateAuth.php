@@ -5,12 +5,13 @@ namespace Taler\Api\Instance\Actions;
 use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
 use Taler\Api\Instance\Dto\InstanceAuthConfigTokenOLD;
 use Taler\Api\Instance\Dto\InstanceAuthConfigExternal;
-use Taler\Api\Instance\Dto\Challenge;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 
 use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+use const Taler\Http\HTTP_STATUS_CODE_NO_CONTENT;
 
 /**
  * Action for updating the authentication settings for an instance.
@@ -33,7 +34,7 @@ class UpdateAuth
      * @param string $instanceId The instance ID
      * @param InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig The authentication configuration
      * @param array<string, string> $headers Optional request headers
-     * @return Challenge|null Returns Challenge if 2FA is required (202), null on success (204)
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required (202), null on success (204)
      * @throws TalerException
      * @throws \Throwable
      */
@@ -42,7 +43,7 @@ class UpdateAuth
         string $instanceId,
         InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig,
         array $headers = []
-    ): ?Challenge {
+    ): ?ChallengeResponse {
         $action = new self($instanceClient);
 
         try {
@@ -106,19 +107,19 @@ class UpdateAuth
      * Handles the response from the update auth request.
      *
      * @param ResponseInterface $response
-     * @return Challenge|null Returns Challenge if 2FA is required, null on success
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required, null on success
      * @throws TalerException
      */
-    private function handleResponse(ResponseInterface $response): ?Challenge
+    private function handleResponse(ResponseInterface $response): ?ChallengeResponse
     {
         $statusCode = $response->getStatusCode();
 
         if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
-            $data = $this->instanceClient->parseResponseBody($response, 202);
-            return Challenge::createFromArray($data);
+            $data = $this->instanceClient->parseResponseBody($response, HTTP_STATUS_CODE_ACCEPTED);
+            return ChallengeResponse::createFromArray($data);
         }
 
-        $this->instanceClient->parseResponseBody($response, 204);
+        $this->instanceClient->parseResponseBody($response, HTTP_STATUS_CODE_NO_CONTENT);
 
         return null;
     }

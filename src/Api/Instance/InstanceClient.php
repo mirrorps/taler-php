@@ -7,7 +7,6 @@ use Taler\Api\Instance\Dto\InstanceConfigurationMessage;
 use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
 use Taler\Api\Instance\Dto\InstanceAuthConfigTokenOLD;
 use Taler\Api\Instance\Dto\InstanceAuthConfigExternal;
-use Taler\Api\Instance\Dto\Challenge;
 use Taler\Api\Instance\Dto\LoginTokenRequest;
 use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
 use Taler\Api\Instance\Dto\GetAccessTokensRequest;
@@ -96,7 +95,7 @@ class InstanceClient extends AbstractApiClient
      * @param string $instanceId The instance ID
      * @param InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig The authentication configuration
      * @param array<string, string> $headers Optional request headers
-     * @return Challenge|null Returns Challenge if 2FA is required, null on success
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required, null on success
      * @throws TalerException
      * @throws \Throwable
      *
@@ -106,7 +105,7 @@ class InstanceClient extends AbstractApiClient
         string $instanceId,
         InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig,
         array $headers = []
-    ): ?Challenge {
+    ): ?ChallengeResponse {
         return Actions\UpdateAuth::run($this, $instanceId, $authConfig, $headers);
     }
 
