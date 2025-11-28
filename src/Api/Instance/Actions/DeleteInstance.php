@@ -3,9 +3,12 @@
 namespace Taler\Api\Instance\Actions;
 
 use Psr\Http\Message\ResponseInterface;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
+
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+use const Taler\Http\HTTP_STATUS_CODE_NO_CONTENT;
 
 class DeleteInstance
 {
@@ -23,7 +26,7 @@ class DeleteInstance
      * @param string $instanceId
      * @param bool $purge If true, include purge=YES
      * @param array<string, string> $headers
-     * @return Challenge|null Returns Challenge if 2FA is required (202), null on success (204)
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required (202), null on success (204)
      * @throws TalerException
      * @throws \Throwable
      */
@@ -32,7 +35,7 @@ class DeleteInstance
         string $instanceId,
         bool $purge = false,
         array $headers = []
-    ): ?Challenge {
+    ): ?ChallengeResponse {
         $action = new self($instanceClient);
 
         try {
@@ -91,20 +94,20 @@ class DeleteInstance
     }
 
     /**
-     * Handle 202 Challenge or 204 No Content
+     * Handle 202 ChallengeResponse or 204 No Content
      *
-     * @return Challenge|null
+     * @return ChallengeResponse|null
      */
-    private function handleResponse(ResponseInterface $response): ?Challenge
+    private function handleResponse(ResponseInterface $response): ?ChallengeResponse
     {
         $statusCode = $response->getStatusCode();
 
-        if ($statusCode === 202) {
-            $data = $this->instanceClient->parseResponseBody($response, 202);
-            return Challenge::createFromArray($data);
+        if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
+            $data = $this->instanceClient->parseResponseBody($response, HTTP_STATUS_CODE_ACCEPTED);
+            return ChallengeResponse::createFromArray($data);
         }
 
-        $this->instanceClient->parseResponseBody($response, 204);
+        $this->instanceClient->parseResponseBody($response, HTTP_STATUS_CODE_NO_CONTENT);
 
         return null;
     }
