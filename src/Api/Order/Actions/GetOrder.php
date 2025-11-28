@@ -8,6 +8,10 @@ use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
+
+use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
+use const Taler\Http\HTTP_STATUS_CODE_SUCCESS;
 
 class GetOrder
 {
@@ -20,7 +24,7 @@ class GetOrder
      * @param string $orderId
      * @param array<string, string> $params HTTP params
      * @param array<string, string> $headers Optional request headers
-     * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|array<string, mixed>
+     * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
@@ -29,7 +33,7 @@ class GetOrder
         string $orderId,
         array $params = [],
         array $headers = []
-    ): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|array
+    ): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|ChallengeResponse|array
     {
         $getOrder = new self($orderClient);
 
@@ -87,9 +91,23 @@ class GetOrder
             });
     }
 
-    private function handleResponse(ResponseInterface $response): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse
+    private function handleResponse(ResponseInterface $response): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|ChallengeResponse
     {
-        $data = $this->orderClient->parseResponseBody($response, 200);
+        // $data = $this->orderClient->parseResponseBody($response, 200);
+
+        $data = json_decode((string)$response->getBody(), true);
+
+        if($response->getStatusCode() == HTTP_STATUS_CODE_ACCEPTED) {
+            return ChallengeResponse::createFromArray($data);
+        }
+
+        if($response->getStatusCode() != HTTP_STATUS_CODE_SUCCESS) {
+            throw new TalerException(
+                message: 'Unexpected response status code: ' . $response->getStatusCode(),
+                code: $response->getStatusCode(),
+                response: $response
+            );
+        }
 
         return match ($data['order_status']) {
             'paid'    => CheckPaymentPaidResponse::createFromArray($data),

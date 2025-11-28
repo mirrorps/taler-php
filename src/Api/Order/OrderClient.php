@@ -44,11 +44,11 @@ class OrderClient extends AbstractApiClient
      * @param string $orderId
      * @param array<string, string> $params HTTP params
      * @param array<string, string> $headers Optional request headers
-     * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|array<string, mixed>
+     * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getOrder(string $orderId, array $params = [], array $headers = []): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|array
+    public function getOrder(string $orderId, array $params = [], array $headers = []): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array
     {
         return Actions\GetOrder::run($this, $orderId, $params, $headers);
     }

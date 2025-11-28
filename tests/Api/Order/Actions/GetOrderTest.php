@@ -9,6 +9,7 @@ use Taler\Api\Order\OrderClient;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -134,6 +135,42 @@ class GetOrderTest extends TestCase
         $this->assertEquals('unpaid', $result->order_status);
         $this->assertEquals('taler://pay/example', $result->taler_pay_uri);
         $this->assertEquals('100.00', $result->total_amount);
+    }
+
+    public function testRunTwoFactorChallengeResponse(): void
+    {
+        $orderId = 'test_order_2fa';
+
+        $expectedData = [
+            'challenges' => [
+                [
+                    'challenge_id' => 'ch-order',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***9999',
+                ],
+            ],
+            'combi_and' => true,
+        ];
+
+        $this->response->method('getStatusCode')->willReturn(202);
+        $this->stream->method('__toString')
+            ->willReturn(json_encode($expectedData));
+        $this->response->method('getBody')
+            ->willReturn($this->stream);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('request')
+            ->with('GET', "private/orders/{$orderId}?", [])
+            ->willReturn($this->response);
+
+        $result = GetOrder::run($this->orderClient, $orderId);
+
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('ch-order', $result->challenges[0]->challenge_id);
+        $this->assertSame('sms', $result->challenges[0]->tan_channel);
+        $this->assertSame('***9999', $result->challenges[0]->tan_info);
     }
 
     public function testRunWithTalerException(): void
