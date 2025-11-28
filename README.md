@@ -2520,12 +2520,257 @@ The shortcode:
 - Creates a Taler order using the SDK’s Order API.
 - Retrieves the unpaid status to obtain the `taler_pay_uri`.
 - Renders a link that compatible Taler wallets can use to start the payment flow.
-
 You can further adapt this example to:
 
 - Redirect to a custom thank-you page after payment confirmation using the Order status API.
 - Log or persist WordPress-side order metadata alongside the Taler `order_id`.
 - Add styling for `.taler-pay-button` via your theme or plugin CSS.
+
+---
+
+## Using TalerPHP in Drupal
+
+You can integrate the SDK into Drupal (9/10/11) via a small custom module that uses the Drupal service container.
+
+### Install the SDK with Composer
+
+From your Drupal project root (where `composer.json` lives):
+
+```bash
+cd /path/to/drupal
+composer require mirrorps/taler-php
+```
+
+Drupal will automatically pick up the SDK through Composer’s autoloader; no manual `require` is needed.
+
+Store secrets such as the backend URL and access token in environment variables (`.env`) or `settings.php`, not directly in module code.
+
+### Create a minimal `taler_payments` module
+
+Create the module directory:
+
+```bash
+mkdir -p web/modules/custom/taler_payments
+```
+
+Or, if your Drupal root is not `web/`, adjust the path accordingly (for example `modules/custom/taler_payments`).
+
+#### 1) Module info file
+
+Create `web/modules/custom/taler_payments/taler_payments.info.yml`:
+
+```yaml
+name: 'Taler Payments'
+type: module
+description: 'Simple integration of the TalerPHP SDK.'
+core_version_requirement: '^9 || ^10 || ^11'
+package: 'Payments'
+```
+
+#### 2) Service definition: shared Taler client
+
+Create `web/modules/custom/taler_payments/taler_payments.services.yml`:
+
+```yaml
+services:
+  taler_payments.client:
+    class: Taler\Taler
+    factory: ['Drupal\taler_payments\Factory\TalerClientFactory', 'create']
+
+```
+Now create the factory at `web/modules/custom/taler_payments/src/Factory/TalerClientFactory.php`:
+
+```php
+<?php
+
+namespace Drupal\taler_payments\Factory;
+
+use Taler\Factory\Factory;
+use Taler\Taler;
+
+/**
+ * Factory for creating the shared Taler client used in Drupal.
+ *
+ * This reads configuration from environment variables so we don't rely on
+ * Symfony-style %env()% placeholders in Drupal's container.
+ */
+final class TalerClientFactory {
+
+  /**
+   * Create the Taler client instance.
+   */
+  public static function create(): Taler {
+    $baseUrl = getenv('TALER_BASE_URL') ?: 'https://backend.demo.taler.net/instances/sandbox';
+    $token = getenv('TALER_TOKEN') ?: '';
+
+    return Factory::create([
+      'base_url' => $baseUrl,
+      'token' => $token,
+    ]);
+  }
+
+}
+```
+
+**Configure environment**
+
+Make sure your web/PHP environment exports:
+
+- `TALER_BASE_URL` – your Taler backend instance (e.g. sandbox)
+- `TALER_TOKEN` – your bearer token for that instance, e.g. `Bearer <real-token>`
+
+#### 3) Route for a “Pay with Taler” page
+
+Create `web/modules/custom/taler_payments/taler_payments.routing.yml`:
+
+```yaml
+taler_payments.pay_page:
+  path: '/taler/pay'
+  defaults:
+    _controller: '\Drupal\taler_payments\Controller\TalerPayController::pay'
+    _title: 'Pay with GNU Taler'
+  requirements:
+    _permission: 'access content'
+```
+
+#### 4) Allow the `taler://` URI scheme
+
+By default, Drupal considers only a few URI schemes safe; `taler://` is not one of them. Add a small `.module` file to allow it.
+
+Create `web/modules/custom/taler_payments/taler_payments.module`:
+
+```php
+<?php
+
+/**
+ * @file
+ * Hooks and callbacks for the Taler Payments module.
+ */
+
+/**
+ * Implements hook_allowed_protocols_alter().
+ *
+ * Ensure Drupal treats the "taler" URI scheme as safe so that links to
+ * taler://pay/... are not stripped or rewritten.
+ */
+function taler_payments_allowed_protocols_alter(array &$protocols): void {
+  if (!in_array('taler', $protocols, TRUE)) {
+    $protocols[] = 'taler';
+  }
+}
+
+```
+
+#### 5) Controller that uses the SDK
+
+Create `web/modules/custom/taler_payments/src/Controller/TalerPayController.php`:
+
+```php
+<?php
+
+namespace Drupal\taler_payments\Controller;
+
+use Drupal\Core\Controller\ControllerBase;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Taler\Taler;
+use Taler\Api\Order\Dto\OrderV0;
+use Taler\Api\Order\Dto\PostOrderRequest;
+use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+
+class TalerPayController extends ControllerBase {
+
+  /**
+   * @var \Taler\Taler
+   */
+  protected Taler $taler;
+
+  public function __construct(Taler $taler) {
+    $this->taler = $taler;
+  }
+
+  public static function create(ContainerInterface $container): self {
+    return new self(
+      $container->get('taler_payments.client')
+    );
+  }
+
+  /**
+   * Simple "Pay with GNU Taler" page.
+   */
+  public function pay(): array {
+    $orderClient = $this->taler->order();
+
+    $order = new OrderV0(
+      summary: 'Donation',
+      amount: 'KUDOS:5.00', // adjust to your backend configuration
+      fulfillment_message: 'Thank you for your donation. Your order will be fulfilled after payment.'
+    );
+
+    $request = new PostOrderRequest(order: $order);
+
+    try {
+      // 1) Create order and get its ID.
+      $created = $orderClient->createOrder($request);
+
+      // 2) Fetch unpaid order status, including taler_pay_uri.
+      $status = $orderClient->getOrder($created->order_id);
+
+      if ($status instanceof CheckPaymentUnpaidResponse && $status->taler_pay_uri !== null) {
+        // Render a direct taler:// link without going through Drupal's Url
+        // validators, since taler:// is a special wallet URI.
+        $uri = $status->taler_pay_uri;
+        $safe_uri = htmlspecialchars($uri, ENT_QUOTES, 'UTF-8');
+
+        $link = '<a href="' . $safe_uri . '" class="taler-pay-button">'
+          . $this->t('Pay with GNU Taler')
+          . '</a>';
+
+        // Mark the link as safe, since it comes from a trusted Taler backend.
+        return [
+          '#markup' => Markup::create($link),
+        ];
+      }
+
+      return [
+        '#markup' => $this->t('Taler order created, but no unpaid status is available.'),
+      ];
+    }
+    catch (\Taler\Exception\TalerException $e) {
+      // In production, you might log this instead of showing details.
+      return [
+        '#markup' => $this->t('Taler payment temporarily unavailable.'),
+      ];
+    }
+    catch (\Throwable $e) {
+      return [
+        '#markup' => $this->t('An unexpected error occurred.'),
+      ];
+    }
+  }
+
+}
+```
+
+#### 6) Enable and test
+
+1. **Clear caches** (via Drush or UI):
+  - UI: `Admin → Configuration → Development → Performance` and click **“Clear all caches”**.
+
+2. **Enable the module**:
+  - Go to `Admin → Extend`.
+  - Enable **“Taler Payments”** (under “Payments”).
+
+3. **Test the payment page**:
+  - Visit:
+
+     /taler/pay
+        - With valid `TALER_BASE_URL`, `TALER_TOKEN`, and the correct `amount` currency:
+     - The controller should:
+       - Create an order via the TalerPHP SDK.
+       - Fetch its unpaid status (including `taler_pay_uri`).
+       - Render a **“Pay with GNU Taler”** link with a `taler://pay/...` URI, which a Taler wallet can use.
+
+If you see an error like `Unexpected response status code: 401`, this indicates the Taler backend rejected the request (e.g. invalid token); double-check `TALER_TOKEN` and `TALER_BASE_URL` configuration.
 
 ---
 
