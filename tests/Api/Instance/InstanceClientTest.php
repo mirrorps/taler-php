@@ -7,7 +7,7 @@ use Taler\Api\Instance\Dto\InstanceConfigurationMessage;
 use Taler\Api\Dto\Location;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 
 
 
@@ -94,22 +94,32 @@ class InstanceClientTest extends TestCase
     }
 
     /**
-     * Test that forgotPassword method returns Challenge when 2FA is required.
+     * Test that forgotPassword method returns ChallengeResponse when 2FA is required.
      */
     public function testForgotPasswordReturnsChallenge(): void
     {
         $authConfig = new InstanceAuthConfigToken('new-password');
-        $challenge = new Challenge('challenge-123');
+        $challengeResponse = new ChallengeResponse(
+            challenges: [
+                new \Taler\Api\TwoFactorAuth\Dto\Challenge(
+                    challenge_id: 'challenge-123',
+                    tan_channel: 'sms',
+                    tan_info: '***1234'
+                ),
+            ],
+            combi_and: true
+        );
 
         $this->instanceClient
             ->expects($this->once())
             ->method('forgotPassword')
             ->with('test-instance', $authConfig, [])
-            ->willReturn($challenge);
+            ->willReturn($challengeResponse);
 
         $result = $this->instanceClient->forgotPassword('test-instance', $authConfig, []);
-        $this->assertInstanceOf(Challenge::class, $result);
-        $this->assertEquals('challenge-123', $result->getChallengeId());
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertSame('challenge-123', $result->challenges[0]->challenge_id);
     }
 
     /**

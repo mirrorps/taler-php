@@ -15,6 +15,7 @@ use Taler\Api\Instance\Dto\TokenInfos;
 use Taler\Api\Instance\Dto\InstanceReconfigurationMessage;
 use Taler\Api\Instance\Dto\QueryInstancesResponse;
 use Taler\Exception\TalerException;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 
 /**
  * Client for managing merchant instances.
@@ -55,7 +56,7 @@ class InstanceClient extends AbstractApiClient
      * @param string $instanceId The instance ID
      * @param InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig The new authentication configuration
      * @param array<string, string> $headers Optional request headers
-     * @return Challenge|null Returns Challenge if 2FA is required, null on success
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required, null on success
      * @throws TalerException
      * @throws \Throwable
      *
@@ -65,7 +66,7 @@ class InstanceClient extends AbstractApiClient
         string $instanceId,
         InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig,
         array $headers = []
-    ): ?Challenge {
+    ): ?ChallengeResponse {
         return Actions\ForgotPassword::run($this, $instanceId, $authConfig, $headers);
     }
 

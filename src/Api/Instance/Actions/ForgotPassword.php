@@ -9,6 +9,7 @@ use Taler\Api\Instance\Dto\Challenge;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 
 use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
 
@@ -30,7 +31,7 @@ class ForgotPassword
      * @param string $instanceId The instance ID
      * @param InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig The new authentication configuration
      * @param array<string, string> $headers Optional request headers
-     * @return Challenge|null Returns Challenge if 2FA is required, null on success
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required, null on success
      * @throws TalerException
      * @throws \Throwable
      */
@@ -39,7 +40,7 @@ class ForgotPassword
         string $instanceId,
         InstanceAuthConfigToken|InstanceAuthConfigTokenOLD|InstanceAuthConfigExternal $authConfig,
         array $headers = []
-    ): ?Challenge {
+    ): ?ChallengeResponse {
         $forgotPassword = new self($instanceClient);
 
         try {
@@ -105,17 +106,17 @@ class ForgotPassword
      * Handles the response from the forgot password request.
      *
      * @param ResponseInterface $response
-     * @return Challenge|null Returns Challenge if 2FA is required, null on success
+     * @return ChallengeResponse|null Returns ChallengeResponse if 2FA is required, null on success
      * @throws TalerException
      */
-    private function handleResponse(ResponseInterface $response): ?Challenge
+    private function handleResponse(ResponseInterface $response): ChallengeResponse|null
     {
         $statusCode = $response->getStatusCode();
 
         if ($statusCode === HTTP_STATUS_CODE_ACCEPTED) {
             // 2FA required - return challenge
             $data = $this->instanceClient->parseResponseBody($response, 202);
-            return Challenge::createFromArray($data);
+            return ChallengeResponse::createFromArray($data);
         }
         
         $this->instanceClient->parseResponseBody($response, 204);

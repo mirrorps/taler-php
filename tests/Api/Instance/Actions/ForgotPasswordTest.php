@@ -6,7 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Taler\Api\Instance\Actions\ForgotPassword;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Api\Instance\Dto\InstanceAuthConfigToken;
-use Taler\Api\Instance\Dto\Challenge;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
@@ -73,7 +73,14 @@ class ForgotPasswordTest extends TestCase
     public function testTwoFactorChallengeResponse(): void
     {
         $challengeData = [
-            'challenge_id' => 'challenge-123'
+            'challenges' => [
+                [
+                    'challenge_id' => 'challenge-123',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***1234',
+                ],
+            ],
+            'combi_and' => true,
         ];
 
         $this->response->expects($this->once())
@@ -105,8 +112,12 @@ class ForgotPasswordTest extends TestCase
 
         $result = ForgotPassword::run($this->instanceClient, 'test-instance', $this->authConfig);
 
-        $this->assertInstanceOf(Challenge::class, $result);
-        $this->assertEquals('challenge-123', $result->getChallengeId());
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('challenge-123', $result->challenges[0]->challenge_id);
+        $this->assertSame('sms', $result->challenges[0]->tan_channel);
+        $this->assertSame('***1234', $result->challenges[0]->tan_info);
     }
 
     /**
