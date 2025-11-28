@@ -135,7 +135,7 @@ class InstanceClient extends AbstractApiClient
      * @param string $instanceId The instance ID
      * @param LoginTokenRequest $loginTokenRequest The login token request
      * @param array<string, string> $headers Optional request headers
-     * @return LoginTokenSuccessResponse|array<string, mixed>
+     * @return LoginTokenSuccessResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      *
@@ -145,7 +145,7 @@ class InstanceClient extends AbstractApiClient
         string $instanceId,
         LoginTokenRequest $loginTokenRequest,
         array $headers = []
-    ): LoginTokenSuccessResponse|array {
+    ): LoginTokenSuccessResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array {
         return Actions\GetAccessToken::run($this, $instanceId, $loginTokenRequest, $headers);
     }
 

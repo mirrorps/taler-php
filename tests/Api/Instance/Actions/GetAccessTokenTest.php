@@ -7,6 +7,7 @@ use Taler\Api\Instance\Actions\GetAccessToken;
 use Taler\Api\Instance\InstanceClient;
 use Taler\Api\Instance\Dto\LoginTokenRequest;
 use Taler\Api\Instance\Dto\LoginTokenSuccessResponse;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 
@@ -71,6 +72,59 @@ class GetAccessTokenTest extends TestCase
         $result = GetAccessToken::run($this->instanceClient, 'test-instance', $this->requestDto);
         $this->assertInstanceOf(LoginTokenSuccessResponse::class, $result);
         $this->assertSame('Bearer xyz', $result->access_token);
+    }
+
+    public function testRunTwoFactorChallengeResponse(): void
+    {
+        $data = [
+            'challenges' => [
+                [
+                    'challenge_id' => 'ch-login-1',
+                    'tan_channel' => 'sms',
+                    'tan_info' => '***1234',
+                ],
+            ],
+            'combi_and' => true,
+        ];
+
+        $this->instanceClient->expects($this->once())
+            ->method('setResponse')
+            ->with($this->response);
+
+        $this->instanceClient->expects($this->once())
+            ->method('handleWrappedResponse')
+            ->willReturnCallback(function(callable $handler) {
+                $response = $this->response;
+                return $handler($response);
+            });
+
+        $this->response->expects($this->once())
+            ->method('getStatusCode')
+            ->willReturn(202);
+
+        $this->instanceClient->expects($this->once())
+            ->method('parseResponseBody')
+            ->with($this->response, 202)
+            ->willReturn($data);
+
+        $httpClient = $this->createMock(\Taler\Http\HttpClientWrapper::class);
+        $this->instanceClient->expects($this->once())
+            ->method('getClient')
+            ->willReturn($httpClient);
+
+        $httpClient->expects($this->once())
+            ->method('request')
+            ->with('POST', 'instances/test-instance/private/token', [], $this->isType('string'))
+            ->willReturn($this->response);
+
+        $result = GetAccessToken::run($this->instanceClient, 'test-instance', $this->requestDto);
+
+        $this->assertInstanceOf(ChallengeResponse::class, $result);
+        $this->assertCount(1, $result->challenges);
+        $this->assertTrue($result->combi_and);
+        $this->assertSame('ch-login-1', $result->challenges[0]->challenge_id);
+        $this->assertSame('sms', $result->challenges[0]->tan_channel);
+        $this->assertSame('***1234', $result->challenges[0]->tan_info);
     }
 
     public function testRunAsync(): void
@@ -153,8 +207,7 @@ class GetAccessTokenTest extends TestCase
                 return $handler($response);
             });
 
-        $this->response->expects($this->once())
-            ->method('getStatusCode')
+        $this->response->method('getStatusCode')
             ->willReturn(500);
 
         $this->instanceClient->expects($this->once())
