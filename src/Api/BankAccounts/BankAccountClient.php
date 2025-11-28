@@ -9,6 +9,7 @@ use Taler\Api\BankAccounts\Dto\AccountsSummaryResponse;
 use Taler\Api\BankAccounts\Dto\BankAccountDetail;
 use Taler\Api\BankAccounts\Dto\AccountPatchDetails;
 use Taler\Api\Base\AbstractApiClient;
+use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 
 class BankAccountClient extends AbstractApiClient
@@ -18,12 +19,12 @@ class BankAccountClient extends AbstractApiClient
      *
      * @param AccountAddDetails $details
      * @param array<string, string> $headers Optional request headers
-     * @return AccountAddResponse|array<string, mixed>
+     * @return AccountAddResponse|ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      * @see https://docs.taler.net/core/api-merchant.html#bank-accounts
      */
-    public function createAccount(AccountAddDetails $details, array $headers = []): AccountAddResponse|array
+    public function createAccount(AccountAddDetails $details, array $headers = []): AccountAddResponse|ChallengeResponse|array
     {
         return Actions\CreateAccount::run($this, $details, $headers);
     }
