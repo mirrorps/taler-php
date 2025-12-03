@@ -2400,7 +2400,7 @@ composer require mirrorps/taler-php
 Make sure your plugin (or theme) loads Composer’s autoloader:
 
 ```php
-// In wp-content/plugins/taler-payments/taler-payments.php
+// In plugins/taler-payments/taler-payments.php
 require_once __DIR__ . '/vendor/autoload.php';
 ```
 
@@ -2410,7 +2410,7 @@ Store secrets such as the backend URL and access token in environment variables 
 
 ### Minimal plugin: shortcode-based “Pay with Taler” button
 
-Create a plugin file at `wp-content/plugins/taler-payments/taler-payments.php`:
+Create a plugin file at `plugins/taler-payments/taler-payments.php`:
 
 ```php
 <?php
