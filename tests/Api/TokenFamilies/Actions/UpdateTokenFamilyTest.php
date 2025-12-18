@@ -10,7 +10,6 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 use Taler\Api\Dto\Timestamp;
 use Taler\Api\TokenFamilies\Actions\UpdateTokenFamily;
-use Taler\Api\TokenFamilies\Dto\TokenFamilyDetails;
 use Taler\Api\TokenFamilies\Dto\TokenFamilyUpdateRequest;
 use Taler\Api\TokenFamilies\TokenFamiliesClient;
 use Taler\Config\TalerConfig;
@@ -63,19 +62,7 @@ class UpdateTokenFamilyTest extends TestCase
         $details = $this->makeRequest();
 
         $this->response->method('getStatusCode')->willReturn(204);
-        $this->stream->method('__toString')->willReturn(json_encode([
-            'slug' => $slug,
-            'name' => 'Updated Name',
-            'description' => 'Updated Desc',
-            'valid_after' => ['t_s' => 1700000000],
-            'valid_before' => ['t_s' => 1800000000],
-            'duration' => ['d_us' => 60_000_000],
-            'validity_granularity' => ['d_us' => 60_000_000],
-            'start_offset' => ['d_us' => 0],
-            'kind' => 'discount',
-            'issued' => 10,
-            'used' => 5,
-        ], JSON_THROW_ON_ERROR));
+        $this->stream->method('__toString')->willReturn('');
         $this->response->method('getBody')->willReturn($this->stream);
 
         $headers = ['X-Test' => 'test'];
@@ -85,11 +72,8 @@ class UpdateTokenFamilyTest extends TestCase
             ->with('PATCH', "private/tokenfamilies/{$slug}", $headers, $this->anything())
             ->willReturn($this->response);
 
-        $result = UpdateTokenFamily::run($this->client, $slug, $details, $headers);
-        $this->assertInstanceOf(TokenFamilyDetails::class, $result);
-        $this->assertSame('Updated Name', $result->name);
-        $this->assertSame(10, $result->issued);
-        $this->assertSame(5, $result->used);
+        UpdateTokenFamily::run($this->client, $slug, $details, $headers);
+        $this->addToAssertionCount(1);
     }
 
     public function testRunWithTalerException(): void
@@ -109,19 +93,7 @@ class UpdateTokenFamilyTest extends TestCase
         $promise = new Promise();
 
         $this->response->method('getStatusCode')->willReturn(204);
-        $this->stream->method('__toString')->willReturn(json_encode([
-            'slug' => $slug,
-            'name' => 'Updated Name',
-            'description' => 'Updated Desc',
-            'valid_after' => ['t_s' => 1700000000],
-            'valid_before' => ['t_s' => 1800000000],
-            'duration' => ['d_us' => 60_000_000],
-            'validity_granularity' => ['d_us' => 60_000_000],
-            'start_offset' => ['d_us' => 0],
-            'kind' => 'discount',
-            'issued' => 10,
-            'used' => 5,
-        ], JSON_THROW_ON_ERROR));
+        $this->stream->method('__toString')->willReturn('');
         $this->response->method('getBody')->willReturn($this->stream);
 
         $this->httpClientWrapper->expects($this->once())
@@ -132,7 +104,7 @@ class UpdateTokenFamilyTest extends TestCase
         $result = UpdateTokenFamily::runAsync($this->client, $slug, $details);
         $promise->resolve($this->response);
 
-        $this->assertInstanceOf(TokenFamilyDetails::class, $result->wait());
+        $this->assertNull($result->wait());
     }
 }
 

@@ -5,6 +5,8 @@ namespace Taler\Api\Base;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Exception\TalerException;
 
+use const Taler\Http\HTTP_STATUS_CODE_NO_CONTENT;
+
 abstract class AbstractApiClient extends BaseApiClient
 {
     /**
@@ -21,12 +23,12 @@ abstract class AbstractApiClient extends BaseApiClient
             return $handler($response);
         }
 
-        $decoded = json_decode((string) $response->getBody(), true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            throw new \RuntimeException('Invalid JSON response: ' . json_last_error_msg());
+        // For 204 No Content, don't try to JSON-decode an empty body
+        if($response->getStatusCode() === HTTP_STATUS_CODE_NO_CONTENT) {
+            return null;
         }
 
-        return $decoded;
+        return $this->decodeResponseBody($response);
     }
 
     /**
@@ -38,8 +40,6 @@ abstract class AbstractApiClient extends BaseApiClient
      */
     public function parseResponseBody(ResponseInterface $response, int $expectedStatusCode = 200): mixed
     {
-        $data = json_decode((string)$response->getBody(), true);
-
         if ($response->getStatusCode() !== $expectedStatusCode) {
             throw new TalerException(
                 message: 'Unexpected response status code: ' . $response->getStatusCode(),
@@ -48,6 +48,29 @@ abstract class AbstractApiClient extends BaseApiClient
             );
         }
 
-        return $data;
+        // For 204 No Content, don't try to JSON-decode an empty body
+        if ($expectedStatusCode === HTTP_STATUS_CODE_NO_CONTENT) {
+            return null;
+        }
+
+        return $this->decodeResponseBody($response);
+    }
+
+    public function decodeResponseBody(
+        ResponseInterface $response,
+        $associative = true,
+        int $depth = 512,
+    ): mixed
+    {
+        try {
+            return json_decode((string)$response->getBody(), $associative, $depth, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new TalerException(
+                message: 'Failed to decode response JSON: ' . $e->getMessage(),
+                code: $response->getStatusCode(),
+                previous: $e,
+                response: $response
+            );
+        }
     }
 } 

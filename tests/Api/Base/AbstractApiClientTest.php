@@ -11,6 +11,7 @@ use Taler\Api\Base\BaseApiClient;
 use Taler\Http\HttpClientWrapper;
 use Taler\Taler;
 use Taler\Config;
+use Taler\Exception\TalerException;
 
 class AbstractApiClientTest extends TestCase
 {
@@ -91,8 +92,8 @@ class AbstractApiClientTest extends TestCase
         $this->responseMock->method('getBody')
             ->willReturn($this->streamMock);
 
-        $this->expectException(\RuntimeException::class);
-        $this->expectExceptionMessageMatches('/Invalid JSON response:/');
+        $this->expectException(TalerException::class);
+        $this->expectExceptionMessage('Failed to decode response JSON:');
         $testClient->handleWrappedResponse($handler);
     }
 

@@ -72,6 +72,32 @@ class ForgetOrderTest extends TestCase
         $this->addToAssertionCount(1);
     }
 
+    public function testRunSuccessNoContent(): void
+    {
+        $orderId = 'test_order_123';
+        $forgetRequest = new ForgetRequest([
+            '$.wire_fee',
+        ]);
+
+        $this->response->method('getStatusCode')->willReturn(204);
+        $this->stream->method('__toString')->willReturn('');
+        $this->response->method('getBody')->willReturn($this->stream);
+
+        $headers = [];
+        $requestData = json_encode([
+            'fields' => $forgetRequest->fields,
+        ]);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('request')
+            ->with('PATCH', "private/orders/{$orderId}/forget", $headers, $requestData)
+            ->willReturn($this->response);
+
+        // 204 No Content should be treated as success without decoding JSON
+        ForgetOrder::run($this->orderClient, $orderId, $forgetRequest);
+        $this->addToAssertionCount(1);
+    }
+
     public function testRunWithTalerException(): void
     {
         $orderId = 'test_order_123';
@@ -163,7 +189,37 @@ class ForgetOrderTest extends TestCase
         $result = ForgetOrder::runAsync($this->orderClient, $orderId, $forgetRequest);
         $promise->resolve($this->response);
 
-        // Expect the promise to resolve without errors; handleWrappedResponse returns void for 204
+        // Expect the promise to resolve without errors; handler returns decoded body (null) for 200
+        $this->assertNull($result->wait());
+    }
+
+    public function testRunAsyncNoContent(): void
+    {
+        $orderId = 'test_order_123';
+        $forgetRequest = new ForgetRequest([
+            '$.wire_fee',
+        ]);
+
+        $promise = new Promise();
+
+        $this->response->method('getStatusCode')->willReturn(204);
+        $this->stream->method('__toString')->willReturn('');
+        $this->response->method('getBody')->willReturn($this->stream);
+
+        $headers = [];
+        $requestData = json_encode([
+            'fields' => $forgetRequest->fields,
+        ]);
+
+        $this->httpClientWrapper->expects($this->once())
+            ->method('requestAsync')
+            ->with('PATCH', "private/orders/{$orderId}/forget", $headers, $requestData)
+            ->willReturn($promise);
+
+        $result = ForgetOrder::runAsync($this->orderClient, $orderId, $forgetRequest);
+        $promise->resolve($this->response);
+
+        // For 204 No Content the handler returns without decoding, promise should resolve to null
         $this->assertNull($result->wait());
     }
 }
