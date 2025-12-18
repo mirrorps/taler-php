@@ -37,7 +37,7 @@ class LockRequest implements \JsonSerializable
     {
         return new self(
             lock_uuid: $data['lock_uuid'],
-            duration: RelativeTime::fromArray($data['duration']),
+            duration: RelativeTime::createFromArray($data['duration']),
             quantity: $data['quantity']
         );
     }

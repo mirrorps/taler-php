@@ -42,7 +42,7 @@ class LoginTokenSuccessResponse
             token: $data['token'] ?? null,
             access_token: $data['access_token'],
             scope: $data['scope'],
-            expiration: Timestamp::fromArray($data['expiration']),
+            expiration: Timestamp::createFromArray($data['expiration']),
             refreshable: $data['refreshable']
         );
     }

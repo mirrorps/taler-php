@@ -34,10 +34,10 @@ class AuditorKeys
      * } $data
      * @return self
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         $denominationKeys = array_map(
-            fn (array $key) => AuditorDenominationKey::fromArray($key),
+            fn (array $key) => AuditorDenominationKey::createFromArray($key),
             $data['denomination_keys']
         );
 

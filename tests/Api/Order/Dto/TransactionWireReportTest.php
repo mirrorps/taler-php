@@ -17,7 +17,7 @@ class TransactionWireReportTest extends TestCase
             'coin_pub' => 'test_coin_pub_key'
         ];
 
-        $report = TransactionWireReport::fromArray($data);
+        $report = TransactionWireReport::createFromArray($data);
 
         $this->assertInstanceOf(TransactionWireReport::class, $report);
         $this->assertEquals($data['code'], $report->code);

@@ -14,7 +14,7 @@ class TaxTest extends TestCase
             'tax' => '19.99'
         ];
 
-        $tax = Tax::fromArray($data);
+        $tax = Tax::createFromArray($data);
 
         $this->assertInstanceOf(Tax::class, $tax);
         $this->assertEquals($data['name'], $tax->name);
@@ -28,7 +28,7 @@ class TaxTest extends TestCase
             'tax' => '0.00'
         ];
 
-        $tax = Tax::fromArray($data);
+        $tax = Tax::createFromArray($data);
 
         $this->assertInstanceOf(Tax::class, $tax);
         $this->assertEquals($data['name'], $tax->name);

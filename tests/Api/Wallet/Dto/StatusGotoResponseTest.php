@@ -13,7 +13,7 @@ class StatusGotoResponseTest extends TestCase
             'public_reorder_url' => 'https://shop.test.taler.net/reorder/123'
         ];
 
-        $response = StatusGotoResponse::fromArray($data);
+        $response = StatusGotoResponse::createFromArray($data);
 
         $this->assertInstanceOf(StatusGotoResponse::class, $response);
         $this->assertEquals($data['public_reorder_url'], $response->public_reorder_url);

@@ -86,7 +86,7 @@ class GetOrders
          * } $data */
         $data = $this->orderClient->parseResponseBody($response, 200);
 
-        return OrderHistory::fromArray($data);
+        return OrderHistory::createFromArray($data);
     }
 
     /**

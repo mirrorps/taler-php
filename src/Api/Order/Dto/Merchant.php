@@ -33,15 +33,15 @@ class Merchant
      *     jurisdiction?: array{country?: string|null, town?: string|null, state?: string|null, region?: string|null, province?: string|null, street?: string|null}|null
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['name'],
             $data['email'] ?? null,
             $data['website'] ?? null,
             $data['logo'] ?? null,
-            isset($data['address']) ? Location::fromArray($data['address']) : null,
-            isset($data['jurisdiction']) ? Location::fromArray($data['jurisdiction']) : null
+            isset($data['address']) ? Location::createFromArray($data['address']) : null,
+            isset($data['jurisdiction']) ? Location::createFromArray($data['jurisdiction']) : null
         );
     }
 } 

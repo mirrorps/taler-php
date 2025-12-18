@@ -27,12 +27,12 @@ class RefundDetails
      *     amount: string
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['reason'],
             $data['pending'],
-            Timestamp::fromArray($data['timestamp']),
+            Timestamp::createFromArray($data['timestamp']),
             $data['amount']
         );
     }

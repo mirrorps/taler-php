@@ -52,7 +52,7 @@ class OrderHistoryTest extends TestCase
             ]
         ];
 
-        $orderHistory = OrderHistory::fromArray($data);
+        $orderHistory = OrderHistory::createFromArray($data);
 
         $this->assertCount(1, $orderHistory->orders);
         $this->assertInstanceOf(OrderHistoryEntry::class, $orderHistory->orders[0]);

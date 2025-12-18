@@ -68,11 +68,11 @@ class TokenFamilyCreateRequest implements \JsonSerializable
             description: $data['description'],
             description_i18n: $data['description_i18n'] ?? null,
             extra_data: $data['extra_data'] ?? null,
-            valid_after: isset($data['valid_after']) ? Timestamp::fromArray($data['valid_after']) : null,
-            valid_before: Timestamp::fromArray($data['valid_before']),
-            duration: RelativeTime::fromArray($data['duration']),
-            validity_granularity: RelativeTime::fromArray($data['validity_granularity']),
-            start_offset: RelativeTime::fromArray($data['start_offset']),
+            valid_after: isset($data['valid_after']) ? Timestamp::createFromArray($data['valid_after']) : null,
+            valid_before: Timestamp::createFromArray($data['valid_before']),
+            duration: RelativeTime::createFromArray($data['duration']),
+            validity_granularity: RelativeTime::createFromArray($data['validity_granularity']),
+            start_offset: RelativeTime::createFromArray($data['start_offset']),
             kind: $data['kind']
         );
     }

@@ -19,7 +19,7 @@ class DenyAllAccountRestriction implements AccountRestriction
      * @param array{type?: string} $data
      * @throws \InvalidArgumentException if type is missing or not 'deny'
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         if (!isset($data['type'])) {
             throw new \InvalidArgumentException('Missing type field');

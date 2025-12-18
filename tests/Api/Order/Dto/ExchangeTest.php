@@ -16,7 +16,7 @@ class ExchangeTest extends TestCase
             'max_contribution' => '1000.00'
         ];
 
-        $exchange = Exchange::fromArray($data);
+        $exchange = Exchange::createFromArray($data);
 
         $this->assertInstanceOf(Exchange::class, $exchange);
         $this->assertEquals($data['url'], $exchange->url);
@@ -33,7 +33,7 @@ class ExchangeTest extends TestCase
             'master_pub' => 'test_master_public_key'
         ];
 
-        $exchange = Exchange::fromArray($data);
+        $exchange = Exchange::createFromArray($data);
 
         $this->assertInstanceOf(Exchange::class, $exchange);
         $this->assertEquals($data['url'], $exchange->url);

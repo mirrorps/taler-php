@@ -44,8 +44,8 @@ class TokenInfo
     public static function createFromArray(array $data): self
     {
         return new self(
-            creation_time: Timestamp::fromArray($data['creation_time']),
-            expiration: Timestamp::fromArray($data['expiration']),
+            creation_time: Timestamp::createFromArray($data['creation_time']),
+            expiration: Timestamp::createFromArray($data['expiration']),
             scope: $data['scope'],
             refreshable: $data['refreshable'],
             description: $data['description'] ?? null,

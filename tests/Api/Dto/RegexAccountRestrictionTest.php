@@ -54,7 +54,7 @@ class RegexAccountRestrictionTest extends TestCase
             'human_hint' => self::SAMPLE_HUMAN_HINT
         ];
 
-        $restriction = RegexAccountRestriction::fromArray($data);
+        $restriction = RegexAccountRestriction::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_PAYTO_REGEX, $restriction->payto_regex);
         $this->assertSame(self::SAMPLE_HUMAN_HINT, $restriction->human_hint);
@@ -70,7 +70,7 @@ class RegexAccountRestrictionTest extends TestCase
             'human_hint_i18n' => self::SAMPLE_I18N
         ];
 
-        $restriction = RegexAccountRestriction::fromArray($data);
+        $restriction = RegexAccountRestriction::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_PAYTO_REGEX, $restriction->payto_regex);
         $this->assertSame(self::SAMPLE_HUMAN_HINT, $restriction->human_hint);
@@ -86,7 +86,7 @@ class RegexAccountRestrictionTest extends TestCase
             'human_hint_i18n' => null
         ];
 
-        $restriction = RegexAccountRestriction::fromArray($data);
+        $restriction = RegexAccountRestriction::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_PAYTO_REGEX, $restriction->payto_regex);
         $this->assertSame(self::SAMPLE_HUMAN_HINT, $restriction->human_hint);

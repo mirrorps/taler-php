@@ -21,7 +21,7 @@ class ZeroLimitedOperationTest extends TestCase
      */
     public function testFromArrayWithValidOperationType(string $operationType): void
     {
-        $operation = ZeroLimitedOperation::fromArray(['operation_type' => $operationType]);
+        $operation = ZeroLimitedOperation::createFromArray(['operation_type' => $operationType]);
         $this->assertSame($operationType, $operation->operation_type);
     }
 
@@ -36,7 +36,7 @@ class ZeroLimitedOperationTest extends TestCase
     {
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid operation type "INVALID". Must be one of: WITHDRAW, DEPOSIT, MERGE, BALANCE, CLOSE, AGGREGATE, TRANSACTION, REFUND');
-        ZeroLimitedOperation::fromArray(['operation_type' => 'INVALID']);
+        ZeroLimitedOperation::createFromArray(['operation_type' => 'INVALID']);
     }
 
     public function testObjectImmutability(): void

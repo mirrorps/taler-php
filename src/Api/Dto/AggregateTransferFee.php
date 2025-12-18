@@ -37,13 +37,13 @@ class AggregateTransferFee
      * } $data
      * @throws \InvalidArgumentException if required fields are missing or invalid
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             wire_fee: $data['wire_fee'],
             closing_fee: $data['closing_fee'],
-            start_date: Timestamp::fromArray($data['start_date']),
-            end_date: Timestamp::fromArray($data['end_date']),
+            start_date: Timestamp::createFromArray($data['start_date']),
+            end_date: Timestamp::createFromArray($data['end_date']),
             sig: $data['sig']
         );
     }

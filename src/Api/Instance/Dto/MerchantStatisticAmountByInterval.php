@@ -28,7 +28,7 @@ class MerchantStatisticAmountByInterval
     public static function createFromArray(array $data): self
     {
         return new self(
-            start_time: Timestamp::fromArray($data['start_time']),
+            start_time: Timestamp::createFromArray($data['start_time']),
             cumulative_amounts: $data['cumulative_amounts']
         );
     }

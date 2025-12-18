@@ -155,7 +155,7 @@ class PostOrderRequest
 
         return new self(
             order: $order,
-            refund_delay: isset($data['refund_delay']) ? RelativeTime::fromArray($data['refund_delay']) : null,
+            refund_delay: isset($data['refund_delay']) ? RelativeTime::createFromArray($data['refund_delay']) : null,
             payment_target: $data['payment_target'] ?? null,
             session_id: $data['session_id'] ?? null,
             inventory_products: isset($data['inventory_products']) 

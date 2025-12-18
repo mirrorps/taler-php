@@ -17,7 +17,7 @@ class RefundDetailsTest extends TestCase
             'amount' => '25.50'
         ];
 
-        $refund = RefundDetails::fromArray($data);
+        $refund = RefundDetails::createFromArray($data);
 
         $this->assertInstanceOf(RefundDetails::class, $refund);
         $this->assertEquals($data['reason'], $refund->reason);

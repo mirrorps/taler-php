@@ -41,7 +41,7 @@ class TrackTransferResponse
             $data['wire_fee'],
             $data['merchant_pub'],
             $data['h_payto'],
-            Timestamp::fromArray($data['execution_time']),
+            Timestamp::createFromArray($data['execution_time']),
             $deposits,
             $data['exchange_sig'],
             $data['exchange_pub']

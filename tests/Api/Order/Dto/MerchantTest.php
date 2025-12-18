@@ -27,7 +27,7 @@ class MerchantTest extends TestCase
             ]
         ];
 
-        $merchant = Merchant::fromArray($data);
+        $merchant = Merchant::createFromArray($data);
 
         $this->assertInstanceOf(Merchant::class, $merchant);
         $this->assertEquals($data['name'], $merchant->name);
@@ -52,7 +52,7 @@ class MerchantTest extends TestCase
             'name' => 'Test Merchant Inc.'
         ];
 
-        $merchant = Merchant::fromArray($data);
+        $merchant = Merchant::createFromArray($data);
 
         $this->assertInstanceOf(Merchant::class, $merchant);
         $this->assertEquals($data['name'], $merchant->name);

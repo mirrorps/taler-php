@@ -9,7 +9,7 @@ class BankAccountEntryTest extends TestCase
 {
     public function testFromArrayAndValidation(): void
     {
-        $entry = BankAccountEntry::fromArray([
+        $entry = BankAccountEntry::createFromArray([
             'payto_uri' => 'payto://iban/DE123',
             'h_wire' => 'hash',
             'active' => true,

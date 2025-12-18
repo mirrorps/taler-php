@@ -21,13 +21,13 @@ class RelativeTimeTest extends TestCase
 
     public function testFromArrayWithMicroseconds(): void
     {
-        $duration = RelativeTime::fromArray(['d_us' => 500000]);
+        $duration = RelativeTime::createFromArray(['d_us' => 500000]);
         $this->assertSame(500000, $duration->d_us);
     }
 
     public function testFromArrayWithForever(): void
     {
-        $duration = RelativeTime::fromArray(['d_us' => 'forever']);
+        $duration = RelativeTime::createFromArray(['d_us' => 'forever']);
         $this->assertSame('forever', $duration->d_us);
     }
 

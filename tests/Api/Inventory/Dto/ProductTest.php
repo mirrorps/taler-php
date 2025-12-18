@@ -33,7 +33,7 @@ class ProductTest extends TestCase
             ]
         ];
 
-        $product = Product::fromArray($data);
+        $product = Product::createFromArray($data);
 
         $this->assertInstanceOf(Product::class, $product);
         $this->assertEquals($data['product_id'], $product->product_id);
@@ -57,7 +57,7 @@ class ProductTest extends TestCase
             'description' => 'Minimal Product'
         ];
 
-        $product = Product::fromArray($data);
+        $product = Product::createFromArray($data);
 
         $this->assertInstanceOf(Product::class, $product);
         $this->assertNull($product->product_id);

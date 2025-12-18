@@ -70,7 +70,7 @@ class MerchantAccountKycRedirect
             exchange_code: $data['exchange_code'] ?? null,
             access_token: $data['access_token'] ?? null,
             limits: isset($data['limits']) ? array_map(
-                fn(array $limitData) => AccountLimit::fromArray($limitData),
+                fn(array $limitData) => AccountLimit::createFromArray($limitData),
                 $data['limits']
             ) : null,
             payto_kycauths: $data['payto_kycauths'] ?? null

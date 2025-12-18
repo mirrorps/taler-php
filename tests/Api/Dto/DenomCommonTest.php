@@ -91,7 +91,7 @@ class DenomCommonTest extends TestCase
             'lost' => false
         ];
 
-        $denomCommon = DenomCommon::fromArray($data);
+        $denomCommon = DenomCommon::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_MASTER_SIG, $denomCommon->master_sig);
         $this->assertInstanceOf(Timestamp::class, $denomCommon->stamp_start);
@@ -115,7 +115,7 @@ class DenomCommonTest extends TestCase
             'stamp_expire_legal' => ['t_s' => self::SAMPLE_STAMP_EXPIRE_LEGAL_S]
         ];
 
-        $denomCommon = DenomCommon::fromArray($data);
+        $denomCommon = DenomCommon::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_MASTER_SIG, $denomCommon->master_sig);
         $this->assertInstanceOf(Timestamp::class, $denomCommon->stamp_start);
@@ -140,7 +140,7 @@ class DenomCommonTest extends TestCase
             'lost' => true
         ];
 
-        $denomCommon = DenomCommon::fromArray($data);
+        $denomCommon = DenomCommon::createFromArray($data);
 
         $this->assertTrue($denomCommon->lost);
     }
@@ -155,7 +155,7 @@ class DenomCommonTest extends TestCase
             'stamp_expire_legal' => ['t_s' => self::SAMPLE_STAMP_EXPIRE_LEGAL_S]
         ];
 
-        $denomCommon = DenomCommon::fromArray($data);
+        $denomCommon = DenomCommon::createFromArray($data);
 
         $this->assertInstanceOf(Timestamp::class, $denomCommon->stamp_start);
         $this->assertSame('never', $denomCommon->stamp_start->t_s);

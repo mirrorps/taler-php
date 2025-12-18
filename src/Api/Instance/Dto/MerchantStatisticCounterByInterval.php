@@ -28,7 +28,7 @@ class MerchantStatisticCounterByInterval
     public static function createFromArray(array $data): self
     {
         return new self(
-            start_time: Timestamp::fromArray($data['start_time']),
+            start_time: Timestamp::createFromArray($data['start_time']),
             cumulative_counter: $data['cumulative_counter']
         );
     }

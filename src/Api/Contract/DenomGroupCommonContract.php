@@ -61,5 +61,5 @@ interface DenomGroupCommonContract
      *     age_mask?: string
      * } $data
      */
-    public static function fromArray(array $data): self;
+    public static function createFromArray(array $data): self;
 } 

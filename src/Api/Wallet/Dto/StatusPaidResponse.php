@@ -25,7 +25,7 @@ class StatusPaidResponse
      *     refund_taken: string
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['refunded'],

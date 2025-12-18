@@ -38,8 +38,8 @@ class TokenIssueCsPublicKey
     {
         return new self(
             cs_pub: $data['cs_pub'],
-            signature_validity_start: Timestamp::fromArray($data['signature_validity_start']),
-            signature_validity_end: Timestamp::fromArray($data['signature_validity_end'])
+            signature_validity_start: Timestamp::createFromArray($data['signature_validity_start']),
+            signature_validity_end: Timestamp::createFromArray($data['signature_validity_end'])
         );
     }
 

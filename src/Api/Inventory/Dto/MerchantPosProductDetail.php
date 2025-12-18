@@ -68,7 +68,7 @@ class MerchantPosProductDetail
             unit: $data['unit'],
             price: $data['price'],
             image: $data['image'] ?? null,
-            taxes: isset($data['taxes']) ? array_map(static fn(array $t) => Tax::fromArray($t), $data['taxes']) : null,
+            taxes: isset($data['taxes']) ? array_map(static fn(array $t) => Tax::createFromArray($t), $data['taxes']) : null,
             total_stock: $data['total_stock'] ?? null,
             minimum_age: $data['minimum_age'] ?? null,
         );

@@ -60,9 +60,9 @@ class GetOrder
         $data = json_decode((string)$response->getBody(), true);
         
         return match ($statusCode) {
-            200 => StatusPaidResponse::fromArray($data),
-            202 => StatusGotoResponse::fromArray($data),
-            402 => StatusUnpaidResponse::fromArray($data),
+            200 => StatusPaidResponse::createFromArray($data),
+            202 => StatusGotoResponse::createFromArray($data),
+            402 => StatusUnpaidResponse::createFromArray($data),
             default => throw new TalerException("Unexpected response status code: $statusCode", $statusCode)
         };
     }

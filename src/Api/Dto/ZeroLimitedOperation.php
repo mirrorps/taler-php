@@ -57,7 +57,7 @@ class ZeroLimitedOperation
      *
      * @param array{operation_type: string} $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             operation_type: $data['operation_type']

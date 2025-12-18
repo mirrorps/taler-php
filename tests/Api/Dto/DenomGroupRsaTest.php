@@ -71,12 +71,12 @@ class DenomGroupRsaTest extends TestCase
             fee_refresh: self::SAMPLE_FEE_REFRESH,
             fee_refund: self::SAMPLE_FEE_REFUND,
             denoms: array_map(
-        fn(array $denom) => DenomCommon::fromArray($denom),
+        fn(array $denom) => DenomCommon::createFromArray($denom),
                 $this->validData['denoms']
             ),
         );
 
-        $denoms[] = DenomCommon::fromArray($this->validData['denoms'][0]);
+        $denoms[] = DenomCommon::createFromArray($this->validData['denoms'][0]);
 
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
@@ -89,9 +89,9 @@ class DenomGroupRsaTest extends TestCase
 
     public function testFromArrayWithValidData(): void
     {
-        $group = DenomGroupRsa::fromArray($this->validData);
+        $group = DenomGroupRsa::createFromArray($this->validData);
 
-        $denoms[] = DenomCommon::fromArray($this->validData['denoms'][0]);
+        $denoms[] = DenomCommon::createFromArray($this->validData['denoms'][0]);
 
         $this->assertSame(self::SAMPLE_VALUE, $group->getValue());
         $this->assertSame(self::SAMPLE_FEE_WITHDRAW, $group->getFeeWithdraw());
@@ -109,7 +109,7 @@ class DenomGroupRsaTest extends TestCase
 
         $data = $this->validData;
         $data['cipher'] = 'INVALID';
-        DenomGroupRsa::fromArray($data);
+        DenomGroupRsa::createFromArray($data);
     }
 
     public function testFromArrayWithLostDenom(): void
@@ -117,7 +117,7 @@ class DenomGroupRsaTest extends TestCase
         $data = $this->validData;
         $data['denoms'][0]['lost'] = true;
 
-        $group = DenomGroupRsa::fromArray($data);
+        $group = DenomGroupRsa::createFromArray($data);
         $denoms = $group->getDenoms();
         $this->assertTrue($denoms[0]->lost ?? false);
     }

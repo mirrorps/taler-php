@@ -37,7 +37,7 @@ class TemplateContractDetails implements \JsonSerializable
     {
         return new self(
             minimum_age: $data['minimum_age'],
-            pay_duration: RelativeTime::fromArray($data['pay_duration']),
+            pay_duration: RelativeTime::createFromArray($data['pay_duration']),
             summary: $data['summary'] ?? null,
             currency: $data['currency'] ?? null,
             amount: $data['amount'] ?? null,

@@ -84,11 +84,11 @@ class AccountLimit
      *     soft_limit?: bool
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             operation_type: $data['operation_type'],
-            timeframe: RelativeTime::fromArray($data['timeframe']),
+            timeframe: RelativeTime::createFromArray($data['timeframe']),
             threshold: $data['threshold'],
             soft_limit: $data['soft_limit'] ?? false
         );

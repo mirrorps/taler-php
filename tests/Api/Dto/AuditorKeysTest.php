@@ -50,7 +50,7 @@ class AuditorKeysTest extends TestCase
             ],
         ];
 
-        $dto = AuditorKeys::fromArray($data);
+        $dto = AuditorKeys::createFromArray($data);
 
         $this->assertEquals(self::SAMPLE_AUDITOR_PUB, $dto->auditor_pub);
         $this->assertEquals(self::SAMPLE_AUDITOR_URL, $dto->auditor_url);

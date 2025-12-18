@@ -25,7 +25,7 @@ class AuditorDenominationKeyTest extends TestCase
             'auditor_sig' => self::SAMPLE_AUDITOR_SIG,
         ];
 
-        $dto = AuditorDenominationKey::fromArray($data);
+        $dto = AuditorDenominationKey::createFromArray($data);
 
         $this->assertEquals(self::SAMPLE_DENOM_PUB_H, $dto->denom_pub_h);
         $this->assertEquals(self::SAMPLE_AUDITOR_SIG, $dto->auditor_sig);

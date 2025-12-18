@@ -206,17 +206,17 @@ class CheckPaymentPaidResponse
             exchange_http_status: $data['exchange_http_status'],
             refund_amount: $data['refund_amount'],
             contract_terms: self::createContractTerms($data['contract_terms']),
-            last_payment: Timestamp::fromArray($data['last_payment']),
+            last_payment: Timestamp::createFromArray($data['last_payment']),
             wire_details: array_map(
-                static fn (array $detail) => TransactionWireTransfer::fromArray($detail),
+                static fn (array $detail) => TransactionWireTransfer::createFromArray($detail),
                 $data['wire_details']
             ),
             wire_reports: array_map(
-                static fn (array $report) => TransactionWireReport::fromArray($report),
+                static fn (array $report) => TransactionWireReport::createFromArray($report),
                 $data['wire_reports']
             ),
             refund_details: array_map(
-                static fn (array $detail) => RefundDetails::fromArray($detail),
+                static fn (array $detail) => RefundDetails::createFromArray($detail),
                 $data['refund_details']
             ),
             order_status_url: $data['order_status_url'],

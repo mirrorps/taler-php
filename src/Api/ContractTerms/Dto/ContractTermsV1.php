@@ -200,20 +200,20 @@ class ContractTermsV1
             summary: $data['summary'],
             order_id: $data['order_id'],
             products: array_map(
-                static fn (array $product) => Product::fromArray($product),
+                static fn (array $product) => Product::createFromArray($product),
                 $data['products']
             ),
-            timestamp: Timestamp::fromArray($data['timestamp']),
-            refund_deadline: Timestamp::fromArray($data['refund_deadline']),
-            pay_deadline: Timestamp::fromArray($data['pay_deadline']),
-            wire_transfer_deadline: Timestamp::fromArray($data['wire_transfer_deadline']),
+            timestamp: Timestamp::createFromArray($data['timestamp']),
+            refund_deadline: Timestamp::createFromArray($data['refund_deadline']),
+            pay_deadline: Timestamp::createFromArray($data['pay_deadline']),
+            wire_transfer_deadline: Timestamp::createFromArray($data['wire_transfer_deadline']),
             merchant_pub: $data['merchant_pub'],
             merchant_base_url: $data['merchant_base_url'],
-            merchant: Merchant::fromArray($data['merchant']),
+            merchant: Merchant::createFromArray($data['merchant']),
             h_wire: $data['h_wire'],
             wire_method: $data['wire_method'],
             exchanges: array_map(
-                static fn (array $exchange) => Exchange::fromArray($exchange),
+                static fn (array $exchange) => Exchange::createFromArray($exchange),
                 $data['exchanges']
             ),
             nonce: $data['nonce'],
@@ -222,9 +222,9 @@ class ContractTermsV1
             fulfillment_url: $data['fulfillment_url'] ?? null,
             fulfillment_message: $data['fulfillment_message'] ?? null,
             fulfillment_message_i18n: $data['fulfillment_message_i18n'] ?? null,
-            delivery_location: isset($data['delivery_location']) ? Location::fromArray($data['delivery_location']) : null,
-            delivery_date: isset($data['delivery_date']) ? Timestamp::fromArray($data['delivery_date']) : null,
-            auto_refund: isset($data['auto_refund']) ? RelativeTime::fromArray($data['auto_refund']) : null,
+            delivery_location: isset($data['delivery_location']) ? Location::createFromArray($data['delivery_location']) : null,
+            delivery_date: isset($data['delivery_date']) ? Timestamp::createFromArray($data['delivery_date']) : null,
+            auto_refund: isset($data['auto_refund']) ? RelativeTime::createFromArray($data['auto_refund']) : null,
             extra: $data['extra'] ?? null,
             minimum_age: $data['minimum_age'] ?? null
         );

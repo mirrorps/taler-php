@@ -86,12 +86,12 @@ class CreateAccount
     private function handleResponse(ResponseInterface $response): AccountAddResponse|ChallengeResponse
     {
         // $data = $this->client->parseResponseBody($response, 200);
-        // return AccountAddResponse::fromArray($data);
+        // return AccountAddResponse::createFromArray($data);
 
         $data = json_decode((string)$response->getBody(), true);
 
         return match ($response->getStatusCode()) {
-            HTTP_STATUS_CODE_SUCCESS  => AccountAddResponse::fromArray($data), //-- success
+            HTTP_STATUS_CODE_SUCCESS  => AccountAddResponse::createFromArray($data), //-- success
             HTTP_STATUS_CODE_ACCEPTED => ChallengeResponse::createFromArray($data), //-- 2FA required
             default => throw new TalerException(
                 message: 'Unexpected response status code: ' . $response->getStatusCode(),

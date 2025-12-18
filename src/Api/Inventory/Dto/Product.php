@@ -51,19 +51,19 @@ class Product
      * @return self
      * @throws \InvalidArgumentException When required data is missing or invalid
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         $taxes = null;
         if (isset($data['taxes'])) {
             $taxes = array_map(
-                fn (array $key) => Tax::fromArray($key),
+                fn (array $key) => Tax::createFromArray($key),
                 $data['taxes']
             );
         }
 
         $delivery_date = null;
         if (isset($data['delivery_date'])) {
-            $delivery_date = Timestamp::fromArray($data['delivery_date']);
+            $delivery_date = Timestamp::createFromArray($data['delivery_date']);
         }
 
         return new self(

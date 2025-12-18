@@ -78,10 +78,10 @@ class ProductPatchDetail implements \JsonSerializable
             description_i18n: $data['description_i18n'] ?? null,
             categories: $data['categories'] ?? null,
             image: $data['image'] ?? null,
-            taxes: isset($data['taxes']) ? array_map(static fn(array $t) => Tax::fromArray($t), $data['taxes']) : null,
+            taxes: isset($data['taxes']) ? array_map(static fn(array $t) => Tax::createFromArray($t), $data['taxes']) : null,
             total_lost: $data['total_lost'] ?? null,
-            address: isset($data['address']) ? Location::fromArray($data['address']) : null,
-            next_restock: isset($data['next_restock']) ? Timestamp::fromArray($data['next_restock']) : null,
+            address: isset($data['address']) ? Location::createFromArray($data['address']) : null,
+            next_restock: isset($data['next_restock']) ? Timestamp::createFromArray($data['next_restock']) : null,
             minimum_age: $data['minimum_age'] ?? null,
         );
     }

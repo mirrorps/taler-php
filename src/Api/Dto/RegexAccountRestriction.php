@@ -40,7 +40,7 @@ class RegexAccountRestriction implements AccountRestriction
      * } $data
      * @throws \InvalidArgumentException if type is missing or not 'regex', or if required fields are missing
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         if (!isset($data['type'])) { // @phpstan-ignore-line - explicitly ensuring the type is properly set
             throw new \InvalidArgumentException('Missing type field');

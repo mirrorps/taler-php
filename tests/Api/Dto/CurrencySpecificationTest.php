@@ -62,7 +62,7 @@ class CurrencySpecificationTest extends TestCase
 
     public function testFromArrayWithValidData(): void
     {
-        $spec = CurrencySpecification::fromArray($this->validData);
+        $spec = CurrencySpecification::createFromArray($this->validData);
 
         $this->assertSame($this->validData['name'], $spec->name);
         $this->assertSame($this->validData['currency'], $spec->currency);
@@ -80,6 +80,6 @@ class CurrencySpecificationTest extends TestCase
         $invalidData = $this->validData;
         $invalidData['alt_unit_names'] = ['3' => 'k$']; // Missing '0' key
 
-        CurrencySpecification::fromArray($invalidData);
+        CurrencySpecification::createFromArray($invalidData);
     }
 } 

@@ -37,13 +37,13 @@ class FutureSignKey
      * } $data
      * @return self
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['key'],
-            Timestamp::fromArray($data['stamp_start']),
-            Timestamp::fromArray($data['stamp_expire']),
-            Timestamp::fromArray($data['stamp_end']),
+            Timestamp::createFromArray($data['stamp_start']),
+            Timestamp::createFromArray($data['stamp_expire']),
+            Timestamp::createFromArray($data['stamp_end']),
             $data['signkey_secmod_sig']
         );
     }
