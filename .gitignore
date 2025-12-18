@@ -46,3 +46,4 @@ Desktop.ini
 # PHPStan config
 phpstan.neon
 composer.lock
+/notes.txt

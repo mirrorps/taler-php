@@ -95,7 +95,18 @@ class GetOrder
     {
         // $data = $this->orderClient->parseResponseBody($response, 200);
 
-        $data = json_decode((string)$response->getBody(), true);
+        // try {
+        //     $data = json_decode((string)$response->getBody(), true, 512, JSON_THROW_ON_ERROR);
+        // } catch (\JsonException $e) {
+        //     throw new TalerException(
+        //         message: 'Failed to decode order response JSON: ' . $e->getMessage(),
+        //         code: $response->getStatusCode(),
+        //         previous: $e,
+        //         response: $response
+        //     );
+        // }
+
+        $data = $this->orderClient->decodeResponseBody($response);
 
         if($response->getStatusCode() == HTTP_STATUS_CODE_ACCEPTED) {
             return ChallengeResponse::createFromArray($data);

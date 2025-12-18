@@ -7,6 +7,9 @@ use Taler\Api\Order\OrderClient;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 
+use const Taler\Http\HTTP_STATUS_CODE_NO_CONTENT;
+use const Taler\Http\HTTP_STATUS_CODE_SUCCESS;
+
 class ForgetOrder
 {
     public function __construct(
@@ -105,7 +108,21 @@ class ForgetOrder
      */
     private function handleResponse(ResponseInterface $response): void
     {
-        $this->orderClient->parseResponseBody($response, 200);
+        /**
+         * Success status codes are 200 and 204.
+         * For both, we don't need to decode the body.
+         */
+        $statusCode = $response->getStatusCode();
+
+        if(in_array($statusCode, [HTTP_STATUS_CODE_SUCCESS, HTTP_STATUS_CODE_NO_CONTENT])) {
+            return;
+        }
+
+        throw new TalerException(
+            message: 'Unexpected response status code: ' . $response->getStatusCode(),
+            code: $response->getStatusCode(),
+            response: $response
+        );
     }
 }
 

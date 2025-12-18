@@ -21,7 +21,7 @@ class UpdateTokenFamily
      * @param string $slug
      * @param TokenFamilyUpdateRequest $details
      * @param array<string, string> $headers
-     * @return TokenFamilyDetails|array<string, mixed>
+     * @return void
      * @throws TalerException
      * @throws \Throwable
      */
@@ -30,7 +30,7 @@ class UpdateTokenFamily
         string $slug,
         TokenFamilyUpdateRequest $details,
         array $headers = []
-    ): TokenFamilyDetails|array {
+    ): void {
         $self = new self($client);
 
         try {
@@ -45,9 +45,7 @@ class UpdateTokenFamily
                 )
             );
 
-            /** @var TokenFamilyDetails|array<string,mixed> $result */
-            $result = $client->handleWrappedResponse($self->handleResponse(...));
-            return $result;
+            $client->handleWrappedResponse($self->handleResponse(...));
         } catch (TalerException $e) {
             throw $e;
         } catch (\Throwable $e) {
@@ -88,12 +86,11 @@ class UpdateTokenFamily
     }
 
     /**
-     * @return TokenFamilyDetails
+     * Handles the response from the update token family request.
      */
-    private function handleResponse(ResponseInterface $response): TokenFamilyDetails
+    private function handleResponse(ResponseInterface $response): void
     {
-        $data = $this->client->parseResponseBody($response, 204);
-        return TokenFamilyDetails::createFromArray($data);
+        $this->client->parseResponseBody($response, 204);
     }
 }
 
