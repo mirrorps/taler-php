@@ -79,6 +79,6 @@ class TalerException extends Exception
          * extra: array<string, mixed>
          * } $json
          */
-        return ErrorDetail::fromArray($json);
+        return ErrorDetail::createFromArray($json);
     }
 }

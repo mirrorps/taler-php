@@ -57,7 +57,7 @@ class ErrorDetail
      *     extra?: array<string, mixed>|null
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             code: $data['code'],

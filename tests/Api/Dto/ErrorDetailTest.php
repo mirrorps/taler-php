@@ -91,7 +91,7 @@ class ErrorDetailTest extends TestCase
     {
         /** @var array{code: int} $data */
         $data = ['code' => 1001];
-        $error = ErrorDetail::fromArray($data);
+        $error = ErrorDetail::createFromArray($data);
 
         $this->assertSame(1001, $error->code);
         $this->assertNull($error->hint);
@@ -109,7 +109,7 @@ class ErrorDetailTest extends TestCase
 
     public function testFromArrayWithAllParameters(): void
     {
-        $error = ErrorDetail::fromArray($this->fullData);
+        $error = ErrorDetail::createFromArray($this->fullData);
 
         $this->assertSame($this->fullData['code'], $error->code);
         $this->assertSame($this->fullData['hint'], $error->hint);
@@ -135,7 +135,7 @@ class ErrorDetailTest extends TestCase
             // Omitting other optional parameters
         ];
 
-        $error = ErrorDetail::fromArray($data);
+        $error = ErrorDetail::createFromArray($data);
 
         $this->assertSame($data['code'], $error->code);
         $this->assertSame($data['hint'], $error->hint);
