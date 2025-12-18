@@ -496,7 +496,7 @@ $orderClient->deleteOrder('order_123');
 Request the backend to forget specific fields of an order's contract terms.
 
 Notes:
-- The request uses HTTP PUT and returns no content on success (HTTP 200).
+- The request uses HTTP PATCH and returns no content on success (HTTP 200 or 204).
 - A valid JSON path must begin with `$.` and end with a field identifier. Array indices and wildcards `*` are allowed inside the path, but the path cannot end with an index or wildcard.
 
 ```php
@@ -523,9 +523,7 @@ $orderClient->forgetOrder(
 );
 ```
 
-If the order or paths are invalid, a `TalerException` will be thrown.
-
-Note: The delete operation returns no content on success (HTTP 204). If the order doesn't exist or can't be deleted, a `TalerException` will be thrown.
+If the order or paths are invalid, or if the backend rejects the request (for example HTTP 400, 404, or 409), a `TalerException` will be thrown. The exception code contains the HTTP status, and you can inspect structured error details via `$e->getResponseDTO()` if the backend returned a JSON error body.
 
 ### Asynchronous Operations
 
@@ -1690,7 +1688,7 @@ $tokenFamilies->createTokenFamily($request);
 
 ### Update Token Family
 
-Update an existing token family. Returns detailed information (HTTP 200) as `TokenFamilyDetails`.
+Update an existing token family. Returns no content on success (HTTP 204).
 
 ```php
 use Taler\Api\TokenFamilies\Dto\TokenFamilyUpdateRequest;
@@ -1706,8 +1704,8 @@ $patch = new TokenFamilyUpdateRequest(
     valid_before: new Timestamp(1800000100)
 );
 
-// Returns TokenFamilyDetails on HTTP 200
-$details = $tokenFamilies->updateTokenFamily('family-01', $patch);
+// 204 No Content on success
+$tokenFamilies->updateTokenFamily('family-01', $patch);
 ```
 
 ### Get Token Families
