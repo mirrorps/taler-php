@@ -28,7 +28,7 @@ class Timestamp
      *
      * @param array{t_s: int|string} $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             t_s: $data['t_s']

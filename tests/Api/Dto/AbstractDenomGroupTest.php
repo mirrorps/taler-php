@@ -33,7 +33,7 @@ class AbstractDenomGroupTest extends TestCase
                 return [];
             }
 
-            public static function fromArray(array $data): DenomGroupCommonContract
+            public static function createFromArray(array $data): DenomGroupCommonContract
             {
                 return new self(
                     value: $data['value'],
@@ -72,7 +72,7 @@ class AbstractDenomGroupTest extends TestCase
                 return [];
             }
 
-            public static function fromArray(array $data): DenomGroupCommonContract
+            public static function createFromArray(array $data): DenomGroupCommonContract
             {
                 return new self(
                     value: $data['value'],

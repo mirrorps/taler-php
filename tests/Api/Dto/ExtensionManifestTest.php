@@ -42,7 +42,7 @@ class ExtensionManifestTest extends TestCase
             'version' => self::SAMPLE_VERSION,
         ];
 
-        $dto = ExtensionManifest::fromArray($data);
+        $dto = ExtensionManifest::createFromArray($data);
 
         $this->assertTrue($dto->critical);
         $this->assertEquals(self::SAMPLE_VERSION, $dto->version);
@@ -58,7 +58,7 @@ class ExtensionManifestTest extends TestCase
             'config' => $config,
         ];
 
-        $dto = ExtensionManifest::fromArray($data);
+        $dto = ExtensionManifest::createFromArray($data);
 
         $this->assertFalse($dto->critical);
         $this->assertEquals(self::SAMPLE_VERSION, $dto->version);

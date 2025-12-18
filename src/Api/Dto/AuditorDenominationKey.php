@@ -25,7 +25,7 @@ class AuditorDenominationKey
      * @param array<string, string> $data
      * @return self
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['denom_pub_h'],

@@ -27,7 +27,7 @@ class Tax
      * @return self
      * @throws \InvalidArgumentException When required data is missing or invalid
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             name: $data['name'],

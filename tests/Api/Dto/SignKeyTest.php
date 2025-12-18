@@ -45,7 +45,7 @@ class SignKeyTest extends TestCase
             'master_sig' => self::SAMPLE_MASTER_SIG,
         ];
 
-        $dto = SignKey::fromArray($data);
+        $dto = SignKey::createFromArray($data);
 
         $this->assertEquals(self::SAMPLE_KEY, $dto->key);
         $this->assertInstanceOf(Timestamp::class, $dto->stamp_start);

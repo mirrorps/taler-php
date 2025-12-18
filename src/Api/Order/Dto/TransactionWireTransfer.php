@@ -30,12 +30,12 @@ class TransactionWireTransfer
      *     confirmed: bool
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['exchange_url'],
             $data['wtid'],
-            Timestamp::fromArray($data['execution_time']),
+            Timestamp::createFromArray($data['execution_time']),
             $data['amount'],
             $data['confirmed']
         );

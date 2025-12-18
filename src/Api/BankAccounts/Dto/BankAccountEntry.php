@@ -29,7 +29,7 @@ class BankAccountEntry
     /**
      * @param array{payto_uri: string, h_wire: string, active: bool} $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             payto_uri: $data['payto_uri'],

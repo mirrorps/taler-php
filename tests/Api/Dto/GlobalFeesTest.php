@@ -84,7 +84,7 @@ class GlobalFeesTest extends TestCase
             'master_sig' => self::SAMPLE_MASTER_SIG
         ];
 
-        $globalFees = GlobalFees::fromArray($data);
+        $globalFees = GlobalFees::createFromArray($data);
 
         $this->assertInstanceOf(Timestamp::class, $globalFees->start_date);
         $this->assertSame(self::SAMPLE_START_DATE_S, $globalFees->start_date->t_s);

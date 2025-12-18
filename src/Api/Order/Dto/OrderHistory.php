@@ -32,11 +32,11 @@ class OrderHistory
      *
      * @param array<string, mixed> $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             orders: array_map(
-                static fn (array $order) => OrderHistoryEntry::fromArray($order),
+                static fn (array $order) => OrderHistoryEntry::createFromArray($order),
                 $data['orders']
             )
         );

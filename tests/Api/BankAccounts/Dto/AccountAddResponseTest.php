@@ -14,7 +14,7 @@ class AccountAddResponseTest extends TestCase
             'salt' => 'salt456'
         ];
 
-        $dto = AccountAddResponse::fromArray($data);
+        $dto = AccountAddResponse::createFromArray($data);
         $this->assertSame('hash123', $dto->h_wire);
         $this->assertSame('salt456', $dto->salt);
     }

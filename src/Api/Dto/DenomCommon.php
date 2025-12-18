@@ -39,14 +39,14 @@ class DenomCommon
      *     lost?: bool
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             master_sig: $data['master_sig'],
-            stamp_start: Timestamp::fromArray($data['stamp_start']),
-            stamp_expire_withdraw: Timestamp::fromArray($data['stamp_expire_withdraw']),
-            stamp_expire_deposit: Timestamp::fromArray($data['stamp_expire_deposit']),
-            stamp_expire_legal: Timestamp::fromArray($data['stamp_expire_legal']),
+            stamp_start: Timestamp::createFromArray($data['stamp_start']),
+            stamp_expire_withdraw: Timestamp::createFromArray($data['stamp_expire_withdraw']),
+            stamp_expire_deposit: Timestamp::createFromArray($data['stamp_expire_deposit']),
+            stamp_expire_legal: Timestamp::createFromArray($data['stamp_expire_legal']),
             lost: $data['lost'] ?? null
         );
     }

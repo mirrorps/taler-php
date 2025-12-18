@@ -25,7 +25,7 @@ class Recoup
      *
      * @param array{h_denom_pub: string} $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             h_denom_pub: $data['h_denom_pub']

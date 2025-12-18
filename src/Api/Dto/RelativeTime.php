@@ -32,7 +32,7 @@ class RelativeTime
      *
      * @param array{d_us: int|string} $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             d_us: $data['d_us']

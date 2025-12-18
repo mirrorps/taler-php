@@ -24,7 +24,7 @@ class RecoupTest extends TestCase
             'h_denom_pub' => self::SAMPLE_H_DENOM_PUB
         ];
 
-        $recoup = Recoup::fromArray($data);
+        $recoup = Recoup::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_H_DENOM_PUB, $recoup->h_denom_pub);
     }

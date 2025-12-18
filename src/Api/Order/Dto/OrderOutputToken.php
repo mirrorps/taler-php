@@ -56,7 +56,7 @@ class OrderOutputToken
         return new self(
             token_family_slug: $data['token_family_slug'],
             count: $data['count'] ?? 1,
-            valid_at: isset($data['valid_at']) ? Timestamp::fromArray($data['valid_at']) : null
+            valid_at: isset($data['valid_at']) ? Timestamp::createFromArray($data['valid_at']) : null
         );
     }
 

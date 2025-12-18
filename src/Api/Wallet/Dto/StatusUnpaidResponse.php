@@ -22,7 +22,7 @@ class StatusUnpaidResponse
      *     already_paid_order_id?: string|null
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             $data['taler_pay_uri'],

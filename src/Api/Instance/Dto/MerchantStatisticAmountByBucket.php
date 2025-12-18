@@ -34,8 +34,8 @@ class MerchantStatisticAmountByBucket
     public static function createFromArray(array $data): self
     {
         return new self(
-            start_time: Timestamp::fromArray($data['start_time']),
-            end_time: Timestamp::fromArray($data['end_time']),
+            start_time: Timestamp::createFromArray($data['start_time']),
+            end_time: Timestamp::createFromArray($data['end_time']),
             range: $data['range'],
             cumulative_amounts: $data['cumulative_amounts']
         );

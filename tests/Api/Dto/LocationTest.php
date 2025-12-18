@@ -22,7 +22,7 @@ class LocationTest extends TestCase
             'address_lines' => ['Floor 12', 'Suite 1200']
         ];
 
-        $location = Location::fromArray($data);
+        $location = Location::createFromArray($data);
 
         $this->assertInstanceOf(Location::class, $location);
         $this->assertEquals($data['country'], $location->country);
@@ -44,7 +44,7 @@ class LocationTest extends TestCase
             'town' => 'San Francisco'
         ];
 
-        $location = Location::fromArray($data);
+        $location = Location::createFromArray($data);
 
         $this->assertInstanceOf(Location::class, $location);
         $this->assertEquals($data['country'], $location->country);
@@ -61,7 +61,7 @@ class LocationTest extends TestCase
 
     public function testFromArrayWithEmptyArray(): void
     {
-        $location = Location::fromArray([]);
+        $location = Location::createFromArray([]);
 
         $this->assertInstanceOf(Location::class, $location);
         $this->assertNull($location->country);

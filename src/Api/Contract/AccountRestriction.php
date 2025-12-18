@@ -24,5 +24,5 @@ interface AccountRestriction
      * ) $data
      * @return self Either RegexAccountRestriction or DenyAllAccountRestriction
      */
-    public static function fromArray(array $data): self;
+    public static function createFromArray(array $data): self;
 } 

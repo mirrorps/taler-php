@@ -62,7 +62,7 @@ class GetAccounts
     private function handleResponse(ResponseInterface $response): AccountsSummaryResponse
     {
         $data = $this->client->parseResponseBody($response, 200);
-        return AccountsSummaryResponse::fromArray($data);
+        return AccountsSummaryResponse::createFromArray($data);
     }
 }
 

@@ -70,7 +70,7 @@ class AccountLimitTest extends TestCase
             'soft_limit' => true
         ];
 
-        $accountLimit = AccountLimit::fromArray($data);
+        $accountLimit = AccountLimit::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_OPERATION_TYPE, $accountLimit->operation_type);
         $this->assertSame(3600000000, $accountLimit->timeframe->d_us);
@@ -86,7 +86,7 @@ class AccountLimitTest extends TestCase
             'threshold' => self::SAMPLE_THRESHOLD
         ];
 
-        $accountLimit = AccountLimit::fromArray($data);
+        $accountLimit = AccountLimit::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_OPERATION_TYPE, $accountLimit->operation_type);
         $this->assertSame(3600000000, $accountLimit->timeframe->d_us);

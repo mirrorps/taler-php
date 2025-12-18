@@ -18,7 +18,7 @@ class TransactionWireTransferTest extends TestCase
             'confirmed' => true
         ];
 
-        $transfer = TransactionWireTransfer::fromArray($data);
+        $transfer = TransactionWireTransfer::createFromArray($data);
 
         $this->assertInstanceOf(TransactionWireTransfer::class, $transfer);
         $this->assertEquals($data['exchange_url'], $transfer->exchange_url);

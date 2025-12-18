@@ -65,7 +65,7 @@ class DenomGroupRsa extends AbstractDenomGroup
      *     }>
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         if ($data['cipher'] !== self::CIPHER) {
             throw new \InvalidArgumentException(sprintf(
@@ -82,7 +82,7 @@ class DenomGroupRsa extends AbstractDenomGroup
             fee_refresh: $data['fee_refresh'],
             fee_refund: $data['fee_refund'],
             denoms: array_map(
-        fn(array $denom) => DenomCommon::fromArray($denom),
+        fn(array $denom) => DenomCommon::createFromArray($denom),
                 $data['denoms']
             ),
         );

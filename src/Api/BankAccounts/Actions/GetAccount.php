@@ -64,7 +64,7 @@ class GetAccount
     private function handleResponse(ResponseInterface $response): BankAccountDetail
     {
         $data = $this->client->parseResponseBody($response, 200);
-        return BankAccountDetail::fromArray($data);
+        return BankAccountDetail::createFromArray($data);
     }
 }
 

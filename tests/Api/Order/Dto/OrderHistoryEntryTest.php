@@ -49,7 +49,7 @@ class OrderHistoryEntryTest extends TestCase
             'paid' => false
         ];
 
-        $orderHistoryEntry = OrderHistoryEntry::fromArray($data);
+        $orderHistoryEntry = OrderHistoryEntry::createFromArray($data);
 
         $this->assertSame(self::SAMPLE_ORDER_ID, $orderHistoryEntry->order_id);
         $this->assertSame(self::SAMPLE_ROW_ID, $orderHistoryEntry->row_id);

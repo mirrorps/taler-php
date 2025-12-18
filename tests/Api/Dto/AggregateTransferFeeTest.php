@@ -69,7 +69,7 @@ class AggregateTransferFeeTest extends TestCase
 
     public function testFromArrayWithValidData(): void
     {
-        $fee = AggregateTransferFee::fromArray($this->validData);
+        $fee = AggregateTransferFee::createFromArray($this->validData);
 
         $this->assertSame(self::SAMPLE_WIRE_FEE, $fee->wire_fee);
         $this->assertSame(self::SAMPLE_CLOSING_FEE, $fee->closing_fee);
@@ -95,6 +95,6 @@ class AggregateTransferFeeTest extends TestCase
         $data = $this->validData;
         $data['start_date'] = (array)new \stdClass();
 
-        AggregateTransferFee::fromArray($data); //@phpstan-ignore-line - testing error case
+        AggregateTransferFee::createFromArray($data); //@phpstan-ignore-line - testing error case
     }
 } 

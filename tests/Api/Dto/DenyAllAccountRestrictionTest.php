@@ -18,7 +18,7 @@ class DenyAllAccountRestrictionTest extends TestCase
     {
         $data = ['type' => 'deny'];
 
-        $restriction = DenyAllAccountRestriction::fromArray($data);
+        $restriction = DenyAllAccountRestriction::createFromArray($data);
 
         $this->assertSame('deny', $restriction->getType());
     }

@@ -100,11 +100,11 @@ class InstanceReconfigurationMessage
     {
         return new self(
             name: $data['name'],
-            address: Location::fromArray($data['address']),
-            jurisdiction: Location::fromArray($data['jurisdiction']),
+            address: Location::createFromArray($data['address']),
+            jurisdiction: Location::createFromArray($data['jurisdiction']),
             use_stefan: $data['use_stefan'],
-            default_wire_transfer_delay: RelativeTime::fromArray($data['default_wire_transfer_delay']),
-            default_pay_delay: RelativeTime::fromArray($data['default_pay_delay']),
+            default_wire_transfer_delay: RelativeTime::createFromArray($data['default_wire_transfer_delay']),
+            default_pay_delay: RelativeTime::createFromArray($data['default_pay_delay']),
             email: $data['email'] ?? null,
             phone_number: $data['phone_number'] ?? null,
             website: $data['website'] ?? null,

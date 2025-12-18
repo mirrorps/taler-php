@@ -53,7 +53,7 @@ class MerchantVersionResponse
     {
         $currencies = [];
         foreach ($data['currencies'] as $code => $spec) {
-            $currencies[$code] = CurrencySpecification::fromArray($spec);
+            $currencies[$code] = CurrencySpecification::createFromArray($spec);
         }
 
         $exchanges = array_map(

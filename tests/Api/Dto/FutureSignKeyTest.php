@@ -45,7 +45,7 @@ class FutureSignKeyTest extends TestCase
             'signkey_secmod_sig' => self::SAMPLE_SIGNKEY_SECMOD_SIG,
         ];
 
-        $dto = FutureSignKey::fromArray($data);
+        $dto = FutureSignKey::createFromArray($data);
 
         $this->assertEquals(self::SAMPLE_KEY, $dto->key);
         $this->assertInstanceOf(Timestamp::class, $dto->stamp_start);

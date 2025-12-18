@@ -17,7 +17,7 @@ class AccountsSummaryResponseTest extends TestCase
             ]
         ];
 
-        $response = AccountsSummaryResponse::fromArray($data);
+        $response = AccountsSummaryResponse::createFromArray($data);
         $this->assertCount(2, $response->accounts);
         $this->assertInstanceOf(BankAccountEntry::class, $response->accounts[0]);
         $this->assertSame('payto://iban/DE1', $response->accounts[0]->payto_uri);

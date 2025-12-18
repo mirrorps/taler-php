@@ -18,10 +18,10 @@ class AccountsSummaryResponse
     /**
      * @param array{accounts: array<int, array{payto_uri: string, h_wire: string, active: bool}>} $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         $accounts = array_map(
-            static fn(array $a) => BankAccountEntry::fromArray($a),
+            static fn(array $a) => BankAccountEntry::createFromArray($a),
             $data['accounts']
         );
 

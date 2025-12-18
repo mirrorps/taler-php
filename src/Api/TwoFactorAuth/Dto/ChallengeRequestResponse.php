@@ -36,8 +36,8 @@ class ChallengeRequestResponse
     public static function createFromArray(array $data): self
     {
         return new self(
-            solve_expiration: Timestamp::fromArray($data['solve_expiration']),
-            earliest_retransmission: Timestamp::fromArray($data['earliest_retransmission'])
+            solve_expiration: Timestamp::createFromArray($data['solve_expiration']),
+            earliest_retransmission: Timestamp::createFromArray($data['earliest_retransmission'])
         );
     }
 }

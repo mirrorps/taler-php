@@ -61,17 +61,17 @@ class GlobalFees
      *     master_sig: string
      * } $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
-            start_date: Timestamp::fromArray($data['start_date']),
-            end_date: Timestamp::fromArray($data['end_date']),
+            start_date: Timestamp::createFromArray($data['start_date']),
+            end_date: Timestamp::createFromArray($data['end_date']),
             history_fee: $data['history_fee'],
             account_fee: $data['account_fee'],
             purse_fee: $data['purse_fee'],
-            history_expiration: RelativeTime::fromArray($data['history_expiration']),
+            history_expiration: RelativeTime::createFromArray($data['history_expiration']),
             purse_account_limit: $data['purse_account_limit'],
-            purse_timeout: RelativeTime::fromArray($data['purse_timeout']),
+            purse_timeout: RelativeTime::createFromArray($data['purse_timeout']),
             master_sig: $data['master_sig']
         );
     }

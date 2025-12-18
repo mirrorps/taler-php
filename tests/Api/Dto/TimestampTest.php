@@ -27,19 +27,19 @@ class TimestampTest extends TestCase
 
     public function testFromArrayWithSeconds(): void
     {
-        $timestamp = Timestamp::fromArray(['t_s' => 1710979200]);
+        $timestamp = Timestamp::createFromArray(['t_s' => 1710979200]);
         $this->assertSame(1710979200, $timestamp->t_s);
     }
 
     public function testFromArrayWithNever(): void
     {
-        $timestamp = Timestamp::fromArray(['t_s' => 'never']);
+        $timestamp = Timestamp::createFromArray(['t_s' => 'never']);
         $this->assertSame('never', $timestamp->t_s);
     }
 
     public function testFromArrayWithZero(): void
     {
-        $timestamp = Timestamp::fromArray(['t_s' => 0]);
+        $timestamp = Timestamp::createFromArray(['t_s' => 0]);
         $this->assertSame(0, $timestamp->t_s);
     }
 
@@ -67,13 +67,13 @@ class TimestampTest extends TestCase
     public function testFromArrayMissingTsField(): void
     {
         $this->expectException(\TypeError::class);
-        Timestamp::fromArray([]); // @phpstan-ignore-line - Intentionally passing invalid data to test error handling
+        Timestamp::createFromArray([]); // @phpstan-ignore-line - Intentionally passing invalid data to test error handling
     }
 
     public function testFromArrayWithInvalidData(): void
     {
         $this->expectException(\TypeError::class);
-        Timestamp::fromArray(['invalid_key' => 123]); // @phpstan-ignore-line - Intentionally passing invalid data to test error handling
+        Timestamp::createFromArray(['invalid_key' => 123]); // @phpstan-ignore-line - Intentionally passing invalid data to test error handling
     }
 
     public function testLargeTimestamp(): void

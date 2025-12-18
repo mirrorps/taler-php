@@ -102,7 +102,7 @@ class DenomGroupRsaAgeRestrictedTest extends TestCase
 
     public function testFromArrayWithValidData(): void
     {
-        $group = DenomGroupRsaAgeRestricted::fromArray($this->validData);
+        $group = DenomGroupRsaAgeRestricted::createFromArray($this->validData);
 
         $denoms = array_map(
             fn(array $denom) => new DenomCommon(
@@ -133,7 +133,7 @@ class DenomGroupRsaAgeRestrictedTest extends TestCase
 
         $data = $this->validData;
         $data['cipher'] = 'INVALID';
-        DenomGroupRsaAgeRestricted::fromArray($data);
+        DenomGroupRsaAgeRestricted::createFromArray($data);
     }
 
     public function testFromArrayWithLostDenom(): void
@@ -141,7 +141,7 @@ class DenomGroupRsaAgeRestrictedTest extends TestCase
         $data = $this->validData;
         $data['denoms'][0]['lost'] = true;
 
-        $group = DenomGroupRsaAgeRestricted::fromArray($data);
+        $group = DenomGroupRsaAgeRestricted::createFromArray($data);
         $denoms = $group->getDenoms();
         $this->assertTrue($denoms[0]->lost ?? false);
     }

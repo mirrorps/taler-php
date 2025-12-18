@@ -59,7 +59,7 @@ class LoginTokenRequest
     {
         return new self(
             scope: $data['scope'],
-            duration: isset($data['duration']) ? RelativeTime::fromArray($data['duration']) : null,
+            duration: isset($data['duration']) ? RelativeTime::createFromArray($data['duration']) : null,
             description: $data['description'] ?? null,
             refreshable: $data['refreshable'] ?? null
         );

@@ -33,7 +33,7 @@ class FutureKeysResponse
         );
 
         $futureSignkeys = array_map(
-            fn (array $signkeyData) => FutureSignKey::fromArray([
+            fn (array $signkeyData) => FutureSignKey::createFromArray([
                 'key' => $signkeyData['key'],
                 'stamp_start' => ['t_s' => strtotime($signkeyData['stamp_start'])],
                 'stamp_expire' => ['t_s' => strtotime($signkeyData['stamp_expire'])],

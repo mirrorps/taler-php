@@ -40,7 +40,7 @@ class OutOfStockResponse
             product_id: $data['product_id'],
             requested_quantity: $data['requested_quantity'],
             available_quantity: $data['available_quantity'],
-            restock_expected: isset($data['restock_expected']) ? Timestamp::fromArray($data['restock_expected']) : null,
+            restock_expected: isset($data['restock_expected']) ? Timestamp::createFromArray($data['restock_expected']) : null,
         );
     }
 }

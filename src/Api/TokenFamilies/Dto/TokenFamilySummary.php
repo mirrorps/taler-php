@@ -32,8 +32,8 @@ class TokenFamilySummary
         return new self(
             slug: $data['slug'],
             name: $data['name'],
-            valid_after: Timestamp::fromArray($data['valid_after']),
-            valid_before: Timestamp::fromArray($data['valid_before']),
+            valid_after: Timestamp::createFromArray($data['valid_after']),
+            valid_before: Timestamp::createFromArray($data['valid_before']),
             kind: $data['kind'],
         );
     }

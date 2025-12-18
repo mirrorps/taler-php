@@ -15,7 +15,7 @@ class StatusUnpaidResponseTest extends TestCase
             'already_paid_order_id' => 'order_456'
         ];
 
-        $response = StatusUnpaidResponse::fromArray($data);
+        $response = StatusUnpaidResponse::createFromArray($data);
 
         $this->assertInstanceOf(StatusUnpaidResponse::class, $response);
         $this->assertEquals($data['taler_pay_uri'], $response->taler_pay_uri);
@@ -29,7 +29,7 @@ class StatusUnpaidResponseTest extends TestCase
             'taler_pay_uri' => 'taler://pay/example.com/orders/123'
         ];
 
-        $response = StatusUnpaidResponse::fromArray($data);
+        $response = StatusUnpaidResponse::createFromArray($data);
 
         $this->assertInstanceOf(StatusUnpaidResponse::class, $response);
         $this->assertEquals($data['taler_pay_uri'], $response->taler_pay_uri);

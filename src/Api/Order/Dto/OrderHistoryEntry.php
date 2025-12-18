@@ -44,12 +44,12 @@ class OrderHistoryEntry
      *
      * @param array<string, mixed> $data
      */
-    public static function fromArray(array $data): self
+    public static function createFromArray(array $data): self
     {
         return new self(
             order_id: $data['order_id'],
             row_id: $data['row_id'],
-            timestamp: Timestamp::fromArray($data['timestamp']),
+            timestamp: Timestamp::createFromArray($data['timestamp']),
             amount: $data['amount'],
             summary: $data['summary'],
             refundable: $data['refundable'],

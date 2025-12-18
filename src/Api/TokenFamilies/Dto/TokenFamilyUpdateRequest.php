@@ -51,8 +51,8 @@ class TokenFamilyUpdateRequest implements \JsonSerializable
             description: $data['description'],
             description_i18n: $data['description_i18n'] ?? null,
             extra_data: $data['extra_data'] ?? null,
-            valid_after: Timestamp::fromArray($data['valid_after']),
-            valid_before: Timestamp::fromArray($data['valid_before'])
+            valid_after: Timestamp::createFromArray($data['valid_after']),
+            valid_before: Timestamp::createFromArray($data['valid_before'])
         );
     }
 

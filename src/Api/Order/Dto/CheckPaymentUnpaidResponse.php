@@ -54,7 +54,7 @@ class CheckPaymentUnpaidResponse
         return new self(
             order_status: $data['order_status'],
             taler_pay_uri: $data['taler_pay_uri'],
-            creation_time: Timestamp::fromArray($data['creation_time']),
+            creation_time: Timestamp::createFromArray($data['creation_time']),
             summary: $data['summary'],
             total_amount: $data['total_amount'] ?? null,
             already_paid_order_id: $data['already_paid_order_id'] ?? null,

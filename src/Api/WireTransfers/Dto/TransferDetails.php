@@ -44,7 +44,7 @@ class TransferDetails
             payto_uri: $data['payto_uri'],
             exchange_url: $data['exchange_url'],
             transfer_serial_id: $data['transfer_serial_id'],
-            execution_time: Timestamp::fromArray($data['execution_time']),
+            execution_time: Timestamp::createFromArray($data['execution_time']),
             verified: $data['verified'] ?? null,
             confirmed: $data['confirmed'] ?? null,
             expected: $data['expected'] ?? null,

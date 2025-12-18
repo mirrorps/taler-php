@@ -16,7 +16,7 @@ class StatusPaidResponseTest extends TestCase
             'refund_taken' => '50.00'
         ];
 
-        $response = StatusPaidResponse::fromArray($data);
+        $response = StatusPaidResponse::createFromArray($data);
 
         $this->assertInstanceOf(StatusPaidResponse::class, $response);
         $this->assertEquals($data['refunded'], $response->refunded);
@@ -34,7 +34,7 @@ class StatusPaidResponseTest extends TestCase
             'refund_taken' => '0.00'
         ];
 
-        $response = StatusPaidResponse::fromArray($data);
+        $response = StatusPaidResponse::createFromArray($data);
 
         $this->assertInstanceOf(StatusPaidResponse::class, $response);
         $this->assertFalse($response->refunded);
