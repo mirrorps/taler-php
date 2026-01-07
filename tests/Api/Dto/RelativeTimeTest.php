@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Api\Dto;
+namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\RelativeTime;
