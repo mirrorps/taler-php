@@ -200,13 +200,13 @@ class OrderCommonTest extends TestCase
 
     /**
      * @param array<string, mixed> $data
-     * @param string $expectedMessage
+     * @param string $message
      * @dataProvider invalidDataProvider
      */
-    public function testFromArrayWithInvalidData(array $data, string $expectedMessage): void
+    public function testFromArrayWithInvalidData(array $data, string $message): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($expectedMessage);
+        $this->expectExceptionMessage($message);
 
         OrderCommon::createFromArray($data);
     }
@@ -214,7 +214,7 @@ class OrderCommonTest extends TestCase
     /**
      * @return array<string, array{data: array<string, mixed>, message: string}>
      */
-    public function invalidDataProvider(): array
+    public static function invalidDataProvider(): array
     {
         return [
             'missing_summary' => [

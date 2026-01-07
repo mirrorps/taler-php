@@ -30,13 +30,13 @@ class MinimalInventoryProductTest extends TestCase
     /**
      * @param string $product_id
      * @param int $quantity
-     * @param string $expectedMessage
+     * @param string $message
      * @dataProvider invalidDataProvider
      */
-    public function testInvalidConstruction(string $product_id, int $quantity, string $expectedMessage): void
+    public function testInvalidConstruction(string $product_id, int $quantity, string $message): void
     {
         $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage($expectedMessage);
+        $this->expectExceptionMessage($message);
 
         new MinimalInventoryProduct($product_id, $quantity);
     }
@@ -44,7 +44,7 @@ class MinimalInventoryProductTest extends TestCase
     /**
      * @return array<string, array{product_id: string, quantity: int, message: string}>
      */
-    public function invalidDataProvider(): array
+    public static function invalidDataProvider(): array
     {
         return [
             'empty_product_id' => [

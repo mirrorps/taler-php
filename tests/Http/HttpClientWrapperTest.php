@@ -477,7 +477,7 @@ class HttpClientWrapperTest extends TestCase
     /**
      * @return array<string, array<int, string>>
      */
-    public function maliciousUrlProvider(): array
+    public static function maliciousUrlProvider(): array
     {
         return [
             'Path traversal' => ['../etc/passwd'],

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Api\Dto;
+namespace Taler\Tests\Api\Dto;
 
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\ZeroLimitedOperation;
@@ -48,7 +48,7 @@ class ZeroLimitedOperationTest extends TestCase
     /**
      * @return array<string, array{string}>
      */
-    public function validOperationTypesProvider(): array
+    public static function validOperationTypesProvider(): array
     {
         return [
             'WITHDRAW' => [ZeroLimitedOperation::OPERATION_WITHDRAW],
