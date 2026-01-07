@@ -61,6 +61,7 @@ class FactoryTest extends TestCase
             'version' => '42:1:0',
             'name' => 'taler-exchange',
             'currency' => 'EUR',
+            'currencies' => [],
             'currency_specification' => [
                 'name' => 'Euro',
                 'currency' => 'EUR',

@@ -56,9 +56,14 @@ abstract class AbstractApiClient extends BaseApiClient
         return $this->decodeResponseBody($response);
     }
 
+    /**
+     * @param ResponseInterface $response
+     * @param bool $associative
+     * @param int<1, max> $depth
+     */
     public function decodeResponseBody(
         ResponseInterface $response,
-        $associative = true,
+        bool $associative = true,
         int $depth = 512,
     ): mixed
     {

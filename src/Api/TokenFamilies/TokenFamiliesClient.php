@@ -44,13 +44,13 @@ class TokenFamiliesClient extends AbstractApiClient
      * @param string $slug
      * @param TokenFamilyUpdateRequest $request
      * @param array<string, string> $headers Optional request headers
-     * @return TokenFamilyDetails|array<string, mixed>
+     * @return void
      * @throws TalerException
      * @throws \Throwable
      */
-    public function updateTokenFamily(string $slug, TokenFamilyUpdateRequest $request, array $headers = []): TokenFamilyDetails|array
+    public function updateTokenFamily(string $slug, TokenFamilyUpdateRequest $request, array $headers = []): void
     {
-        return UpdateTokenFamily::run($this, $slug, $request, $headers);
+        UpdateTokenFamily::run($this, $slug, $request, $headers);
     }
 
     /**

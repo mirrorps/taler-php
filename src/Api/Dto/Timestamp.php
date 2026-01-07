@@ -30,6 +30,10 @@ class Timestamp
      */
     public static function createFromArray(array $data): self
     {
+        if (!array_key_exists('t_s', $data)) {
+            throw new \TypeError('Missing required key "t_s"');
+        }
+
         return new self(
             t_s: $data['t_s']
         );

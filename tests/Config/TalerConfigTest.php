@@ -142,7 +142,7 @@ class TalerConfigTest extends TestCase
     /**
      * @return array<string, array<string>>
      */
-    public function invalidBaseUrlProvider(): array
+    public static function invalidBaseUrlProvider(): array
     {
         return [
             'Empty URL' => [''],
