@@ -26,7 +26,8 @@ class Timestamp
     /**
      * Creates a new instance from an array of data
      *
-     * @param array{t_s: int|string} $data
+     * @param array $data Array containing required key "t_s"
+     * @phpstan-param array{t_s?: int|string} $data
      */
     public static function createFromArray(array $data): self
     {
