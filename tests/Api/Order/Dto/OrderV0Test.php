@@ -16,8 +16,8 @@ class OrderV0Test extends TestCase
     {
         $data = [
                          'summary' => 'Test order',
-             'amount' => '10.00',
-             'max_fee' => '1.00',
+             'amount' => 'EUR:10.00',
+             'max_fee' => 'EUR:1.00',
              'summary_i18n' => [
                 'en' => 'Test order',
                 'de' => 'Testbestellung'
@@ -59,8 +59,8 @@ class OrderV0Test extends TestCase
 
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
-         $this->assertSame('10.00', $OrderV0->amount);
-         $this->assertSame('1.00', $OrderV0->max_fee);
+         $this->assertSame('EUR:10.00', $OrderV0->amount);
+         $this->assertSame('EUR:1.00', $OrderV0->max_fee);
          $this->assertSame(['en' => 'Test order', 'de' => 'Testbestellung'], $OrderV0->summary_i18n);
         $this->assertSame('test-123', $OrderV0->order_id);
         $this->assertSame('https://example.com/reorder/123', $OrderV0->public_reorder_url);
@@ -90,7 +90,7 @@ class OrderV0Test extends TestCase
     {
         $data = [
             'summary' => 'Test order',
-            'amount' => '10.00',
+            'amount' => 'EUR:10.00',
             'fulfillment_message' => 'ok'
         ];
 
@@ -98,7 +98,7 @@ class OrderV0Test extends TestCase
 
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
-         $this->assertSame('10.00', $OrderV0->amount);
+         $this->assertSame('EUR:10.00', $OrderV0->amount);
          $this->assertNull($OrderV0->max_fee);
          $this->assertNull($OrderV0->summary_i18n);
         $this->assertNull($OrderV0->order_id);
@@ -139,7 +139,7 @@ class OrderV0Test extends TestCase
     {
         return [
             'missing_summary' => [
-                 'data' => ['amount' => '10.00'],
+                 'data' => ['amount' => 'EUR:10.00'],
                  'message' => 'Summary is required and must be a non-empty string'
              ],
              'missing_amount' => [
@@ -151,40 +151,52 @@ class OrderV0Test extends TestCase
                  'message' => 'Amount is required and must be a non-empty string'
              ],
             'empty_summary' => [
-                'data' => ['summary' => '', 'amount' => '10.00'],
+                'data' => ['summary' => '', 'amount' => 'EUR:10.00'],
                 'message' => 'Summary is required and must be a non-empty string'
             ],
             'invalid_summary_i18n' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'summary_i18n' => 'not_an_array'],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'summary_i18n' => 'not_an_array'],
                 'message' => 'Summary i18n must be an array of strings'
             ],
             'invalid_order_id_type' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'order_id' => 123],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'order_id' => 123],
                 'message' => 'Order ID must be a string'
             ],
             'invalid_order_id_format' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'order_id' => 'test@123'],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'order_id' => 'test@123'],
                 'message' => 'Order ID can only contain A-Za-z0-9.:_- characters'
             ],
             'invalid_minimum_age' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'minimum_age' => -1],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'minimum_age' => -1],
                 'message' => 'Minimum age must be a positive integer'
             ],
             'invalid_products_type' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'products' => 'not_an_array'],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'products' => 'not_an_array'],
                 'message' => 'Products must be an array'
             ],
             'invalid_product_item' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'products' => ['not_an_array']],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'products' => ['not_an_array']],
                 'message' => 'Each product must be an array'
             ],
             'invalid_merchant_base_url_format' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'merchant_base_url' => 'https://example.com'],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'merchant_base_url' => 'https://example.com'],
                 'message' => 'Merchant base URL must be an absolute URL that ends with a slash'
             ],
             'invalid_merchant_base_url' => [
-                'data' => ['summary' => 'Test', 'amount' => '10.00', 'merchant_base_url' => 'not_a_url/'],
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'merchant_base_url' => 'not_a_url/'],
                 'message' => 'Merchant base URL must be a valid URL'
+            ],
+            'amount_without_currency' => [
+                'data' => ['summary' => 'Test', 'amount' => '42', 'fulfillment_message' => 'ok'],
+                'message' => 'Amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
+            ],
+            'amount_with_invalid_currency' => [
+                'data' => ['summary' => 'Test', 'amount' => 'EU:10.00', 'fulfillment_message' => 'ok'],
+                'message' => 'Amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
+            ],
+            'invalid_max_fee_format' => [
+                'data' => ['summary' => 'Test', 'amount' => 'EUR:10.00', 'max_fee' => '1.00', 'fulfillment_message' => 'ok'],
+                'message' => 'Max fee must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:0.10")'
             ]
         ];
     }

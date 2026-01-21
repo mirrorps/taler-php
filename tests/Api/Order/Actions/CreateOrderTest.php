@@ -55,7 +55,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
         
@@ -95,7 +95,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
         
@@ -118,7 +118,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
 
@@ -154,7 +154,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
         
@@ -181,7 +181,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
         
@@ -224,7 +224,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
 
@@ -275,7 +275,7 @@ class CreateOrderTest extends TestCase
     {
         $choices = [
             new OrderChoice(
-                amount: '50.00'
+                amount: 'EUR:50.00'
             )
         ];
 

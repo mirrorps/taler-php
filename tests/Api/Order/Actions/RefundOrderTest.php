@@ -51,7 +51,7 @@ class RefundOrderTest extends TestCase
     {
         $orderId = 'test_order_123';
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
@@ -88,7 +88,7 @@ class RefundOrderTest extends TestCase
     {
         $orderId = 'test_order_123';
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
@@ -105,7 +105,7 @@ class RefundOrderTest extends TestCase
     {
         $orderId = 'test_order_123';
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
@@ -135,7 +135,7 @@ class RefundOrderTest extends TestCase
     {
         $orderId = 'test_order_123';
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
@@ -156,7 +156,7 @@ class RefundOrderTest extends TestCase
     {
         $orderId = 'test_order_123';
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
@@ -196,7 +196,7 @@ class RefundOrderTest extends TestCase
     {
         $orderId = 'test_order_123';
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
