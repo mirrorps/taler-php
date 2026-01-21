@@ -11,8 +11,8 @@ use Taler\Api\Dto\Timestamp;
 
 class OrderChoiceTest extends TestCase
 {
-    private const SAMPLE_AMOUNT = '10.00';
-    private const SAMPLE_MAX_FEE = '1.00';
+    private const SAMPLE_AMOUNT = 'EUR:10.00';
+    private const SAMPLE_MAX_FEE = 'EUR:1.00';
     private const SAMPLE_TOKEN_FAMILY_SLUG = 'test-token-family';
     private const SAMPLE_TIMESTAMP = 1234567890;
 
@@ -113,6 +113,25 @@ class OrderChoiceTest extends TestCase
         $this->expectExceptionMessage('Amount cannot be empty');
 
         new OrderChoice(amount: '');
+    }
+
+    public function testValidationFailsWithInvalidAmountFormat(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Amount must be a valid Taler amount in the format CURRENCY:VALUE');
+
+        new OrderChoice(amount: '42');
+    }
+
+    public function testValidationFailsWithInvalidMaxFeeFormat(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        $this->expectExceptionMessage('Max fee must be a valid Taler amount in the format CURRENCY:VALUE');
+
+        new OrderChoice(
+            amount: self::SAMPLE_AMOUNT,
+            max_fee: '1.00'
+        );
     }
 
     public function testValidationFailsWithInvalidInput(): void

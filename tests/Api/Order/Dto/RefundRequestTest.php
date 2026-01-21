@@ -18,11 +18,11 @@ final class RefundRequestTest extends TestCase
     public function testCreateSuccess(): void
     {
         $refundRequest = new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: 'Customer dissatisfaction'
         );
 
-        $this->assertSame('10.00', $refundRequest->refund);
+        $this->assertSame('EUR:10.00', $refundRequest->refund);
         $this->assertSame('Customer dissatisfaction', $refundRequest->reason);
     }
 
@@ -32,13 +32,13 @@ final class RefundRequestTest extends TestCase
     public function testCreateFromArraySuccess(): void
     {
         $data = [
-            'refund' => '10.00',
+            'refund' => 'EUR:10.00',
             'reason' => 'Customer dissatisfaction'
         ];
 
         $refundRequest = RefundRequest::createFromArray($data);
 
-        $this->assertSame('10.00', $refundRequest->refund);
+        $this->assertSame('EUR:10.00', $refundRequest->refund);
         $this->assertSame('Customer dissatisfaction', $refundRequest->reason);
     }
 
@@ -65,8 +65,22 @@ final class RefundRequestTest extends TestCase
         $this->expectExceptionMessage('Refund reason is required');
 
         new RefundRequest(
-            refund: '10.00',
+            refund: 'EUR:10.00',
             reason: ''
+        );
+    }
+
+    /**
+     * Test validation failure for invalid refund amount format.
+     */
+    public function testValidationFailureInvalidRefundFormat(): void
+    {
+        $this->expectException(TalerException::class);
+        $this->expectExceptionMessage('Refund amount must be a valid Taler amount in the format CURRENCY:VALUE');
+
+        new RefundRequest(
+            refund: '10.00',
+            reason: 'Customer dissatisfaction'
         );
     }
 

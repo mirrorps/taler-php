@@ -50,7 +50,7 @@ class OrderV1Test extends TestCase
             'summary' => 'Full order',
             'choices' => [
                 [
-                    'amount' => '10.00',
+                    'amount' => 'EUR:0.10',
                     'inputs' => [
                         ['n' => 0, 'token_family_slug' => 'family-1']
                     ],
@@ -58,7 +58,7 @@ class OrderV1Test extends TestCase
                         ['type' => 'token', 'token_family_slug' => 'family-1'],
                         ['type' => 'tax-receipt']
                     ],
-                    'max_fee' => '0.10'
+                    'max_fee' => 'EUR:0.10'
                 ]
             ],
             'summary_i18n' => ['en' => 'Full order'],

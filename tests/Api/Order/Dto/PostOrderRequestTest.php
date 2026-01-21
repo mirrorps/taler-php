@@ -24,7 +24,7 @@ class PostOrderRequestTest extends TestCase
     {
         $this->order_v0 = new OrderV0(
             summary: 'Test Order V0',
-            amount: '10.00',
+            amount: 'EUR:10.00',
             fulfillment_message: 'ok'
         );
 
@@ -33,7 +33,7 @@ class PostOrderRequestTest extends TestCase
             'fulfillment_message' => 'ok',
             'choices' => [
                 [
-                    'amount' => '10.00'
+                    'amount' => 'EUR:10.00'
                 ]
             ]
         ]);
@@ -184,7 +184,7 @@ class PostOrderRequestTest extends TestCase
         $data = [
             'order' => [
                 'summary' => 'Test Order V0',
-                'amount' => '10.00',
+                'amount' => 'EUR:10.00',
                 'fulfillment_message' => 'ok'
             ]
         ];
@@ -208,7 +208,7 @@ class PostOrderRequestTest extends TestCase
                 'fulfillment_message' => 'ok',
                 'choices' => [
                     [
-                        'amount' => '10.00'
+                        'amount' => 'EUR:10.00'
                     ]
                 ]
             ]
@@ -229,7 +229,7 @@ class PostOrderRequestTest extends TestCase
         $data = [
             'order' => [
                 'summary' => 'Test Order V0',
-                'amount' => '10.00',
+                'amount' => 'EUR:10.00',
                 'fulfillment_message' => 'ok'
             ],
             'refund_delay' => ['d_us' => 86400000000],
@@ -267,7 +267,7 @@ class PostOrderRequestTest extends TestCase
                 'fulfillment_message' => 'ok',
                 'choices' => [
                     [
-                        'amount' => '10.00'
+                        'amount' => 'EUR:10.00'
                     ]
                 ]
             ],

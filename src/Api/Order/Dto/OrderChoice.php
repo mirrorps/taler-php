@@ -2,6 +2,8 @@
 
 namespace Taler\Api\Order\Dto;
 
+use function Taler\Helpers\isValidTalerAmount;
+
 /**
  * DTO for order choice data
  */
@@ -35,6 +37,18 @@ class OrderChoice
     {
         if (empty($this->amount)) {
             throw new \InvalidArgumentException('Amount cannot be empty');
+        }
+
+        if (!isValidTalerAmount($this->amount)) {
+            throw new \InvalidArgumentException(
+                'Amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
+            );
+        }
+
+        if ($this->max_fee !== null && !isValidTalerAmount($this->max_fee)) {
+            throw new \InvalidArgumentException(
+                'Max fee must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:0.10")'
+            );
         }
 
         foreach ($this->inputs as $input) {

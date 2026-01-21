@@ -8,6 +8,8 @@ use Taler\Api\Inventory\Dto\Product;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Dto\Timestamp;
 
+use function Taler\Helpers\isValidTalerAmount;
+
 class OrderV0 extends OrderCommon
 {
     public readonly int $version;
@@ -154,6 +156,18 @@ class OrderV0 extends OrderCommon
     {
         if ($this->amount === '' || trim($this->amount) === '') {
             throw new InvalidArgumentException('Amount is required and must be a non-empty string');
+        }
+
+        if (!isValidTalerAmount($this->amount)) {
+            throw new InvalidArgumentException(
+                'Amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
+            );
+        }
+
+        if ($this->max_fee !== null && !isValidTalerAmount($this->max_fee)) {
+            throw new InvalidArgumentException(
+                'Max fee must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:0.10")'
+            );
         }
     }
 } 

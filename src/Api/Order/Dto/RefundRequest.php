@@ -4,6 +4,8 @@ namespace Taler\Api\Order\Dto;
 
 use Taler\Exception\TalerException;
 
+use function Taler\Helpers\isValidTalerAmount;
+
 /**
  * DTO for refund request data.
  */
@@ -33,6 +35,12 @@ final class RefundRequest
     {
         if (empty($this->refund)) {
             throw new TalerException('Refund amount is required');
+        }
+
+        if (!isValidTalerAmount($this->refund)) {
+            throw new TalerException(
+                'Refund amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
+            );
         }
 
         if (empty($this->reason)) {
