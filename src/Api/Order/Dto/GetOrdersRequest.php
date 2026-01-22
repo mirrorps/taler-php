@@ -13,7 +13,19 @@ namespace Taler\Api\Order\Dto;
 class GetOrdersRequest
 {
     /**
-     * @param array<string, scalar|null> $extraParams Extra (forward-compatible) query parameters
+     * Query Parameters (GNU Taler docs: https://docs.taler.net/core/api-merchant.html#inspecting-orders)
+     *
+     * @param ?bool $paid Optional. If set to yes, only return paid orders, if no only unpaid orders. Do not give (or use “all”) to see all orders regardless of payment status.
+     * @param ?bool $refunded Optional. If set to yes, only return refunded orders, if no only unrefunded orders. Do not give (or use “all”) to see all orders regardless of refund status.
+     * @param ?bool $wired Optional. If set to yes, only return wired orders, if no only orders with missing wire transfers. Do not give (or use “all”) to see all orders regardless of wire transfer status.
+     * @param ?int $limit Optional. At most return the given number of results. Negative for descending by row ID, positive for ascending by row ID. Default is 20. Since protocol v12.
+     * @param ?int $date_s Optional. Non-negative date in seconds after the UNIX Epoc, if not specified, we default to the oldest or most recent entry, depending on limit.
+     * @param ?int $offset Optional. Starting row_id for an iteration. Since protocol v12.
+     * @param ?int $timeout_ms Optional. Timeout in milliseconds to wait for additional orders if the answer would otherwise be negative (long polling). Only useful if limit is positive. Note that the merchant MAY still return a response that contains fewer than limit orders.
+     * @param ?string $session_id Optional. Since protocol v6. Filters by session ID.
+     * @param ?string $fulfillment_url Optional. Since protocol v6. Filters by fulfillment URL.
+     * @param ?string $summary_filter Optional. Only returns orders where the summary contains the given text as a substring. Matching is case-insensitive. Since protocol v23.
+     * @param array<string, scalar|null> $extraParams Extra (forward-compatible) query parameters for power users.
      */
     public function __construct(
         public readonly ?bool $paid = null,
