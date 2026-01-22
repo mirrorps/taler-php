@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Taler\Api\Order\Actions\GetOrders;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
@@ -75,15 +76,16 @@ class GetOrdersTest extends TestCase
         $this->response->method('getBody')
             ->willReturn($this->stream);
 
-        $params = ['status' => 'completed'];
+        $request = new GetOrdersRequest(limit: -20, paid: true);
         $headers = ['X-Test' => 'test'];
 
+        $params = $request->toArray();
         $this->httpClientWrapper->expects($this->once())
             ->method('request')
             ->with('GET', 'private/orders?' . http_build_query($params), $headers)
             ->willReturn($this->response);
 
-        $result = GetOrders::run($this->orderClient, $params, $headers);
+        $result = GetOrders::run($this->orderClient, $request, $headers);
 
         $this->assertInstanceOf(OrderHistory::class, $result);
         $this->assertCount(2, $result->orders);
@@ -142,15 +144,16 @@ class GetOrdersTest extends TestCase
         $this->response->method('getBody')
             ->willReturn($this->stream);
 
-        $params = ['status' => 'pending'];
+        $request = new GetOrdersRequest(limit: 1, paid: false);
         $headers = ['X-Test' => 'test'];
 
+        $params = $request->toArray();
         $this->httpClientWrapper->expects($this->once())
             ->method('requestAsync')
             ->with('GET', 'private/orders?' . http_build_query($params), $headers)
             ->willReturn($promise);
 
-        $result = GetOrders::runAsync($this->orderClient, $params, $headers);
+        $result = GetOrders::runAsync($this->orderClient, $request, $headers);
         $promise->resolve($this->response);
 
         $this->assertInstanceOf(OrderHistory::class, $result->wait());

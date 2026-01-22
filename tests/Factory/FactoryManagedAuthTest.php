@@ -5,6 +5,7 @@ namespace Taler\Tests\Factory;
 use Http\Mock\Client as MockClient;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
+use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Factory\Factory;
 use Taler\Taler;
 
@@ -144,7 +145,7 @@ class FactoryManagedAuthTest extends TestCase
         $taler->getConfig()->setAttribute('authTokenExpiresAtTs', time() - 1);
 
         // Make an auth-required call; this should trigger provider refresh and then GET orders
-        $taler->order()->getOrders(['limit' => '1']);
+        $taler->order()->getOrders(new GetOrdersRequest(limit: 1));
 
         $this->assertSame('Bearer token-2', $taler->getConfig()->getAuthToken());
 

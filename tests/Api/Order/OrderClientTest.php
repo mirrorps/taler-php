@@ -15,6 +15,7 @@ use Taler\Api\Order\Dto\RefundRequest;
 use Taler\Api\Order\Dto\OrderV1;
 use Taler\Api\Order\Dto\OrderChoice;
 use Taler\Api\Order\Dto\OrderHistory;
+use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\OrderClient;
 use Taler\Config\TalerConfig;
@@ -118,15 +119,16 @@ class OrderClientTest extends TestCase
         $this->stream->method('__toString')->willReturn(json_encode($expected));
         $this->response->method('getBody')->willReturn($this->stream);
 
-        $params = ['status' => 'completed'];
+        $request = new GetOrdersRequest(limit: -20, paid: true);
         $headers = ['X-Test' => 'y'];
 
+        $params = $request->toArray();
         $this->httpClient->expects($this->once())
             ->method('request')
             ->with('GET', 'private/orders?' . http_build_query($params), $headers)
             ->willReturn($this->response);
 
-        $result = $this->client->getOrders($params, $headers);
+        $result = $this->client->getOrders($request, $headers);
         $this->assertInstanceOf(OrderHistory::class, $result);
         $this->assertCount(1, $result->orders);
         $this->assertSame('o1', $result->orders[0]->order_id);

@@ -6,6 +6,7 @@ use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\MerchantRefundResponse;
 use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Api\Order\Dto\PostOrderRequest;
@@ -17,27 +18,27 @@ use Taler\Exception\TalerException;
 class OrderClient extends AbstractApiClient
 {
     /**
-     * @param array<string, string> $params HTTP params
+     * @param GetOrdersRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers Optional request headers
      * @return OrderHistory|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getOrders(array $params = [], array $headers = []): OrderHistory|array
+    public function getOrders(GetOrdersRequest|array|null $request = null, array $headers = []): OrderHistory|array
     {
-        return Actions\GetOrders::run($this, $params, $headers);
+        return Actions\GetOrders::run($this, $request, $headers);
     }
 
     /**
-     * @param array<string, string> $params HTTP params
+     * @param GetOrdersRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers Optional request headers
      * @return mixed
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getOrdersAsync(array $params = [], array $headers = []): mixed
+    public function getOrdersAsync(GetOrdersRequest|array|null $request = null, array $headers = []): mixed
     {
-        return Actions\GetOrders::runAsync($this, $params, $headers);
+        return Actions\GetOrders::runAsync($this, $request, $headers);
     }
 
     /**

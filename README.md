@@ -76,7 +76,8 @@ $taler = Factory::create([
 ]);
 
 // Use the client as usual; the SDK injects/refreshes the Authorization token automatically.
-$orders = $taler->order()->getOrders(['limit' => '-20']);
+use Taler\Api\Order\Dto\GetOrdersRequest;
+$orders = $taler->order()->getOrders(new GetOrdersRequest(limit: -20));
 ```
 #### Retrieve and persist the managed token
 
@@ -408,9 +409,9 @@ Retrieve the order history with optional filtering:
 $orders = $orderClient->getOrders();
 
 // Get orders with filters
-$orders = $orderClient->getOrders([
-    'limit' => '-20',  // last 20 orders
-]);
+$orders = $orderClient->getOrders(new \Taler\Api\Order\Dto\GetOrdersRequest(
+    limit: -20, // last 20 orders
+));
 
 // Access order history details
 foreach ($orders->orders as $order) {

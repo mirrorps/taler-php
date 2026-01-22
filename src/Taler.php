@@ -22,6 +22,7 @@ use Taler\Api\TokenFamilies\TokenFamiliesClient;
 use \Taler\Api\Config\ConfigClient;
 use Taler\Api\DonauCharity\DonauCharityClient;
 use Taler\Api\TwoFactorAuth\TwoFactorAuthClient;
+use Taler\Api\Order\Dto\GetOrdersRequest;
 
 class Taler
 {
@@ -442,7 +443,7 @@ class Taler
             // 3) Auth-required harmless call: GET 'private/orders?limit=1'
             $authChecked = true;
             try {
-                $this->order()->getOrders(['limit' => '1']);
+                $this->order()->getOrders(new GetOrdersRequest(limit: 1));
                 $authOk = true;
                 $report['auth'] = ['ok' => true, 'status' => 200, 'error' => null];
             } catch (\Taler\Exception\TalerException $e) {

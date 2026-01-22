@@ -4,6 +4,7 @@ namespace Taler\Api\Order\Actions;
 
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Exception\TalerException;
 
@@ -14,7 +15,7 @@ class GetOrders
     ) {}
 
     /**
-     * @param array<string, string> $params HTTP params
+     * @param GetOrdersRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers HTTP headers
      * @return OrderHistory|array{
      *     orders: array<array{
@@ -32,13 +33,14 @@ class GetOrders
      */
     public static function run(
         OrderClient $orderClient,
-        array $params = [],
+        GetOrdersRequest|array|null $request = null,
         array $headers = []
     ): OrderHistory|array
     {
         $getOrders = new self($orderClient);
 
         try {
+            $params = $request instanceof GetOrdersRequest ? $request->toArray() : ($request ?? []);
             $getOrders->orderClient->setResponse(
                 $getOrders->orderClient->getClient()->request('GET', 'private/orders?' . http_build_query($params), $headers)
             );
@@ -90,7 +92,7 @@ class GetOrders
     }
 
     /**
-     * @param array<string, string> $params HTTP params
+     * @param GetOrdersRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers HTTP headers
      * @return mixed
      * @throws TalerException
@@ -98,11 +100,12 @@ class GetOrders
      */
     public static function runAsync(
         OrderClient $orderClient,
-        array $params = [],
+        GetOrdersRequest|array|null $request = null,
         array $headers = []
     ): mixed
     {
         $getOrders = new self($orderClient);
+        $params = $request instanceof GetOrdersRequest ? $request->toArray() : ($request ?? []);
 
         return $orderClient
             ->getClient()
