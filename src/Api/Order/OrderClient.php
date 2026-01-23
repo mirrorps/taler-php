@@ -6,6 +6,7 @@ use Taler\Api\Base\AbstractApiClient;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\Order\Dto\GetOrderRequest;
 use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\MerchantRefundResponse;
 use Taler\Api\Order\Dto\OrderHistory;
@@ -43,28 +44,28 @@ class OrderClient extends AbstractApiClient
 
     /**
      * @param string $orderId
-     * @param array<string, string> $params HTTP params
+     * @param GetOrderRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers Optional request headers
      * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array<string, mixed>
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getOrder(string $orderId, array $params = [], array $headers = []): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array
+    public function getOrder(string $orderId, GetOrderRequest|array|null $request = null, array $headers = []): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|\Taler\Api\TwoFactorAuth\Dto\ChallengeResponse|array
     {
-        return Actions\GetOrder::run($this, $orderId, $params, $headers);
+        return Actions\GetOrder::run($this, $orderId, $request, $headers);
     }
 
     /**
      * @param string $orderId
-     * @param array<string, string> $params HTTP params
+     * @param GetOrderRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers Optional request headers
      * @return mixed
      * @throws TalerException
      * @throws \Throwable
      */
-    public function getOrderAsync(string $orderId, array $params = [], array $headers = []): mixed
+    public function getOrderAsync(string $orderId, GetOrderRequest|array|null $request = null, array $headers = []): mixed
     {
-        return Actions\GetOrder::runAsync($this, $orderId, $params, $headers);
+        return Actions\GetOrder::runAsync($this, $orderId, $request, $headers);
     }
 
     /**

@@ -387,9 +387,9 @@ if ($order instanceof CheckPaymentUnpaidResponse) {
 }
 
 // Get order with additional parameters
-$order = $orderClient->getOrder('order_123', [
-    'session_id' => 'session_xyz'     // Optional session ID
-]);
+$order = $orderClient->getOrder('order_123', new \Taler\Api\Order\Dto\GetOrderRequest(
+    session_id: 'session_xyz'     // Optional session ID
+));
 
 // Get order with custom headers
 $order = $orderClient->getOrder(

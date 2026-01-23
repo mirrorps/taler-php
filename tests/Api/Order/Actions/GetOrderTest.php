@@ -9,6 +9,7 @@ use Taler\Api\Order\OrderClient;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\Order\Dto\GetOrderRequest;
 use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
@@ -90,15 +91,16 @@ class GetOrderTest extends TestCase
         $this->response->method('getBody')
             ->willReturn($this->stream);
 
-        $params = ['include_details' => 'true'];
+        $request = new GetOrderRequest(extraParams: ['include_details' => 'true']);
         $headers = ['X-Test' => 'test'];
 
+        $params = $request->toArray();
         $this->httpClientWrapper->expects($this->once())
             ->method('request')
             ->with('GET', "private/orders/{$orderId}?" . http_build_query($params), $headers)
             ->willReturn($this->response);
 
-        $result = GetOrder::run($this->orderClient, $orderId, $params, $headers);
+        $result = GetOrder::run($this->orderClient, $orderId, $request, $headers);
 
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $result);
         $this->assertEquals('paid', $result->order_status);
@@ -247,15 +249,16 @@ class GetOrderTest extends TestCase
         $this->response->method('getBody')
             ->willReturn($this->stream);
 
-        $params = ['include_details' => 'true'];
+        $request = new GetOrderRequest(extraParams: ['include_details' => 'true']);
         $headers = ['X-Test' => 'test'];
 
+        $params = $request->toArray();
         $this->httpClientWrapper->expects($this->once())
             ->method('requestAsync')
             ->with('GET', "private/orders/{$orderId}?" . http_build_query($params), $headers)
             ->willReturn($promise);
 
-        $result = GetOrder::runAsync($this->orderClient, $orderId, $params, $headers);
+        $result = GetOrder::runAsync($this->orderClient, $orderId, $request, $headers);
         $promise->resolve($this->response);
 
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $result->wait());
