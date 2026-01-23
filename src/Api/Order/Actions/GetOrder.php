@@ -8,6 +8,7 @@ use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
+use Taler\Api\Order\Dto\GetOrderRequest;
 use Taler\Api\TwoFactorAuth\Dto\ChallengeResponse;
 
 use const Taler\Http\HTTP_STATUS_CODE_ACCEPTED;
@@ -22,7 +23,7 @@ class GetOrder
     /**
      * @param OrderClient $orderClient
      * @param string $orderId
-     * @param array<string, string> $params HTTP params
+     * @param GetOrderRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers Optional request headers
      * @return CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|ChallengeResponse|array<string, mixed>
      * @throws TalerException
@@ -31,13 +32,14 @@ class GetOrder
     public static function run(
         OrderClient $orderClient,
         string $orderId,
-        array $params = [],
+        GetOrderRequest|array|null $request = null,
         array $headers = []
     ): CheckPaymentPaidResponse|CheckPaymentClaimedResponse|CheckPaymentUnpaidResponse|ChallengeResponse|array
     {
         $getOrder = new self($orderClient);
 
         try {
+            $params = $request instanceof GetOrderRequest ? $request->toArray() : ($request ?? []);
             $getOrder->orderClient->setResponse(
                 $getOrder->orderClient->getClient()->request('GET', "private/orders/{$orderId}?" . http_build_query($params), $headers)
             );
@@ -68,7 +70,7 @@ class GetOrder
     /**
      * @param OrderClient $orderClient
      * @param string $orderId
-     * @param array<string, string> $params HTTP params
+     * @param GetOrderRequest|array<string, scalar>|null $request Query parameters (typed DTO preferred)
      * @param array<string, string> $headers Optional request headers
      * @return mixed
      * @throws TalerException
@@ -77,10 +79,11 @@ class GetOrder
     public static function runAsync(
         OrderClient $orderClient,
         string $orderId,
-        array $params = [],
+        GetOrderRequest|array|null $request = null,
         array $headers = []
     ): mixed {
         $getOrder = new self($orderClient);
+        $params = $request instanceof GetOrderRequest ? $request->toArray() : ($request ?? []);
 
         return $orderClient
             ->getClient()
