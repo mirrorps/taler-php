@@ -22,19 +22,18 @@ class Factory
      * 
      * @param array{
      *     base_url: string,
-     *     token?: string,
-     *     // Optional: have Factory manage login to obtain an access token
-     *     username?: string,
-     *     password?: string,
-     *     instance?: string, // instance ID to authenticate against
-     *     scope?: "readonly"|"write"|"all"|"order-simple"|"order-pos"|"order-mgmt"|"order-full",
-     *     duration_us?: int|string|null, // relative duration in microseconds or "forever"
+     *     token?: string|null,
+     *     username?: string|null,
+     *     password?: string|null,
+     *     instance?: string|null,
+     *     scope?: "readonly"|"write"|"all"|"order-simple"|"order-pos"|"order-mgmt"|"order-full|null",
+     *     duration_us?: int|string|null,
      *     description?: string|null,
      *     client?: ClientInterface|null,
      *     logger?: LoggerInterface|null,
      *     cache?: CacheInterface|null,
-     *     wrapResponse?: bool,
-     *     debugLoggingEnabled?: bool
+     *     wrapResponse?: bool|null,
+     *     debugLoggingEnabled?: bool|null,
      * } $options Configuration options for creating Taler instance
      * @throws InvalidArgumentException when base_url is empty
      */
@@ -85,7 +84,14 @@ class Factory
             );
 
             $basic = 'Basic ' . base64_encode($username . ':' . $password);
-            $provider = function () use (&$taler, $instanceId, $loginRequest, $basic): void {
+            $provider = function () use
+            (
+                &
+                $taler,
+                $instanceId,
+                $loginRequest,
+                $basic
+            ): void {
                 $response = $taler
                     ->instance()
                     ->getAccessToken(
@@ -107,17 +113,20 @@ class Factory
                 } else {
                     /** @var array<string, mixed> $responseArray */
                     $responseArray = $response;
-                    $accessToken = (string) ($responseArray['access_token'] ?? '');
+                    $accessToken = (string)($responseArray['access_token'] ?? '');
                     $expires = $responseArray['expiration']['t_s'] ?? null;
                 }
 
-                $taler->getConfig()->setAttribute('authToken', $accessToken);
+                $taler->getConfig()
+                      ->setAttribute('authToken', $accessToken);
                 $expiresTs = is_int($expires) ? $expires : null;
-                $taler->getConfig()->setAttribute('authTokenExpiresAtTs', $expiresTs);
+                $taler->getConfig()
+                      ->setAttribute('authTokenExpiresAtTs', $expiresTs);
             };
 
             // Install provider on config for automatic refresh
-            $taler->getConfig()->setAttribute('tokenProvider', $provider);
+            $taler->getConfig()
+                  ->setAttribute('tokenProvider', $provider);
 
             // Eagerly obtain the first token now so the instance is immediately usable
             $provider();
@@ -125,10 +134,11 @@ class Factory
 
         // Early validation: ensure the configured backend is a merchant backend
         // by checking the name field from GET /config equals "taler-merchant".
-        $configResponse = $taler->configApi()->getConfig();
+        $configResponse = $taler->configApi()
+                                ->getConfig();
         $name = $configResponse instanceof MerchantVersionResponse
             ? $configResponse->name
-            : (string) ($configResponse['name'] ?? '');
+            : (string)($configResponse['name'] ?? '');
 
         $name = strtolower($name);
 
@@ -141,21 +151,25 @@ class Factory
         // Version compatibility warning (non-fatal): parse Taler versioning triplet and compare
         $version = $configResponse instanceof MerchantVersionResponse
             ? $configResponse->version
-            : (string) ($configResponse['version'] ?? '');
+            : (string)($configResponse['version'] ?? '');
         $parsed = $version !== '' ? parseLibtoolVersion($version) : null;
         if ($parsed !== null) {
-            [$serverCurrent, , $serverAge] = $parsed;
-            $clientCurrent = (int) Taler::TALER_PROTOCOL_VERSION;
+            [
+                $serverCurrent, ,
+                $serverAge
+            ] = $parsed;
+            $clientCurrent = (int)Taler::TALER_PROTOCOL_VERSION;
             if (!isProtocolCompatible($serverCurrent, $serverAge, $clientCurrent)) {
-                $taler->getLogger()->warning(
-                    sprintf(
-                        'Merchant backend protocol may be incompatible. Server version=%s (current=%d, age=%d), client current=%d',
-                        $version,
-                        $serverCurrent,
-                        $serverAge,
-                        $clientCurrent
-                    )
-                );
+                $taler->getLogger()
+                      ->warning(
+                          sprintf(
+                              'Merchant backend protocol may be incompatible. Server version=%s (current=%d, age=%d), client current=%d',
+                              $version,
+                              $serverCurrent,
+                              $serverAge,
+                              $clientCurrent
+                          )
+                      );
             }
         }
 
