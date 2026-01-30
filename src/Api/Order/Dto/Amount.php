@@ -5,9 +5,13 @@ use function Taler\Helpers\isValidTalerAmount;
 
 class Amount implements \JsonSerializable
 {
+    /**
+     * @param string $currency The currency code
+     * @param string $value The amount value
+     */
     public readonly string $currency;
     public readonly string $value;
-    
+
     public function __construct(string $amount)
     {
         if (!isValidTalerAmount($amount)) {
