@@ -5,6 +5,7 @@ namespace Taler\Tests\Api\Order\Dto;
 use PHPUnit\Framework\TestCase;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Inventory\Dto\MinimalInventoryProduct;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\OrderV0;
 use Taler\Api\Order\Dto\OrderV1;
 use Taler\Api\Order\Dto\OrderChoice;
@@ -24,7 +25,7 @@ class PostOrderRequestTest extends TestCase
     {
         $this->order_v0 = new OrderV0(
             summary: 'Test Order V0',
-            amount: 'EUR:10.00',
+            amount: new Amount('EUR:10.00'),
             fulfillment_message: 'ok'
         );
 

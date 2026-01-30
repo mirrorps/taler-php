@@ -16,8 +16,8 @@ class OrderV0 extends OrderCommon
 
     /**
      * @param string $summary Human-readable description of the whole purchase
-     * @param string $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
-     * @param string|null $max_fee Maximum total deposit fee accepted by the merchant for this contract. Overrides defaults of the merchant instance.
+     * @param Amount $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
+     * @param Amount|null $max_fee Maximum total deposit fee accepted by the merchant for this contract. Overrides defaults of the merchant instance.
      * @param array<string, string>|null $summary_i18n Map from IETF BCP 47 language tags to localized summaries
      * @param string|null $order_id Unique identifier for the order
      * @param string|null $public_reorder_url URL where the same contract could be ordered again,
@@ -38,8 +38,8 @@ class OrderV0 extends OrderCommon
      */
     public function __construct(
         public string $summary,
-        public string $amount,
-        public ?string $max_fee = null,
+        public Amount $amount,
+        public ?Amount $max_fee = null,
         public ?array $summary_i18n = null,
         public ?string $order_id = null,
         public ?string $public_reorder_url = null,
@@ -101,6 +101,25 @@ class OrderV0 extends OrderCommon
             throw new InvalidArgumentException('Order ID must be a string');
         }
 
+        // Amount is required (guard before constructing Amount DTO)
+        if (!isset($data['amount']) || !is_string($data['amount']) || trim($data['amount']) === '') {
+            throw new InvalidArgumentException('Amount is required and must be a non-empty string');
+        }
+        if (!isValidTalerAmount($data['amount'])) {
+            throw new InvalidArgumentException(
+                'Amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
+            );
+        }
+
+        // Optional max_fee (guard before constructing Amount DTO)
+        if (isset($data['max_fee']) && $data['max_fee'] !== null) {
+            if (!is_string($data['max_fee']) || trim($data['max_fee']) === '' || !isValidTalerAmount($data['max_fee'])) {
+                throw new InvalidArgumentException(
+                    'Max fee must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:0.10")'
+                );
+            }
+        }
+
         // Minimal type guards to avoid type errors on constructor
         if (isset($data['summary_i18n']) && !is_array($data['summary_i18n'])) {
             throw new InvalidArgumentException('Summary i18n must be an array of strings');
@@ -119,8 +138,8 @@ class OrderV0 extends OrderCommon
 
         $instance = new self(
             summary: $data['summary'] ?? '',
-            amount: $data['amount'] ?? '',
-            max_fee: $data['max_fee'] ?? null,
+            amount: new Amount($data['amount']),
+            max_fee: isset($data['max_fee']) && $data['max_fee'] !== null ? new Amount($data['max_fee']) : null,
             summary_i18n: $data['summary_i18n'] ?? null,
             order_id: $data['order_id'] ?? null,
             public_reorder_url: $data['public_reorder_url'] ?? null,
@@ -154,17 +173,18 @@ class OrderV0 extends OrderCommon
      */
     public function validate(): void
     {
-        if ($this->amount === '' || trim($this->amount) === '') {
+        $amountStr = (string) $this->amount;
+        if ($amountStr === '' || trim($amountStr) === '') {
             throw new InvalidArgumentException('Amount is required and must be a non-empty string');
         }
 
-        if (!isValidTalerAmount($this->amount)) {
+        if (!isValidTalerAmount($amountStr)) {
             throw new InvalidArgumentException(
                 'Amount must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:1.50")'
             );
         }
 
-        if ($this->max_fee !== null && !isValidTalerAmount($this->max_fee)) {
+        if ($this->max_fee !== null && !isValidTalerAmount((string) $this->max_fee)) {
             throw new InvalidArgumentException(
                 'Max fee must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:0.10")'
             );

@@ -8,6 +8,7 @@ use Taler\Api\Dto\Location;
 use Taler\Api\Inventory\Dto\Product;
 use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Dto\Timestamp;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\OrderV0;
 
 class OrderV0Test extends TestCase
@@ -59,8 +60,10 @@ class OrderV0Test extends TestCase
 
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
-         $this->assertSame('EUR:10.00', $OrderV0->amount);
-         $this->assertSame('EUR:1.00', $OrderV0->max_fee);
+        $this->assertInstanceOf(Amount::class, $OrderV0->amount);
+        $this->assertSame('EUR:10.00', (string) $OrderV0->amount);
+        $this->assertInstanceOf(Amount::class, $OrderV0->max_fee);
+        $this->assertSame('EUR:1.00', (string) $OrderV0->max_fee);
          $this->assertSame(['en' => 'Test order', 'de' => 'Testbestellung'], $OrderV0->summary_i18n);
         $this->assertSame('test-123', $OrderV0->order_id);
         $this->assertSame('https://example.com/reorder/123', $OrderV0->public_reorder_url);
@@ -98,7 +101,8 @@ class OrderV0Test extends TestCase
 
         $this->assertInstanceOf(OrderV0::class, $OrderV0);
                  $this->assertSame('Test order', $OrderV0->summary);
-         $this->assertSame('EUR:10.00', $OrderV0->amount);
+        $this->assertInstanceOf(Amount::class, $OrderV0->amount);
+        $this->assertSame('EUR:10.00', (string) $OrderV0->amount);
          $this->assertNull($OrderV0->max_fee);
          $this->assertNull($OrderV0->summary_i18n);
         $this->assertNull($OrderV0->order_id);
