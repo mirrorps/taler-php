@@ -112,7 +112,7 @@ class OrderV0 extends OrderCommon
         }
 
         // Optional max_fee (guard before constructing Amount DTO)
-        if (isset($data['max_fee']) && $data['max_fee'] !== null) {
+        if (isset($data['max_fee'])) {
             if (!is_string($data['max_fee']) || trim($data['max_fee']) === '' || !isValidTalerAmount($data['max_fee'])) {
                 throw new InvalidArgumentException(
                     'Max fee must be a valid Taler amount in the format CURRENCY:VALUE (e.g., "EUR:0.10")'
@@ -139,7 +139,7 @@ class OrderV0 extends OrderCommon
         $instance = new self(
             summary: $data['summary'] ?? '',
             amount: new Amount($data['amount']),
-            max_fee: isset($data['max_fee']) && $data['max_fee'] !== null ? new Amount($data['max_fee']) : null,
+            max_fee: isset($data['max_fee']) ? new Amount($data['max_fee']) : null,
             summary_i18n: $data['summary_i18n'] ?? null,
             order_id: $data['order_id'] ?? null,
             public_reorder_url: $data['public_reorder_url'] ?? null,

@@ -2,7 +2,6 @@
 
 namespace Taler\Api\Order\Dto;
 
-use Taler\Api\ContractTerms\Dto\ContractTermsCommon;
 use Taler\Api\ContractTerms\Dto\ContractTermsV0;
 use Taler\Api\ContractTerms\Dto\ContractTermsV1;
 use Taler\Api\Dto\Timestamp;
@@ -158,10 +157,10 @@ class CheckPaymentPaidResponse
      * @param bool $refunded Was the payment refunded (even partially)?
      * @param bool $refund_pending True if there are any approved refunds that the wallet has not yet obtained
      * @param bool $wired Did the exchange wire us the funds?
-     * @param string $deposit_total Total amount the exchange deposited into our bank account for this contract, excluding fees
+     * @param Amount $deposit_total Total amount the exchange deposited into our bank account for this contract, excluding fees
      * @param int $exchange_code Numeric error code indicating errors the exchange encountered tracking the wire transfer for this purchase
      * @param int $exchange_http_status HTTP status code returned by the exchange when we asked for information to track the wire transfer
-     * @param string $refund_amount Total amount that was refunded, 0 if refunded is false
+     * @param Amount $refund_amount Total amount that was refunded, 0 if refunded is false
      * @param ContractTermsV0|ContractTermsV1 $contract_terms Contract terms
      * @param Timestamp $last_payment If the order is paid, set to the last time when a payment was made to pay for this order
      * @param array<TransactionWireTransfer> $wire_details The wire transfer status from the exchange for this order if available
@@ -175,10 +174,10 @@ class CheckPaymentPaidResponse
         public readonly bool $refunded,
         public readonly bool $refund_pending,
         public readonly bool $wired,
-        public readonly string $deposit_total,
+        public readonly Amount $deposit_total,
         public readonly int $exchange_code,
         public readonly int $exchange_http_status,
-        public readonly string $refund_amount,
+        public readonly Amount $refund_amount,
         public readonly ContractTermsV0|ContractTermsV1 $contract_terms,
         public readonly Timestamp $last_payment,
         public readonly array $wire_details,
@@ -201,10 +200,10 @@ class CheckPaymentPaidResponse
             refunded: $data['refunded'],
             refund_pending: $data['refund_pending'],
             wired: $data['wired'],
-            deposit_total: $data['deposit_total'],
+            deposit_total: new Amount($data['deposit_total']),
             exchange_code: $data['exchange_code'],
             exchange_http_status: $data['exchange_http_status'],
-            refund_amount: $data['refund_amount'],
+            refund_amount: new Amount($data['refund_amount']),
             contract_terms: self::createContractTerms($data['contract_terms']),
             last_payment: Timestamp::createFromArray($data['last_payment']),
             wire_details: array_map(

@@ -4,6 +4,7 @@ namespace Taler\Api\Order\Actions;
 
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Exception\TalerException;
 use Psr\Http\Message\ResponseInterface;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;

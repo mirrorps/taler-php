@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use Taler\Api\ContractTerms\Dto\ContractTermsV0;
 use Taler\Api\ContractTerms\Dto\ContractTermsV1;
 use Taler\Api\Dto\Timestamp;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 
 class CheckPaymentPaidResponseTest extends TestCase
@@ -91,7 +92,7 @@ class CheckPaymentPaidResponseTest extends TestCase
                     'description' => 'Test product',
                     'product_id' => 'prod-123',
                     'quantity' => 1,
-                    'price' => '10.00',
+                    'price' => 'EUR:10.00',
                 ]
             ],
             'timestamp' => ['t_s' => 1234567890],
@@ -122,17 +123,17 @@ class CheckPaymentPaidResponseTest extends TestCase
             'refunded' => false,
             'refund_pending' => false,
             'wired' => true,
-            'deposit_total' => '10.00',
+            'deposit_total' => 'EUR:10.00',
             'exchange_code' => 200,
             'exchange_http_status' => 200,
-            'refund_amount' => '0',
+            'refund_amount' => 'EUR:0.00',
             'last_payment' => ['t_s' => 1234567890],
             'wire_details' => [
                 [
                     'exchange_url' => 'https://test.exchange.com',
                     'wtid' => 'test-wtid',
                     'execution_time' => ['t_s' => 1234567890],
-                    'amount' => '10.00',
+                    'amount' => 'EUR:10.00',
                     'confirmed' => true,
                 ]
             ],
@@ -150,7 +151,7 @@ class CheckPaymentPaidResponseTest extends TestCase
                     'reason' => 'test reason',
                     'pending' => false,
                     'timestamp' => ['t_s' => 1234567890],
-                    'amount' => '0',
+                    'amount' => 'EUR:0.00',
                 ]
             ],
             'order_status_url' => 'https://test.merchant.com/status',
@@ -162,8 +163,8 @@ class CheckPaymentPaidResponseTest extends TestCase
         // Prepare V0 contract terms data
         $contractTermsData = array_merge($this->baseContractTermsData, [
             'version' => 0,
-            'amount' => '10.00',
-            'max_fee' => '1.00',
+            'amount' => 'EUR:10.00',
+            'max_fee' => 'EUR:1.00',
         ]);
 
         /** @var array{
@@ -236,10 +237,12 @@ class CheckPaymentPaidResponseTest extends TestCase
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $response);
         $this->assertInstanceOf(ContractTermsV0::class, $response->contract_terms);
         $this->assertEquals('paid', $response->order_status);
-        $this->assertEquals('10.00', $response->deposit_total);
+        $this->assertInstanceOf(Amount::class, $response->deposit_total);
+        $this->assertSame('EUR:10.00', (string) $response->deposit_total);
         $this->assertEquals(200, $response->exchange_code);
         $this->assertEquals(200, $response->exchange_http_status);
-        $this->assertEquals('0', $response->refund_amount);
+        $this->assertInstanceOf(Amount::class, $response->refund_amount);
+        $this->assertSame('EUR:0.00', (string) $response->refund_amount);
         $this->assertInstanceOf(Timestamp::class, $response->last_payment);
     }
 
@@ -250,7 +253,7 @@ class CheckPaymentPaidResponseTest extends TestCase
             'version' => 1,
             'choices' => [
                 [
-                    'amount' => '10.00',
+                    'amount' => 'EUR:10.00',
                     'inputs' => [
                         [
                             'token_family_slug' => 'test-token',
@@ -262,10 +265,10 @@ class CheckPaymentPaidResponseTest extends TestCase
                             'token_family_slug' => 'test-token',
                             'key_index' => 1,
                             'count' => 1,
-                            'amount' => '10.00',
+                            'amount' => 'EUR:10.00',
                         ]
                     ],
-                    'max_fee' => '1.00',
+                    'max_fee' => 'EUR:1.00',
                 ]
             ],
             'token_families' => [
@@ -386,7 +389,8 @@ class CheckPaymentPaidResponseTest extends TestCase
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $response);
         $this->assertInstanceOf(ContractTermsV1::class, $response->contract_terms);
         $this->assertEquals('paid', $response->order_status);
-        $this->assertEquals('10.00', $response->deposit_total);
+        $this->assertInstanceOf(Amount::class, $response->deposit_total);
+        $this->assertSame('EUR:10.00', (string) $response->deposit_total);
         $this->assertEquals(0, $response->choice_index);
         $this->assertCount(1, $response->wire_details);
         $this->assertCount(1, $response->wire_reports);
