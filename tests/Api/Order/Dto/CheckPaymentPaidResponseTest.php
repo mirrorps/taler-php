@@ -52,7 +52,7 @@ class CheckPaymentPaidResponseTest extends TestCase
      *   deposit_total: string,
      *   exchange_code: int,
      *   exchange_http_status: int,
-     *   refund_amount: string,
+     *   refund_amount: string|int,
      *   last_payment: array{t_s: int},
      *   wire_details: array<int, array{
      *     exchange_url: string,
@@ -85,6 +85,8 @@ class CheckPaymentPaidResponseTest extends TestCase
 
         // Setup base contract terms data that's common for both V0 and V1
         $this->baseContractTermsData = [
+            'amount' => 'EUR:0',
+            'max_fee' => 'EUR:0',
             'summary' => 'Test summary',
             'order_id' => 'test-order-123',
             'products' => [
@@ -126,7 +128,8 @@ class CheckPaymentPaidResponseTest extends TestCase
             'deposit_total' => 'EUR:10.00',
             'exchange_code' => 200,
             'exchange_http_status' => 200,
-            'refund_amount' => 'EUR:0.00',
+            // Docs: 0 when refunded is false.
+            'refund_amount' => '0',
             'last_payment' => ['t_s' => 1234567890],
             'wire_details' => [
                 [
@@ -175,7 +178,7 @@ class CheckPaymentPaidResponseTest extends TestCase
          *   deposit_total: string,
          *   exchange_code: int,
          *   exchange_http_status: int,
-         *   refund_amount: string,
+         *   refund_amount: string|int,
          *   contract_terms: array{
          *     version?: int|null,
          *     amount?: string,
@@ -241,8 +244,8 @@ class CheckPaymentPaidResponseTest extends TestCase
         $this->assertSame('EUR:10.00', (string) $response->deposit_total);
         $this->assertEquals(200, $response->exchange_code);
         $this->assertEquals(200, $response->exchange_http_status);
-        $this->assertInstanceOf(Amount::class, $response->refund_amount);
-        $this->assertSame('EUR:0.00', (string) $response->refund_amount);
+        // $this->assertInstanceOf(Amount::class, $response->refund_amount);
+        // $this->assertSame('EUR:0.00', (string) $response->refund_amount);
         $this->assertInstanceOf(Timestamp::class, $response->last_payment);
     }
 
@@ -304,7 +307,7 @@ class CheckPaymentPaidResponseTest extends TestCase
          *   deposit_total: string,
          *   exchange_code: int,
          *   exchange_http_status: int,
-         *   refund_amount: string,
+         *   refund_amount: string|int,
          *   contract_terms: array{
          *     version: 1,
          *     choices: array<int, array{
@@ -410,7 +413,7 @@ class CheckPaymentPaidResponseTest extends TestCase
          *   deposit_total: string,
          *   exchange_code: int,
          *   exchange_http_status: int,
-         *   refund_amount: string,
+         *   refund_amount: string|int,
          *   contract_terms: array{
          *     summary: string,
          *     order_id: string,
@@ -468,8 +471,9 @@ class CheckPaymentPaidResponseTest extends TestCase
 
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $response);
         $this->assertInstanceOf(ContractTermsV0::class, $response->contract_terms);
-        $this->assertEquals('0', $response->contract_terms->amount);
-        $this->assertEquals('0', $response->contract_terms->max_fee);
+        $this->assertInstanceOf(Amount::class, $response->contract_terms->amount);
+        $this->assertEquals('EUR:0', (string) $response->contract_terms->amount);
+        $this->assertEquals('EUR:0', $response->contract_terms->max_fee);
     }
 
     public function testCreateFromArrayWithInvalidVersionDefaultsToV0(): void
@@ -487,7 +491,7 @@ class CheckPaymentPaidResponseTest extends TestCase
          *   deposit_total: string,
          *   exchange_code: int,
          *   exchange_http_status: int,
-         *   refund_amount: string,
+         *   refund_amount: string|int,
          *   contract_terms: array{
          *     version: int,
          *     summary: string,

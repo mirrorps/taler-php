@@ -160,7 +160,7 @@ class CheckPaymentPaidResponse
      * @param Amount $deposit_total Total amount the exchange deposited into our bank account for this contract, excluding fees
      * @param int $exchange_code Numeric error code indicating errors the exchange encountered tracking the wire transfer for this purchase
      * @param int $exchange_http_status HTTP status code returned by the exchange when we asked for information to track the wire transfer
-     * @param Amount $refund_amount Total amount that was refunded, 0 if refunded is false
+     * @param Amount|string $refund_amount Total amount that was refunded, 0 if refunded is false
      * @param ContractTermsV0|ContractTermsV1 $contract_terms Contract terms
      * @param Timestamp $last_payment If the order is paid, set to the last time when a payment was made to pay for this order
      * @param array<TransactionWireTransfer> $wire_details The wire transfer status from the exchange for this order if available
@@ -177,7 +177,7 @@ class CheckPaymentPaidResponse
         public readonly Amount $deposit_total,
         public readonly int $exchange_code,
         public readonly int $exchange_http_status,
-        public readonly Amount $refund_amount,
+        public readonly Amount|string $refund_amount, //--- Docs: 0 when refunded is false, so allow string
         public readonly ContractTermsV0|ContractTermsV1 $contract_terms,
         public readonly Timestamp $last_payment,
         public readonly array $wire_details,
@@ -203,7 +203,7 @@ class CheckPaymentPaidResponse
             deposit_total: new Amount($data['deposit_total']),
             exchange_code: $data['exchange_code'],
             exchange_http_status: $data['exchange_http_status'],
-            refund_amount: new Amount($data['refund_amount']),
+            refund_amount: (isset($data['refund_amount']) && $data['refund_amount'] !== '0') ? new Amount($data['refund_amount']) : '0',
             contract_terms: self::createContractTerms($data['contract_terms']),
             last_payment: Timestamp::createFromArray($data['last_payment']),
             wire_details: array_map(
@@ -345,8 +345,8 @@ class CheckPaymentPaidResponse
 
         // For version 0 or default, ensure required fields are present
         $v0Data = array_merge([
-            'amount' => '0',
-            'max_fee' => '0',
+            'amount' => $contractTermsData['amount'],
+            'max_fee' => $contractTermsData['max_fee'],
             'summary' => $contractTermsData['summary'],
             'order_id' => $contractTermsData['order_id'],
             'products' => $contractTermsData['products'],

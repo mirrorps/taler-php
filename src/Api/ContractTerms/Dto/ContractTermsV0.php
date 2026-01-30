@@ -7,6 +7,7 @@ use Taler\Api\Dto\RelativeTime;
 use Taler\Api\Dto\Timestamp;
 use Taler\Api\Order\Dto\Merchant;
 use Taler\Api\Inventory\Dto\Product;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\Exchange;
 
 /**
@@ -17,8 +18,8 @@ use Taler\Api\Order\Dto\Exchange;
 class ContractTermsV0
 {
     /**
-     * @param string $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
-     * @param string $max_fee Maximum total deposit fee accepted by the merchant for this contract. Overrides defaults of the merchant instance.
+     * @param Amount $amount Total price for the transaction. The exchange will subtract deposit fees from that amount before transferring it to the merchant.
+     * @param Amount $max_fee Maximum total deposit fee accepted by the merchant for this contract. Overrides defaults of the merchant instance.
      * @param string $summary Human-readable description of the whole purchase
      * @param string $order_id Unique, free-form identifier for the proposal
      * @param array<int, Product> $products List of products that are part of the purchase
@@ -46,8 +47,8 @@ class ContractTermsV0
      * @param int|null $version Defaults to version 0.
      */
     public function __construct(
-        public readonly string $amount,
-        public readonly string $max_fee,
+        public readonly Amount $amount,
+        public readonly Amount $max_fee,
         public readonly string $summary,
         public readonly string $order_id,
         public readonly array $products,
@@ -155,8 +156,8 @@ class ContractTermsV0
     public static function createFromArray(array $data): self
     {
         return new self(
-            amount: $data['amount'],
-            max_fee: $data['max_fee'],
+            amount: new Amount($data['amount']),
+            max_fee: new Amount($data['max_fee']),
             summary: $data['summary'],
             order_id: $data['order_id'],
             products: array_map(

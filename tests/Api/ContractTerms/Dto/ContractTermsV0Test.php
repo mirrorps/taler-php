@@ -10,6 +10,7 @@ use Taler\Api\Dto\Timestamp;
 use Taler\Api\Order\Dto\Merchant;
 use Taler\Api\Order\Dto\Exchange;
 use Taler\Api\Inventory\Dto\Product;
+use Taler\Api\Order\Dto\Amount;
 
 class ContractTermsV0Test extends TestCase
 {
@@ -67,8 +68,8 @@ class ContractTermsV0Test extends TestCase
     public function testConstruct(): void
     {
         $contractTerms = new ContractTermsV0(
-            amount: self::SAMPLE_AMOUNT,
-            max_fee: self::SAMPLE_MAX_FEE,
+            amount: new Amount(self::SAMPLE_AMOUNT),
+            max_fee: new Amount(self::SAMPLE_MAX_FEE),
             summary: self::SAMPLE_SUMMARY,
             order_id: self::SAMPLE_ORDER_ID,
             products: [Product::createFromArray($this->sampleProduct)],
@@ -85,8 +86,10 @@ class ContractTermsV0Test extends TestCase
             nonce: self::SAMPLE_NONCE
         );
 
-        $this->assertSame(self::SAMPLE_AMOUNT, $contractTerms->amount);
-        $this->assertSame(self::SAMPLE_MAX_FEE, $contractTerms->max_fee);
+        $this->assertInstanceOf(Amount::class, $contractTerms->amount);
+        $this->assertSame(self::SAMPLE_AMOUNT, (string) $contractTerms->amount);
+        $this->assertInstanceOf(Amount::class, $contractTerms->max_fee);
+        $this->assertSame(self::SAMPLE_MAX_FEE, (string) $contractTerms->max_fee);
         $this->assertSame(self::SAMPLE_SUMMARY, $contractTerms->summary);
         $this->assertSame(self::SAMPLE_ORDER_ID, $contractTerms->order_id);
         $this->assertCount(1, $contractTerms->products);
@@ -109,8 +112,8 @@ class ContractTermsV0Test extends TestCase
     public function testConstructWithOptionalParameters(): void
     {
         $contractTerms = new ContractTermsV0(
-            amount: self::SAMPLE_AMOUNT,
-            max_fee: self::SAMPLE_MAX_FEE,
+            amount: new Amount(self::SAMPLE_AMOUNT),
+            max_fee: new Amount(self::SAMPLE_MAX_FEE),
             summary: self::SAMPLE_SUMMARY,
             order_id: self::SAMPLE_ORDER_ID,
             products: [Product::createFromArray($this->sampleProduct)],
@@ -228,8 +231,10 @@ class ContractTermsV0Test extends TestCase
 
         $contractTerms = ContractTermsV0::createFromArray($data);
 
-        $this->assertSame(self::SAMPLE_AMOUNT, $contractTerms->amount);
-        $this->assertSame(self::SAMPLE_MAX_FEE, $contractTerms->max_fee);
+        $this->assertInstanceOf(Amount::class, $contractTerms->amount);
+        $this->assertSame(self::SAMPLE_AMOUNT, (string) $contractTerms->amount);
+        $this->assertInstanceOf(Amount::class, $contractTerms->max_fee);
+        $this->assertSame(self::SAMPLE_MAX_FEE, (string) $contractTerms->max_fee);
         $this->assertSame(self::SAMPLE_SUMMARY, $contractTerms->summary);
         $this->assertSame(self::SAMPLE_ORDER_ID, $contractTerms->order_id);
         $this->assertCount(1, $contractTerms->products);
@@ -355,8 +360,10 @@ class ContractTermsV0Test extends TestCase
 
         $contractTerms = ContractTermsV0::createFromArray($data);
 
-        $this->assertSame(self::SAMPLE_AMOUNT, $contractTerms->amount);
-        $this->assertSame(self::SAMPLE_MAX_FEE, $contractTerms->max_fee);
+        $this->assertInstanceOf(Amount::class, $contractTerms->amount);
+        $this->assertSame(self::SAMPLE_AMOUNT, (string) $contractTerms->amount);
+        $this->assertInstanceOf(Amount::class, $contractTerms->max_fee);
+        $this->assertSame(self::SAMPLE_MAX_FEE, (string) $contractTerms->max_fee);
         $this->assertSame(self::SAMPLE_SUMMARY, $contractTerms->summary);
         $this->assertSame(self::SAMPLE_ORDER_ID, $contractTerms->order_id);
         $this->assertCount(1, $contractTerms->products);

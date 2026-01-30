@@ -147,6 +147,8 @@ class OrderClientTest extends TestCase
             'refund_amount' => 'KUDOS:0',
             'contract_terms' => [
                 'version' => 0,
+                'amount' => 'KUDOS:1',
+                'max_fee' => 'KUDOS:0',
                 'summary' => 'S',
                 'order_id' => 'o1',
                 'products' => [],
