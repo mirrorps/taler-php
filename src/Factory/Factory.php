@@ -26,7 +26,7 @@ class Factory
      *     username?: string|null,
      *     password?: string|null,
      *     instance?: string|null,
-     *     scope?: "readonly"|"write"|"all"|"order-simple"|"order-pos"|"order-mgmt"|"order-full|null",
+     *     scope?: "readonly"|"write"|"all"|"order-simple"|"order-pos"|"order-mgmt"|"order-full"|null,
      *     duration_us?: int|string|null,
      *     description?: string|null,
      *     client?: ClientInterface|null,

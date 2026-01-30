@@ -11,7 +11,7 @@ use Taler\Api\Dto\Timestamp;
  *   order_id: string,
  *   row_id: int,
  *   timestamp: array{t_s: int|string},
- *   amount: string,
+ *   amount: Amount,
  *   summary: string,
  *   refundable: bool,
  *   paid: bool
@@ -23,7 +23,7 @@ class OrderHistoryEntry
      * @param string $order_id Order ID of the transaction related to this entry
      * @param int $row_id Row ID of the order in the database
      * @param Timestamp $timestamp When the order was created
-     * @param string $amount The amount of money the order is for
+     * @param Amount $amount The amount of money the order is for
      * @param string $summary The summary of the order
      * @param bool $refundable Whether some part of the order is refundable
      * @param bool $paid Whether the order has been paid or not
@@ -32,7 +32,7 @@ class OrderHistoryEntry
         public readonly string $order_id,
         public readonly int $row_id,
         public readonly Timestamp $timestamp,
-        public readonly string $amount,
+        public readonly Amount $amount,
         public readonly string $summary,
         public readonly bool $refundable,
         public readonly bool $paid,
@@ -50,7 +50,7 @@ class OrderHistoryEntry
             order_id: $data['order_id'],
             row_id: $data['row_id'],
             timestamp: Timestamp::createFromArray($data['timestamp']),
-            amount: $data['amount'],
+            amount: new Amount($data['amount']),
             summary: $data['summary'],
             refundable: $data['refundable'],
             paid: $data['paid']

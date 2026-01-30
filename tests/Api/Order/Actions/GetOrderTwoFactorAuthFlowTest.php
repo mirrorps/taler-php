@@ -8,6 +8,7 @@ use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Taler\Api\Order\Actions\GetOrder;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\TwoFactorAuth\Dto\MerchantChallengeSolveRequest;
 use Taler\Api\TwoFactorAuth\TwoFactorAuthClient;
@@ -83,14 +84,16 @@ final class GetOrderTwoFactorAuthFlowTest extends TestCase
             'refunded' => false,
             'refund_pending' => false,
             'wired' => true,
-            'deposit_total' => '100.00',
+            'deposit_total' => 'EUR:100.00',
             'exchange_code' => 200,
             'exchange_http_status' => 200,
-            'refund_amount' => '0.00',
+            'refund_amount' => 'EUR:0.00',
             'contract_terms' => [
                 'version' => 0,
                 'summary' => 'Test Order',
                 'order_id' => $orderId,
+                'amount' => 'EUR:100.00',
+                'max_fee' => 'EUR:0.00',
                 'products' => [],
                 'timestamp' => ['t_s' => 1234567890],
                 'refund_deadline' => ['t_s' => 1234567890],
@@ -212,7 +215,8 @@ final class GetOrderTwoFactorAuthFlowTest extends TestCase
 
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $result);
         $this->assertSame('paid', $result->order_status);
-        $this->assertSame('100.00', $result->deposit_total);
+        $this->assertInstanceOf(Amount::class, $result->deposit_total);
+        $this->assertSame('EUR:100.00', (string) $result->deposit_total);
         $this->assertSame('Test Order', $result->contract_terms->summary);
         $this->assertSame(4, $step, 'Expected exactly 4 HTTP calls in success 2FA flow');
     }

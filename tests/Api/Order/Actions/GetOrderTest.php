@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Taler\Api\Order\Actions\GetOrder;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\CheckPaymentPaidResponse;
 use Taler\Api\Order\Dto\CheckPaymentClaimedResponse;
 use Taler\Api\Order\Dto\CheckPaymentUnpaidResponse;
@@ -55,14 +56,16 @@ class GetOrderTest extends TestCase
             'refunded' => false,
             'refund_pending' => false,
             'wired' => true,
-            'deposit_total' => '100.00',
+            'deposit_total' => 'EUR:100.00',
             'exchange_code' => 200,
             'exchange_http_status' => 200,
-            'refund_amount' => '0.00',
+            'refund_amount' => 'EUR:0.00',
             'contract_terms' => [
                 'version' => 0,
                 'summary' => 'Test Order',
                 'order_id' => $orderId,
+                'amount' => 'EUR:100.00',
+                'max_fee' => 'EUR:0.00',
                 'products' => [],
                 'timestamp' => ['t_s' => 1234567890],
                 'refund_deadline' => ['t_s' => 1234567890],
@@ -104,7 +107,8 @@ class GetOrderTest extends TestCase
 
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $result);
         $this->assertEquals('paid', $result->order_status);
-        $this->assertEquals('100.00', $result->deposit_total);
+        $this->assertInstanceOf(Amount::class, $result->deposit_total);
+        $this->assertSame('EUR:100.00', (string) $result->deposit_total);
         $this->assertEquals('Test Order', $result->contract_terms->summary);
     }
 
@@ -116,7 +120,7 @@ class GetOrderTest extends TestCase
             'taler_pay_uri' => 'taler://pay/example',
             'creation_time' => ['t_s' => 1234567890],
             'summary' => 'Test Order',
-            'total_amount' => '100.00',
+            'total_amount' => 'EUR:100.00',
             'order_status_url' => 'https://example.com/status'
         ];
 
@@ -136,7 +140,7 @@ class GetOrderTest extends TestCase
         $this->assertInstanceOf(CheckPaymentUnpaidResponse::class, $result);
         $this->assertEquals('unpaid', $result->order_status);
         $this->assertEquals('taler://pay/example', $result->taler_pay_uri);
-        $this->assertEquals('100.00', $result->total_amount);
+        $this->assertEquals('EUR:100.00', $result->total_amount);
     }
 
     public function testRunTwoFactorChallengeResponse(): void
@@ -211,14 +215,16 @@ class GetOrderTest extends TestCase
             'refunded' => false,
             'refund_pending' => false,
             'wired' => true,
-            'deposit_total' => '100.00',
+            'deposit_total' => 'EUR:100.00',
             'exchange_code' => 200,
             'exchange_http_status' => 200,
-            'refund_amount' => '0.00',
+            'refund_amount' => 'EUR:0.00',
             'contract_terms' => [
                 'version' => 0,
                 'summary' => 'Test Order',
                 'order_id' => $orderId,
+                'amount' => 'EUR:100.00',
+                'max_fee' => 'EUR:0.00',
                 'products' => [],
                 'timestamp' => ['t_s' => 1234567890],
                 'refund_deadline' => ['t_s' => 1234567890],
@@ -263,7 +269,8 @@ class GetOrderTest extends TestCase
 
         $this->assertInstanceOf(CheckPaymentPaidResponse::class, $result->wait());
         $this->assertEquals('paid', $result->wait()->order_status);
-        $this->assertEquals('100.00', $result->wait()->deposit_total);
+        $this->assertInstanceOf(Amount::class, $result->wait()->deposit_total);
+        $this->assertSame('EUR:100.00', (string) $result->wait()->deposit_total);
         $this->assertEquals('Test Order', $result->wait()->contract_terms->summary);
     }
 } 

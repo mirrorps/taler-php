@@ -6,6 +6,7 @@ use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 use Taler\Api\Order\Actions\GetOrders;
 use Taler\Api\Order\OrderClient;
+use Taler\Api\Order\Dto\Amount;
 use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Exception\TalerException;
@@ -53,7 +54,7 @@ class GetOrdersTest extends TestCase
                     'order_id' => 'test_order_1',
                     'row_id' => 1,
                     'timestamp' => ['t_s' => 1234567890],
-                    'amount' => '10.00',
+                    'amount' => 'EUR:10.00',
                     'summary' => 'Test Order 1',
                     'refundable' => true,
                     'paid' => true
@@ -62,7 +63,7 @@ class GetOrdersTest extends TestCase
                     'order_id' => 'test_order_2',
                     'row_id' => 2,
                     'timestamp' => ['t_s' => 1234567891],
-                    'amount' => '20.00',
+                    'amount' => 'EUR:20.00',
                     'summary' => 'Test Order 2',
                     'refundable' => false,
                     'paid' => true
@@ -90,9 +91,11 @@ class GetOrdersTest extends TestCase
         $this->assertInstanceOf(OrderHistory::class, $result);
         $this->assertCount(2, $result->orders);
         $this->assertEquals($expectedData['orders'][0]['order_id'], $result->orders[0]->order_id);
-        $this->assertEquals($expectedData['orders'][0]['amount'], $result->orders[0]->amount);
+        $this->assertInstanceOf(Amount::class, $result->orders[0]->amount);
+        $this->assertSame($expectedData['orders'][0]['amount'], (string) $result->orders[0]->amount);
         $this->assertEquals($expectedData['orders'][1]['order_id'], $result->orders[1]->order_id);
-        $this->assertEquals($expectedData['orders'][1]['amount'], $result->orders[1]->amount);
+        $this->assertInstanceOf(Amount::class, $result->orders[1]->amount);
+        $this->assertSame($expectedData['orders'][1]['amount'], (string) $result->orders[1]->amount);
     }
 
     public function testRunWithException(): void
@@ -128,7 +131,7 @@ class GetOrdersTest extends TestCase
                     'order_id' => 'test_order_1',
                     'row_id' => 1,
                     'timestamp' => ['t_s' => 1234567890],
-                    'amount' => '10.00',
+                    'amount' => 'EUR:10.00',
                     'summary' => 'Test Order 1',
                     'refundable' => true,
                     'paid' => true
@@ -159,6 +162,7 @@ class GetOrdersTest extends TestCase
         $this->assertInstanceOf(OrderHistory::class, $result->wait());
         $this->assertCount(1, $result->wait()->orders);
         $this->assertEquals($expectedData['orders'][0]['order_id'], $result->wait()->orders[0]->order_id);
-        $this->assertEquals($expectedData['orders'][0]['amount'], $result->wait()->orders[0]->amount);
+        $this->assertInstanceOf(Amount::class, $result->wait()->orders[0]->amount);
+        $this->assertSame($expectedData['orders'][0]['amount'], (string) $result->wait()->orders[0]->amount);
     }
 } 

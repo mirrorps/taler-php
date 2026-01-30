@@ -7,6 +7,7 @@ use Taler\Api\Order\OrderClient;
 use Taler\Api\Order\Dto\GetOrdersRequest;
 use Taler\Api\Order\Dto\OrderHistory;
 use Taler\Exception\TalerException;
+use Taler\Api\Order\Dto\Amount;
 
 class GetOrders
 {
