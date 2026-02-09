@@ -8,6 +8,7 @@ use Taler\Api\BankAccounts\Dto\BankAccountEntry;
 
 class AccountsSummaryResponseTest extends TestCase
 {
+    //---test
     public function testFromArray(): void
     {
         $data = [
