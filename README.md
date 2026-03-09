@@ -22,9 +22,9 @@ Before you begin, ensure you have met the following requirements:
 
 ---
 
-## Supported Taler protocol versions
+## Supported Taler protocol version
 
-- Supported Taler protocol versions: v12-v20
+- Target Taler merchant backend protocol version: `v20`
 ---
 
 ## Installation
@@ -199,7 +199,7 @@ $ok = isProtocolCompatible($serverCurrent, $serverAge, (int) Taler::TALER_PROTOC
 
 Notes:
 - To receive the WARNING log, pass a PSR-3 logger to the `Factory`.
-- This check is non-fatal (only logs) as long as the backend `name` is valid; the exception is thrown only when the backend is not a merchant backend.
+- The compatibility check is non-fatal as long as the backend `name` is valid; the exception is thrown only when the backend is not a merchant backend.
 
 
 ---

@@ -35,13 +35,13 @@ coverage/
 # Node modules (if any frontend work)
 node_modules/
 
-# Mac system files
-.DS_Store
-
 # Windows system files
 ehthumbs.db
 Icon?
 Desktop.ini
+
+# Cursor, if used
+.cursor/
 
 # PHPStan config
 phpstan.neon
