@@ -203,7 +203,7 @@ class CheckPaymentPaidResponse
             deposit_total: new Amount($data['deposit_total']),
             exchange_code: $data['exchange_code'],
             exchange_http_status: $data['exchange_http_status'],
-            refund_amount: (isset($data['refund_amount']) && $data['refund_amount'] !== '0') ? new Amount($data['refund_amount']) : '0',
+            refund_amount: $data['refund_amount'] !== '0' ? new Amount($data['refund_amount']) : '0',
             contract_terms: self::createContractTerms($data['contract_terms']),
             last_payment: Timestamp::createFromArray($data['last_payment']),
             wire_details: array_map(
@@ -343,10 +343,9 @@ class CheckPaymentPaidResponse
             return ContractTermsV1::createFromArray($v1Data);
         }
 
-        // For version 0 or default, ensure required fields are present
         $v0Data = array_merge([
-            'amount' => $contractTermsData['amount'],
-            'max_fee' => $contractTermsData['max_fee'],
+            'amount' => $contractTermsData['amount'] ?? null,
+            'max_fee' => $contractTermsData['max_fee'] ?? null,
             'summary' => $contractTermsData['summary'],
             'order_id' => $contractTermsData['order_id'],
             'products' => $contractTermsData['products'],
