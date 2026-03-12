@@ -10,6 +10,7 @@ use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
 use Taler\Api\Webhooks\Actions\CreateWebhook;
 use Taler\Api\Webhooks\Dto\WebhookAddDetails;
+use Taler\Api\Dto\Url;
 use Taler\Api\Webhooks\WebhooksClient;
 use Taler\Config\TalerConfig;
 use Taler\Exception\TalerException;
@@ -48,7 +49,7 @@ class CreateWebhookTest extends TestCase
         $details = new WebhookAddDetails(
             webhook_id: 'wh-1',
             event_type: 'order.paid',
-            url: 'https://example.com/webhook',
+            url: Url::fromString('https://example.com/webhook'),
             http_method: 'POST',
             header_template: 'X-Test: {{value}}',
             body_template: '{"id":"{{order_id}}"}'
@@ -73,7 +74,7 @@ class CreateWebhookTest extends TestCase
     {
         $this->expectException(TalerException::class);
 
-        $details = new WebhookAddDetails('wh-1', 'event', 'https://x', 'POST');
+        $details = new WebhookAddDetails('wh-1', 'event', Url::fromString('https://x'), 'POST');
 
         $this->httpClientWrapper->method('request')->willThrowException(new TalerException('boom'));
         CreateWebhook::run($this->client, $details);
@@ -81,7 +82,7 @@ class CreateWebhookTest extends TestCase
 
     public function testRunAsync(): void
     {
-        $details = new WebhookAddDetails('wh-1', 'event', 'https://x', 'POST');
+        $details = new WebhookAddDetails('wh-1', 'event', Url::fromString('https://x'), 'POST');
 
         $promise = new Promise();
 

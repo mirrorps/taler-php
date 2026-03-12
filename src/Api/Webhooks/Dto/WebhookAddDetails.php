@@ -2,6 +2,8 @@
 
 namespace Taler\Api\Webhooks\Dto;
 
+use Taler\Api\Dto\Url;
+
 /**
  * DTO for creating a Webhook.
  *
@@ -12,7 +14,7 @@ class WebhookAddDetails
     /**
      * @param string $webhook_id Webhook ID to use
      * @param string $event_type The event of the webhook: why the webhook is used
-     * @param string $url URL of the webhook where the customer will be redirected
+     * @param Url $url URL of the webhook where the customer will be redirected
      * @param string $http_method Method used by the webhook
      * @param string|null $header_template Header template of the webhook
      * @param string|null $body_template Body template by the webhook
@@ -21,7 +23,7 @@ class WebhookAddDetails
     public function __construct(
         public readonly string $webhook_id,
         public readonly string $event_type,
-        public readonly string $url,
+        public readonly Url $url,
         public readonly string $http_method,
         public readonly ?string $header_template = null,
         public readonly ?string $body_template = null,
@@ -47,7 +49,7 @@ class WebhookAddDetails
         return new self(
             webhook_id: $data['webhook_id'],
             event_type: $data['event_type'],
-            url: $data['url'],
+            url: Url::fromString($data['url']),
             http_method: $data['http_method'],
             header_template: $data['header_template'] ?? null,
             body_template: $data['body_template'] ?? null
@@ -62,25 +64,6 @@ class WebhookAddDetails
 
         if ($this->event_type === '' || trim($this->event_type) === '') {
             throw new \InvalidArgumentException('event_type must not be empty');
-        }
-
-        if ($this->url === '' || trim($this->url) === '') {
-            throw new \InvalidArgumentException('url must not be empty');
-        }
-
-        if (filter_var($this->url, FILTER_VALIDATE_URL) === false) {
-            throw new \InvalidArgumentException('url must be a valid URL');
-        }
-
-        $parts = parse_url($this->url);
-        $scheme = strtolower($parts['scheme'] ?? '');
-
-        if (!in_array($scheme, ['http', 'https'], true)) {
-            throw new \InvalidArgumentException('url scheme must be http or https');
-        }
-        
-        if (!isset($parts['host']) || $parts['host'] === '') {
-            throw new \InvalidArgumentException('url must include a host');
         }
 
         $allowedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
