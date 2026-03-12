@@ -68,6 +68,21 @@ class WebhookAddDetails
             throw new \InvalidArgumentException('url must not be empty');
         }
 
+        if (filter_var($this->url, FILTER_VALIDATE_URL) === false) {
+            throw new \InvalidArgumentException('url must be a valid URL');
+        }
+
+        $parts = parse_url($this->url);
+        $scheme = strtolower($parts['scheme'] ?? '');
+
+        if (!in_array($scheme, ['http', 'https'], true)) {
+            throw new \InvalidArgumentException('url scheme must be http or https');
+        }
+        
+        if (!isset($parts['host']) || $parts['host'] === '') {
+            throw new \InvalidArgumentException('url must include a host');
+        }
+
         $allowedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
         $method = strtoupper($this->http_method);
         if (!in_array($method, $allowedMethods, true)) {

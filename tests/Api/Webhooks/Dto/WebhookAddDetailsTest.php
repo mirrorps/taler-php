@@ -34,6 +34,18 @@ class WebhookAddDetailsTest extends TestCase
         new WebhookAddDetails('', 'event', 'https://x', 'POST');
     }
 
+    public function testValidationFailsOnInvalidUrl(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new WebhookAddDetails('id', 'event', 'not-a-url', 'POST');
+    }
+
+    public function testValidationFailsOnNonHttpScheme(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new WebhookAddDetails('id', 'event', 'ftp://example.com/hook', 'POST');
+    }
+
     public function testValidationFailsOnInvalidMethod(): void
     {
         $this->expectException(\InvalidArgumentException::class);
