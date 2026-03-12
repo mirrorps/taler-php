@@ -30,7 +30,13 @@ class WebhookAddDetailsTest extends TestCase
         $this->assertSame('{"id":"{{order_id}}"}', $details->body_template);
     }
 
-    public function testValidationFailsOnEmptyRequiredFields(): void
+    public function testValidationFailsOnEmptyWebhookId(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+        new WebhookAddDetails('', 'event', Url::fromString('https://x'), 'POST');
+    }
+
+    public function testValidationFailsOnEmptyEventType(): void
     {
         $this->expectException(\InvalidArgumentException::class);
         new WebhookAddDetails('', 'event', Url::fromString('https://x'), 'POST');

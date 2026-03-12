@@ -8,6 +8,7 @@ use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Log\LoggerInterface;
+use Taler\Api\Dto\Url;
 use Taler\Api\Webhooks\Actions\UpdateWebhook;
 use Taler\Api\Webhooks\Dto\WebhookPatchDetails;
 use Taler\Api\Webhooks\WebhooksClient;
@@ -48,7 +49,7 @@ class UpdateWebhookTest extends TestCase
         $webhookId = 'wh-1';
         $details = new WebhookPatchDetails(
             event_type: 'order.paid',
-            url: 'https://example.com/webhook',
+            url: Url::fromString('https://example.com/webhook'),
             http_method: 'POST',
             header_template: 'X-Header: value',
             body_template: '{"id":"{{order_id}}"}'
@@ -74,7 +75,7 @@ class UpdateWebhookTest extends TestCase
         $this->expectException(TalerException::class);
 
         $webhookId = 'wh-1';
-        $details = new WebhookPatchDetails('event', 'https://x', 'POST');
+        $details = new WebhookPatchDetails('event', Url::fromString('https://x'), 'POST');
 
         $this->httpClientWrapper->method('request')->willThrowException(new TalerException('boom'));
         UpdateWebhook::run($this->client, $webhookId, $details);
@@ -83,7 +84,7 @@ class UpdateWebhookTest extends TestCase
     public function testRunAsync(): void
     {
         $webhookId = 'wh-1';
-        $details = new WebhookPatchDetails('event', 'https://x', 'POST');
+        $details = new WebhookPatchDetails('event', Url::fromString('https://x'), 'POST');
 
         $promise = new Promise();
 

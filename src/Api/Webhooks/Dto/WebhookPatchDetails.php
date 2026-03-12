@@ -2,6 +2,8 @@
 
 namespace Taler\Api\Webhooks\Dto;
 
+use Taler\Api\Dto\Url;
+
 /**
  * DTO for updating a Webhook.
  *
@@ -11,7 +13,7 @@ class WebhookPatchDetails
 {
     /**
      * @param string $event_type The event of the webhook: why the webhook is used
-     * @param string $url URL of the webhook where the customer will be redirected
+     * @param Url $url URL of the webhook where the customer will be redirected
      * @param string $http_method Method used by the webhook
      * @param string|null $header_template Header template of the webhook
      * @param string|null $body_template Body template by the webhook
@@ -19,7 +21,7 @@ class WebhookPatchDetails
      */
     public function __construct(
         public readonly string $event_type,
-        public readonly string $url,
+        public readonly Url $url,
         public readonly string $http_method,
         public readonly ?string $header_template = null,
         public readonly ?string $body_template = null,
@@ -43,7 +45,7 @@ class WebhookPatchDetails
     {
         return new self(
             event_type: $data['event_type'],
-            url: $data['url'],
+            url: Url::fromString($data['url']),
             http_method: $data['http_method'],
             header_template: $data['header_template'] ?? null,
             body_template: $data['body_template'] ?? null
@@ -54,10 +56,6 @@ class WebhookPatchDetails
     {
         if ($this->event_type === '' || trim($this->event_type) === '') {
             throw new \InvalidArgumentException('event_type must not be empty');
-        }
-
-        if ($this->url === '' || trim($this->url) === '') {
-            throw new \InvalidArgumentException('url must not be empty');
         }
 
         $allowedMethods = ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'HEAD', 'OPTIONS'];
