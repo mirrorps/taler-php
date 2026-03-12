@@ -24,7 +24,7 @@ Before you begin, ensure you have met the following requirements:
 
 ## Supported Taler protocol version
 
-- Target Taler merchant backend protocol version: `v20`
+- Supported Taler merchant backend protocol version: `v20`
 ---
 
 ## Installation
