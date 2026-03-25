@@ -80,7 +80,7 @@ class ContractTermsV1
      * Creates a new instance from an array of data
      *
      * @param array{
-     *     choices: array<int, array{
+     *     choices?: array<int, array{
      *         amount: string,
      *         inputs: array<int, array{
      *             token_family_slug: string,
@@ -95,7 +95,7 @@ class ContractTermsV1
      *         }>,
      *         max_fee: string
      *     }>,
-     *     token_families: array<string, array{
+     *     token_families?: array<string, array{
      *         name: string,
      *         description: string,
      *         description_i18n?: array<string, string>|null,
@@ -115,7 +115,7 @@ class ContractTermsV1
      *     }>,
      *     summary: string,
      *     order_id: string,
-     *     products: array<int, array{
+     *     products?: array<int, array{
      *         description: string,
      *         product_id?: string|null,
      *         description_i18n?: array<string, string>|null,
@@ -186,12 +186,12 @@ class ContractTermsV1
     {
         $choices = array_map(
             fn (array $choice) => ContractChoice::createFromArray($choice),
-            $data['choices']
+            $data['choices'] ?? []
         );
 
         $tokenFamilies = array_map(
             fn (array $family) => ContractTokenFamily::createFromArray($family),
-            $data['token_families']
+            $data['token_families'] ?? []
         );
 
         return new self(
@@ -201,7 +201,7 @@ class ContractTermsV1
             order_id: $data['order_id'],
             products: array_map(
                 static fn (array $product) => Product::createFromArray($product),
-                $data['products']
+                $data['products'] ?? []
             ),
             timestamp: Timestamp::createFromArray($data['timestamp']),
             refund_deadline: Timestamp::createFromArray($data['refund_deadline']),
