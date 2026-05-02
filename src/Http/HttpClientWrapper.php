@@ -27,7 +27,7 @@ class HttpClientWrapper
     private array $sensitiveKeys = [
 		'authorization', 'access_token', 'refresh_token', 'id_token', 'jwt',
 		'token', 'api_key', 'api-key', 'client_secret', 'password', 'pwd',
-		'merchant_sig', 'lpt', 'session', 'session_id'
+		'merchant_sig', 'lpt', 'session', 'session_id', 'otp_code', 'otp_key', 'tan'
 	];
 
     /**

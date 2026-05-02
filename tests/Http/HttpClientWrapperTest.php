@@ -338,7 +338,13 @@ class HttpClientWrapperTest extends TestCase
 
         $payload = json_encode([
             'access_token' => 'abc123',
-            'details' => ['password' => 'top-secret', 'note' => 'ok']
+            'details' => [
+                'password' => 'top-secret',
+                'otp_code' => '123456',
+                'otp_key' => 'otp-secret',
+                'tan' => 'tan-secret',
+                'note' => 'ok'
+            ]
         ], JSON_THROW_ON_ERROR);
         
         $response = $this->factory->createResponse(200)
@@ -382,8 +388,14 @@ class HttpClientWrapperTest extends TestCase
         $this->assertNotNull($responseBodyRecord, 'Response body was not logged');
         $this->assertStringNotContainsString('abc123', $responseBodyRecord['message']);
         $this->assertStringNotContainsString('top-secret', $responseBodyRecord['message']);
+        $this->assertStringNotContainsString('123456', $responseBodyRecord['message']);
+        $this->assertStringNotContainsString('otp-secret', $responseBodyRecord['message']);
+        $this->assertStringNotContainsString('tan-secret', $responseBodyRecord['message']);
         $this->assertStringContainsString('"access_token":"***"', $responseBodyRecord['message']);
         $this->assertStringContainsString('"password":"***"', $responseBodyRecord['message']);
+        $this->assertStringContainsString('"otp_code":"***"', $responseBodyRecord['message']);
+        $this->assertStringContainsString('"otp_key":"***"', $responseBodyRecord['message']);
+        $this->assertStringContainsString('"tan":"***"', $responseBodyRecord['message']);
     }
 
     /** @test */
